@@ -1,0 +1,28 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+sourceCompatibility=1.7
+group='com.wealdtech'
+version=0.1
+
+repositories
+{
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies
+{
+    compile 'com.wealdtech:wealdtech-core:0.+'
+    compile 'com.google.guava:guava:13.+'
+    testCompile 'org.testng:testng:6.+'
+}
+
+jar
+{
+    manifest
+    {
+        attributes 'Implementation-title': 'Hawk', 'Implementation-version': version
+    }
+}
