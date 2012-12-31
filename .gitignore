@@ -4,3 +4,16 @@
 *.jar
 *.war
 *.ear
+
+# Eclipse
+bin
+.classpath
+.metadata
+.settings
+
+# Gradle
+build
+.gradle
+
+# TestNG
+test-output
