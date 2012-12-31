@@ -5,14 +5,14 @@ import static org.testng.Assert.*;
 import org.testng.annotations.Test;
 
 import com.wealdtech.DataError;
-import com.wealdtech.hawk.HawkCredential;
+import com.wealdtech.hawk.HawkCredentials;
 
 public class TestHawkCredential
 {
   @Test
   public void testModel() throws DataError
   {
-    final HawkCredential testhc1 = new HawkCredential.Builder().keyId("testkeyid").key("testkey").algorithm("hmac-sha-256").build();
+    final HawkCredentials testhc1 = new HawkCredentials.Builder().keyId("testkeyid").key("testkey").algorithm("hmac-sha-256").build();
     assertEquals(testhc1.getKeyId(), "testkeyid");
     assertEquals(testhc1.getKey(), "testkey");
     assertEquals(testhc1.getAlgorithm(), "hmac-sha-256");
@@ -23,7 +23,7 @@ public class TestHawkCredential
   {
     try
     {
-      new HawkCredential.Builder().keyId(null).key("testkey").algorithm("hmac-sha-256").build();
+      new HawkCredentials.Builder().keyId(null).key("testkey").algorithm("hmac-sha-256").build();
       // Should not reach here
       fail();
     }
@@ -38,7 +38,7 @@ public class TestHawkCredential
   {
     try
     {
-      new HawkCredential.Builder().keyId("testkeyid").key(null).algorithm("hmac-sha-256").build();
+      new HawkCredentials.Builder().keyId("testkeyid").key(null).algorithm("hmac-sha-256").build();
       // Should not reach here
       fail();
     }
@@ -53,7 +53,7 @@ public class TestHawkCredential
   {
     try
     {
-      new HawkCredential.Builder().keyId("testkeyid").key("testkey").algorithm(null).build();
+      new HawkCredentials.Builder().keyId("testkeyid").key("testkey").algorithm(null).build();
       // Should not reach here
       fail();
     }
@@ -68,7 +68,7 @@ public class TestHawkCredential
   {
     try
     {
-      new HawkCredential.Builder().keyId("testkeyid").key("testkey").algorithm("md2").build();
+      new HawkCredentials.Builder().keyId("testkeyid").key("testkey").algorithm("md2").build();
       // Should not reach here
       fail();
     }

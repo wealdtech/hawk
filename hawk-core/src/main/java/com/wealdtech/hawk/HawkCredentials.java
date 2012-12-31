@@ -3,15 +3,18 @@ package com.wealdtech.hawk;
 import com.google.common.collect.ImmutableMap;
 import com.wealdtech.DataError;
 
-public class HawkCredential
+public class HawkCredentials
 {
   public final String keyId;
   public final String key;
   public final String algorithm;
 
-  private final ImmutableMap<String, String> SUPPORTEDALGORITHMS = new ImmutableMap.Builder<String, String>().put("hmac-sha-1", "SHA-1").put("hmac-sha-256", "SHA-256").build();
+  private final ImmutableMap<String, String> SUPPORTEDALGORITHMS = new ImmutableMap.Builder<String, String>()
+      .put("hmac-sha-1", "SHA-1")
+      .put("hmac-sha-256", "SHA-256")
+      .build();
 
-  private HawkCredential(final String keyId, final String key, final String algorithm) throws DataError
+  private HawkCredentials(final String keyId, final String key, final String algorithm) throws DataError
   {
     this.keyId = keyId;
     this.key = key;
@@ -50,6 +53,16 @@ public class HawkCredential
     return this.algorithm;
   }
 
+  /**
+   * Obtain the name of the algorithm as known by Java.
+   * 
+   * @return
+   */
+  public String getJavaAlgorithm()
+  {
+    return SUPPORTEDALGORITHMS.get(this.algorithm);
+  }
+
   public static class Builder
   {
     String keyId;
@@ -60,7 +73,7 @@ public class HawkCredential
     {
     }
 
-    public Builder(final HawkCredential prior)
+    public Builder(final HawkCredentials prior)
     {
       this.keyId = prior.getKeyId();
       this.key = prior.getKey();
@@ -85,9 +98,9 @@ public class HawkCredential
       return this;
     }
 
-    public HawkCredential build() throws DataError
+    public HawkCredentials build() throws DataError
     {
-      return new HawkCredential(this.keyId, this.key, this.algorithm);
+      return new HawkCredentials(this.keyId, this.key, this.algorithm);
     }
   }
 }

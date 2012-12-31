@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
+	<name>hawk-client</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
 	<filteredResources>
 		<filter>
-			<id>0</id>
-			<name/>
+			<id>1356906087714</id>
+			<name></name>
 			<type>10</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
@@ -11,8 +25,8 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>0</id>
-			<name/>
+			<id>1356906087716</id>
+			<name></name>
 			<type>10</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
@@ -20,8 +34,8 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>0</id>
-			<name/>
+			<id>1356906087718</id>
+			<name></name>
 			<type>6</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
@@ -29,17 +43,4 @@
 			</matcher>
 		</filter>
 	</filteredResources>
-	<name>hawk-core</name>
-	<comment/>
-	<projects/>
-	<natures>
-		<nature>org.eclipse.jdt.core.javanature</nature>
-	</natures>
-	<buildSpec>
-		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments/>
-		</buildCommand>
-	</buildSpec>
-	<linkedResources/>
 </projectDescription>

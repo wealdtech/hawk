@@ -14,8 +14,8 @@ repositories
 
 dependencies
 {
-    compile 'com.wealdtech:wealdtech-core:0.+'
-    compile 'com.google.guava:guava:13.+'
+//    compile 'com.wealdtech.hawk:hawk-core:0.1'
+    compile project(':hawk-core')
     testCompile 'org.testng:testng:6.+'
 }
 
@@ -23,6 +23,6 @@ jar
 {
     manifest
     {
-        attributes 'Implementation-title': 'Hawk', 'Implementation-version': version
+        attributes 'Implementation-title': 'Hawk server', 'Implementation-version': version
     }
 }
