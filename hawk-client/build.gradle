@@ -1,0 +1,28 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+sourceCompatibility=1.7
+group='com.wealdtech.hawk'
+version=0.1
+
+repositories
+{
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies
+{
+//    compile 'com.wealdtech.hawk:hawk-core:0.1'
+    compile project(':hawk-core')
+    testCompile 'org.testng:testng:6.+'
+}
+
+jar
+{
+    manifest
+    {
+        attributes 'Implementation-title': 'Hawk client', 'Implementation-version': version
+    }
+}
