@@ -1,6 +1,6 @@
 dependencies {
-    compile 'com.wealdtech:wealdtech-core:1.0.0-SNAPSHOT'
-    compile 'com.google.guava:guava:13.+'
+    compile 'com.wealdtech:wealdtech-core:1.0.0-SNAPSHOT+'
+    compile 'com.google.guava:guava:14.+'
     testCompile 'org.testng:testng:6.+'
 }
 

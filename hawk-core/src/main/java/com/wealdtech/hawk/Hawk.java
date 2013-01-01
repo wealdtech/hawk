@@ -16,29 +16,52 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
 
-import sun.misc.BASE64Encoder;
-
+import com.google.common.io.BaseEncoding;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 
+/**
+ * The Hawk class provides helper methods for calculating the MAC, required by
+ * both clients and servers.
+ */
 public class Hawk
 {
   /**
-   * Calculate a MAC
+   * Calculate and return a MAC. The MAC is used to sign the method and
+   * parameters passed as part of a request. It forms the basis to allow the
+   * server to verify that the request has not been tampered with.
+   * <p>
+   * Note that there is no validation of the parameters except to confirm that
+   * mandatory parameters are not null.
    * 
    * @param credentials
+   *          Hawk credentials of the requestor
    * @param timestamp
-   * @param uri
+   *          timestamp of the request
+   * @param url
+   *          URL of the request, including query parameters if appropriate
    * @param nonce
+   *          nonce a random string used to uniquely identify the request
    * @param method
+   *          the HTTP method of the request
    * @param ext
-   * @return
+   *          optional extra data, as supplied by the requestor to differentiate
+   *          the request if required
+   * @return the MAC
+   * @throws DataError
+   *           if there is an issue with the data that prevents creation of the
+   *           MAC
+   * @throws ServerError
+   *           if there is an issue with the server that prevents creation of
+   *           the MAC
    */
   public static String calculateMAC(final HawkCredentials credentials,
                                     final Long timestamp,
@@ -47,6 +70,12 @@ public class Hawk
                                     final String method,
                                     final String ext) throws DataError, ServerError
   {
+    // Check that required parameters are present
+    checkNotNull(timestamp);
+    checkNotNull(url);
+    checkNotNull(nonce);
+    checkNotNull(method);
+
     final StringBuilder sb = new StringBuilder(1024);
     sb.append(timestamp);
     sb.append('\n');
@@ -74,6 +103,21 @@ public class Hawk
     return calculateMac(credentials, sb.toString());
   }
 
+  /**
+   * Internal method to generate the MAC given the compiled string to sign
+   * 
+   * @param credentials
+   *          Hawk credentials of the requestor
+   * @param text
+   *          the compiled string
+   * @return the MAC
+   * @throws DataError
+   *           if there is an issue with the data that prevents creation of the
+   *           MAC
+   * @throws ServerError
+   *           if there is an issue with the server that prevents creation of
+   *           the MAC
+   */
   private static String calculateMac(final HawkCredentials credentials,
                                      final String text) throws DataError, ServerError
   {
@@ -88,7 +132,7 @@ public class Hawk
       {
         throw new ServerError("Unable to encode with UTF-8!", uee);
       }
-      return new BASE64Encoder().encode(md.digest());
+      return BaseEncoding.base64().encode(md.digest());
     }
     catch (NoSuchAlgorithmException nsae)
     {

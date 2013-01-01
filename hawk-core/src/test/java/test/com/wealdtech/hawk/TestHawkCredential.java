@@ -32,6 +32,21 @@ public class TestHawkCredential
     assertEquals(testhc1.getKeyId(), "testkeyid");
     assertEquals(testhc1.getKey(), "testkey");
     assertEquals(testhc1.getAlgorithm(), "hmac-sha-256");
+    testhc1.toString();
+    testhc1.hashCode();
+    assertEquals(testhc1, testhc1);
+    assertNotEquals(null, testhc1);
+
+    final HawkCredentials testhc2 = new HawkCredentials.Builder(testhc1).keyId("testkeyid2").build();
+    assertEquals(testhc2.getKeyId(), "testkeyid2");
+    assertEquals(testhc1.getKey(), "testkey");
+    assertEquals(testhc1.getAlgorithm(), "hmac-sha-256");
+    testhc2.toString();
+    testhc2.hashCode();
+    assertEquals(testhc2, testhc2);
+    assertNotEquals(null, testhc2);
+    assertNotEquals(testhc1, testhc2);
+    assertEquals(testhc1.getJavaAlgorithm(), "SHA-256");
   }
 
   @Test
