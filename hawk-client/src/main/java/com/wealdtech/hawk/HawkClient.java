@@ -20,7 +20,7 @@ import java.net.URL;
 
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
-import com.wealdtech.WealdUtils;
+import com.wealdtech.utils.StringUtils;
 
 public class HawkClient
 {
@@ -46,7 +46,7 @@ public class HawkClient
                                             final String ext) throws DataError, ServerError
   {
     long timestamp = System.currentTimeMillis() / 1000;
-    final String nonce = WealdUtils.generateRandomString(6);
+    final String nonce = StringUtils.generateRandomString(6);
     final String mac = Hawk.calculateMAC(this.credentials, timestamp, url, nonce, method, ext);
 
     final StringBuilder sb = new StringBuilder(1024);
