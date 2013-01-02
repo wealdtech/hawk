@@ -16,7 +16,7 @@
 
 package com.wealdtech.hawk;
 
-import java.net.URL;
+import java.net.URI;
 
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
@@ -33,21 +33,21 @@ public class HawkClient
 
   /**
    * Generate the value for the Hawk authorization header.
-   * 
-   * @param url
+   *
+   * @param uri
    * @param method
    * @param ext
    * @return
    * @throws DataError
    * @throws ServerError
    */
-  public String generateAuthorizationHeader(final URL url,
+  public String generateAuthorizationHeader(final URI uri,
                                             final String method,
                                             final String ext) throws DataError, ServerError
   {
     long timestamp = System.currentTimeMillis() / 1000;
     final String nonce = StringUtils.generateRandomString(6);
-    final String mac = Hawk.calculateMAC(this.credentials, timestamp, url, nonce, method, ext);
+    final String mac = Hawk.calculateMAC(this.credentials, timestamp, uri, nonce, method, ext);
 
     final StringBuilder sb = new StringBuilder(1024);
     sb.append("Hawk id=\"");

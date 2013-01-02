@@ -18,7 +18,8 @@ package test.com.wealdtech.hawk;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ public class DummyHttpServer
       this.server = new HawkServer();
     }
 
+    @Override
     public void handle(final HttpExchange exchange) throws IOException
     {
       String authorizationheader = exchange.getRequestHeaders().getFirst("Authorization");
@@ -71,8 +73,16 @@ public class DummyHttpServer
       }
       try
       {
-        final URL fullurl = new URL("http://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
-        server.authenticate(credentials, fullurl, exchange.getRequestMethod(), authorizationheader);
+        URI fulluri;
+        try
+        {
+          fulluri = new URI("http://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
+        }
+        catch (URISyntaxException e)
+        {
+          throw new DataError("Failed to greate URI from exchange information");
+        }
+        server.authenticate(credentials, fulluri, exchange.getRequestMethod(), authorizationheader);
         System.err.println("Authenticated");
         exchange.sendResponseHeaders(200, 0);
       }

@@ -19,7 +19,7 @@ package com.wealdtech.hawk;
 import static com.wealdtech.Preconditions.*;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
+import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
@@ -41,13 +41,13 @@ public class Hawk
    * <p>
    * Note that there is no validation of the parameters except to confirm that
    * mandatory parameters are not null.
-   * 
+   *
    * @param credentials
    *          Hawk credentials of the requestor
    * @param timestamp
    *          timestamp of the request
-   * @param url
-   *          URL of the request, including query parameters if appropriate
+   * @param uri
+   *          URI of the request, including query parameters if appropriate
    * @param nonce
    *          nonce a random string used to uniquely identify the request
    * @param method
@@ -65,14 +65,14 @@ public class Hawk
    */
   public static String calculateMAC(final HawkCredentials credentials,
                                     final Long timestamp,
-                                    final URL url,
+                                    final URI uri,
                                     final String nonce,
                                     final String method,
                                     final String ext) throws DataError, ServerError
   {
     // Check that required parameters are present
     checkNotNull(timestamp);
-    checkNotNull(url);
+    checkNotNull(uri);
     checkNotNull(nonce);
     checkNotNull(method);
 
@@ -83,16 +83,16 @@ public class Hawk
     sb.append('\n');
     sb.append(method.toUpperCase(Locale.ENGLISH));
     sb.append('\n');
-    sb.append(url.getPath());
-    if (url.getQuery() != null)
+    sb.append(uri.getPath());
+    if (uri.getQuery() != null)
     {
       sb.append('?');
-      sb.append(url.getQuery());
+      sb.append(uri.getQuery());
     }
     sb.append('\n');
-    sb.append(url.getHost().toLowerCase(Locale.ENGLISH));
+    sb.append(uri.getHost().toLowerCase(Locale.ENGLISH));
     sb.append('\n');
-    sb.append(url.getPort());
+    sb.append(uri.getPort());
     sb.append('\n');
     if (ext != null)
     {
@@ -105,7 +105,7 @@ public class Hawk
 
   /**
    * Internal method to generate the MAC given the compiled string to sign
-   * 
+   *
    * @param credentials
    *          Hawk credentials of the requestor
    * @param text

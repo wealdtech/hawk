@@ -16,7 +16,7 @@
 
 package com.wealdtech.hawk;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -47,7 +47,7 @@ public class HawkServer
 
   /**
    * Create an instance of the Hawk server with custom configuration
-   * 
+   *
    * @param configuration
    *          the specific configuration
    */
@@ -56,19 +56,16 @@ public class HawkServer
     this.configuration = configuration;
   }
 
-  public void authenticate(final HawkCredentials credentials, final URL url, final String method, final String authorizationheader) throws DataError, ServerError
+  public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationheaders) throws DataError, ServerError
   {
-    // First off ensure that we are a Hawk authorization
-    final String fieldsstr = splitAuthorizationHeader(authorizationheader);
-
-    // Now obtain the various fields
-    ImmutableMap<String, String> fields = splitAuthFields(fieldsstr);
-
     // Ensure that the timestamp passed in is within suitable bounds
     // TODO
 
-    final String mac = Hawk.calculateMAC(credentials, Long.valueOf(fields.get("ts")), url, fields.get("nonce"), method, fields.get("ext"));
-    if (!timeConstantEquals(mac, fields.get("mac")))
+    // Ensure that this is not a replay of a previous request
+    // TODO
+
+    final String mac = Hawk.calculateMAC(credentials, Long.valueOf(authorizationheaders.get("ts")), uri, authorizationheaders.get("nonce"), method, authorizationheaders.get("ext"));
+    if (!timeConstantEquals(mac, authorizationheaders.get("mac")))
     {
       throw new DataError("Failed to authenticate");
     }
@@ -78,7 +75,7 @@ public class HawkServer
    * Generate text for a WWW-Authenticate header after a failed authentication.
    * <p>
    * Note that this generates the header's contents, and not the header itself.
-   * 
+   *
    * @return text suitable for placement in a WWW-Authenticate header
    */
   public String generateAuthenticateHeader()
@@ -116,7 +113,7 @@ public class HawkServer
     return (res == 0);
   }
 
-  private static String splitAuthorizationHeader(final String authorizationheader) throws DataError
+  public static ImmutableMap<String, String> splitAuthorizationHeader(final String authorizationheader) throws DataError
   {
     List<String> headerfields = Lists.newArrayList(HAWKSPLITTER.split(authorizationheader));
     if (headerfields.size() != 2)
@@ -127,13 +124,9 @@ public class HawkServer
     {
       throw new DataError("Not a Hawk authorization header");
     }
-    return headerfields.get(1);
-  }
 
-  private static ImmutableMap<String, String> splitAuthFields(final String fieldstr)
-  {
     Map<String, String> fields = new HashMap<>();
-    Matcher m = FIELDPATTERN.matcher(fieldstr);
+    Matcher m = FIELDPATTERN.matcher(headerfields.get(1));
     while (m.find())
     {
       String key = m.group(1);
