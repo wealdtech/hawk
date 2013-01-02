@@ -19,6 +19,9 @@ package test.com.wealdtech.hawk;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -49,37 +52,51 @@ public class DummyHttpServer
   private class AuthenticateHandler implements HttpHandler
   {
     private final HawkCredentials credentials;
+    private final HawkServer server;
 
     public AuthenticateHandler(final HawkCredentials credentials)
     {
       this.credentials = credentials;
+      this.server = new HawkServer();
     }
 
-    public void handle(HttpExchange exchange) throws IOException
+    public void handle(final HttpExchange exchange) throws IOException
     {
       String authorizationheader = exchange.getRequestHeaders().getFirst("Authorization");
       if (authorizationheader == null)
       {
         System.err.println("Not authenticated (no authorization header)");
+        addAuthenticateHeader(exchange);
         exchange.sendResponseHeaders(401, 0);
       }
       try
       {
         final URL fullurl = new URL("http://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
-        HawkServer.authenticate(credentials, fullurl, exchange.getRequestMethod(), authorizationheader);
+        server.authenticate(credentials, fullurl, exchange.getRequestMethod(), authorizationheader);
         System.err.println("Authenticated");
         exchange.sendResponseHeaders(200, 0);
       }
       catch (DataError de)
       {
         System.err.println("Not authenticated (data error)");
+        addAuthenticateHeader(exchange);
         exchange.sendResponseHeaders(401, 0);
       }
       catch (ServerError se)
       {
         System.err.println("Not authenticated (server error)");
+        addAuthenticateHeader(exchange);
         exchange.sendResponseHeaders(500, 0);
       }
+    }
+
+    private void addAuthenticateHeader(final HttpExchange exchange)
+    {
+      Map<String, List<String>> responseheaders = exchange.getResponseHeaders();
+      String authenticate = server.generateAuthenticateHeader();
+      List<String> authenticateheader = new ArrayList<>();
+      authenticateheader.add(authenticate);
+      responseheaders.put("WWW-Authenticate", authenticateheader);
     }
   }
 

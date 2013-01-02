@@ -30,12 +30,33 @@ import com.google.common.collect.Lists;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 
-public class HawkServer<T>
+public class HawkServer
 {
   private static final Splitter HAWKSPLITTER = Splitter.onPattern("\\s+").limit(2);
   private static final Pattern FIELDPATTERN = Pattern.compile("([^=]*)\\s*=\\s*\"([^\"]*)[,\"\\s]*");
 
-  public static void authenticate(final HawkCredentials credentials, final URL url, final String method, final String authorizationheader) throws DataError, ServerError
+  private final HawkServerConfiguration configuration;
+
+  /**
+   * Create an instance of the Hawk server
+   */
+  public HawkServer()
+  {
+    this.configuration = new HawkServerConfiguration();
+  }
+
+  /**
+   * Create an instance of the Hawk server with custom configuration
+   * 
+   * @param configuration
+   *          the specific configuration
+   */
+  public HawkServer(final HawkServerConfiguration configuration)
+  {
+    this.configuration = configuration;
+  }
+
+  public void authenticate(final HawkCredentials credentials, final URL url, final String method, final String authorizationheader) throws DataError, ServerError
   {
     // First off ensure that we are a Hawk authorization
     final String fieldsstr = splitAuthorizationHeader(authorizationheader);
@@ -43,11 +64,33 @@ public class HawkServer<T>
     // Now obtain the various fields
     ImmutableMap<String, String> fields = splitAuthFields(fieldsstr);
 
+    // Ensure that the timestamp passed in is within suitable bounds
+    // TODO
+
     final String mac = Hawk.calculateMAC(credentials, Long.valueOf(fields.get("ts")), url, fields.get("nonce"), method, fields.get("ext"));
     if (!timeConstantEquals(mac, fields.get("mac")))
     {
       throw new DataError("Failed to authenticate");
     }
+  }
+
+  /**
+   * Generate text for a WWW-Authenticate header after a failed authentication.
+   * <p>
+   * Note that this generates the header's contents, and not the header itself.
+   * 
+   * @return text suitable for placement in a WWW-Authenticate header
+   */
+  public String generateAuthenticateHeader()
+  {
+    StringBuilder sb = new StringBuilder(64);
+    sb.append("Hawk ts=\"");
+    sb.append(String.valueOf(System.currentTimeMillis() / 1000));
+    sb.append("\", ntp=\"");
+    sb.append(this.configuration.getNtpServer());
+    sb.append('"');
+
+    return sb.toString();
   }
 
   private static boolean timeConstantEquals(final String first, final String second)

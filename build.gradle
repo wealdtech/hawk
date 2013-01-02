@@ -12,6 +12,10 @@ subprojects {
 //        mavenLocal()
     }
 
+    dependencies {
+        testCompile 'org.testng:testng:6.+'
+    }
+
     group = 'com.wealdtech.hawk'
     version = '0.1.0-SNAPSHOT'
 

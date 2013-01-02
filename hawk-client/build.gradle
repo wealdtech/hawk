@@ -1,7 +1,6 @@
 dependencies {
 //    compile 'com.wealdtech.hawk:hawk-core:0.1.+'
     compile project(':hawk-core')
-    testCompile 'org.testng:testng:6.+'
 }
 
 uploadArchives {
