@@ -1,0 +1,23 @@
+dependencies {
+    compile project(':hawk-core')
+    compile project(':hawk-server')
+//    compile 'org.eclipse.jetty:jetty-server:8.1.+'
+//    compile 'org.eclipse.jetty:jetty-servlet:8.1.+'
+    compile 'com.sun.jersey:jersey-core:1.16'
+    compile 'com.sun.jersey:jersey-server:1.16'
+    compile 'com.sun.jersey:jersey-servlet:1.16'
+    compile 'com.sun.jersey:jersey-grizzly2:1.16'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.project {
+                pom.artifactId = 'hawk-server-jersey'
+                name 'Hawk Server for Jersey'
+                description 'Java implementation of Hawk protocol - server for Jersey'
+            }
+        }
+    }
+}
+
