@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
+import com.google.common.collect.ImmutableMap;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -64,37 +65,53 @@ public class DummyHttpServer
     @Override
     public void handle(final HttpExchange exchange) throws IOException
     {
-      String authorizationheader = exchange.getRequestHeaders().getFirst("Authorization");
-      if (authorizationheader == null)
+      // Obtain parameters available from the request
+      URI uri;
+
+      try
       {
-        System.err.println("Not authenticated (no authorization header)");
+        uri = new URI("http://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
+      }
+      catch (URISyntaxException use)
+      {
+        System.out.println("Not authenticated: " + use.getLocalizedMessage());
         addAuthenticateHeader(exchange);
         exchange.sendResponseHeaders(401, 0);
       }
+
+      final String method = exchange.getRequestMethod();
+      final ImmutableMap<String, String> authorizationHeaders;
+
       try
       {
-        URI fulluri;
-        try
-        {
-          fulluri = new URI("http://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
-        }
-        catch (URISyntaxException e)
-        {
-          throw new DataError("Failed to greate URI from exchange information");
-        }
-        server.authenticate(credentials, fulluri, exchange.getRequestMethod(), authorizationheader);
-        System.err.println("Authenticated");
+        authorizationHeaders = HawkServer.splitAuthorizationHeader(exchange.getRequestHeaders().getFirst("Authorization"));
+      }
+      catch (DataError de)
+      {
+        System.out.println("Not authenticated: " + de.getLocalizedMessage());
+        addAuthenticateHeader(exchange);
+        exchange.sendResponseHeaders(401, 0);
+      }
+
+      // We need to obtain our own stored copy of the requestor's credentials
+      // given the keyId parameter passed in as part of the authorization header
+      final HawkCredentials credentials = fetchCredentials(authorizationHeaders.get("keyId"));
+
+      try
+      {
+        server.authenticate(credentials, uri, exchange.getRequestMethod(), authorizationHeaders);
+        System.out.println("Authenticated");
         exchange.sendResponseHeaders(200, 0);
       }
       catch (DataError de)
       {
-        System.err.println("Not authenticated (data error)");
+        System.out.println("Not authenticated (data error)");
         addAuthenticateHeader(exchange);
         exchange.sendResponseHeaders(401, 0);
       }
       catch (ServerError se)
       {
-        System.err.println("Not authenticated (server error)");
+        System.out.println("Not authenticated (server error)");
         addAuthenticateHeader(exchange);
         exchange.sendResponseHeaders(500, 0);
       }
@@ -115,10 +132,10 @@ public class DummyHttpServer
     try
     {
       HawkCredentials credentials = new HawkCredentials.Builder()
-          .keyId("dh37fgj492je")
-          .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-          .algorithm("hmac-sha-256")
-          .build();
+                                                       .keyId("dh37fgj492je")
+                                                       .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
+                                                       .algorithm("hmac-sha-256")
+                                                       .build();
       new DummyHttpServer(credentials);
       while (true)
       {

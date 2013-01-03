@@ -29,6 +29,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
+import com.wealdtech.errors.ErrorInfo;
+import com.wealdtech.errors.ErrorInfoMap;
+
+import static com.wealdtech.Preconditions.checkNotNull;
 
 public class HawkServer
 {
@@ -115,6 +119,7 @@ public class HawkServer
 
   public static ImmutableMap<String, String> splitAuthorizationHeader(final String authorizationheader) throws DataError
   {
+    checkNotNull(authorizationheader);
     List<String> headerfields = Lists.newArrayList(HAWKSPLITTER.split(authorizationheader));
     if (headerfields.size() != 2)
     {
@@ -134,5 +139,14 @@ public class HawkServer
       fields.put(key, value);
     }
     return ImmutableMap.copyOf(fields);
+  }
+
+  // Error messages
+  static
+  {
+    ErrorInfoMap.put(new ErrorInfo("errorCode",
+                                   "userMessage",
+                                   "developerMessage",
+                                   "moreInfo"));
   }
 }

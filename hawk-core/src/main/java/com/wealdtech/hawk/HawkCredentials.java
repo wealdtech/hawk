@@ -20,6 +20,8 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 import com.wealdtech.DataError;
+import com.wealdtech.errors.ErrorInfo;
+import com.wealdtech.errors.ErrorInfoMap;
 
 /**
  * HawkCredentials contains the information required to authenticate requests
@@ -58,15 +60,15 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   {
     if (this.keyId == null)
     {
-      throw new DataError("Key ID is NULL");
+      throw new DataError("HawkCredentials: Key ID is NULL");
     }
     if (this.key == null)
     {
-      throw new DataError("Key is NULL");
+      throw new DataError("HawkCredentials: Key is NULL");
     }
     if (!SUPPORTEDALGORITHMS.containsKey(algorithm))
     {
-      throw new DataError("Unknown algorithm \"" + algorithm + "\"");
+      throw new DataError("HawkCredentials: Unknown algorithm");
     }
   }
 
@@ -116,8 +118,11 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   @Override
   public String toString()
   {
-    return Objects.toStringHelper(this).add("keyId", this.getKeyId()).add("key", this.getKey())
-        .add("algorithm", this.getAlgorithm()).toString();
+    return Objects.toStringHelper(this)
+                  .add("keyId", this.getKeyId())
+                  .add("key", this.getKey())
+                  .add("algorithm", this.getAlgorithm())
+                  .toString();
   }
 
   @Override
@@ -135,8 +140,11 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   @Override
   public int compareTo(final HawkCredentials that)
   {
-    return ComparisonChain.start().compare(this.getKeyId(), that.getKeyId()).compare(this.getKey(), that.getKey())
-        .compare(this.getAlgorithm(), that.getAlgorithm()).result();
+    return ComparisonChain.start()
+                          .compare(this.getKeyId(), that.getKeyId())
+                          .compare(this.getKey(), that.getKey())
+                          .compare(this.getAlgorithm(), that.getAlgorithm())
+                          .result();
   }
 
   /**
@@ -220,5 +228,22 @@ public class HawkCredentials implements Comparable<HawkCredentials>
     {
       return new HawkCredentials(this.keyId, this.key, this.algorithm);
     }
+  }
+
+  // Error information
+  static
+  {
+    ErrorInfoMap.put(new ErrorInfo("HawkCredentials: Key ID is NULL",
+                                   "I was passed incorrect authentication information so cannot proceed with the request",
+                                   "Hawk credentials mandate a key ID",
+                                   "http://www.wealdtech.com/help/HawkCredentials: Key ID is NULL"));
+    ErrorInfoMap.put(new ErrorInfo("HawkCredentials: Key is NULL",
+                                   "I was passed incorrect authentication information so cannot proceed with the request",
+                                   "Hawk credentials mandate a key",
+                                   "http://www.wealdtech.com/help/HawkCredentials: Key is NULL"));
+    ErrorInfoMap.put(new ErrorInfo("HawkCredentials: Unknown algorithm",
+                                   "I was passed incorrect authentication information so cannot proceed with the request",
+                                   "Hawk credentials mandate a key",
+                                   "http://www.wealdtech.com/help/HawkCredentials: Unknown algorithm"));
   }
 }

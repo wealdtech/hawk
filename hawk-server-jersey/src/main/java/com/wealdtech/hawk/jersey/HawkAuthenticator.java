@@ -1,7 +1,7 @@
 package com.wealdtech.hawk.jersey;
 
 import com.google.common.base.Optional;
-import com.wealdtech.DataError;
+import com.sun.jersey.spi.container.ContainerRequest;
 import com.wealdtech.ServerError;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.jersey.auth.Authenticator;
@@ -9,9 +9,8 @@ import com.wealdtech.jersey.auth.Authenticator;
 public class HawkAuthenticator<P> implements Authenticator<HawkCredentials, P>
 {
   @Override
-  public Optional<P> authenticate(final HawkCredentials credentials) throws DataError, ServerError
+  public Optional<P> authenticate(final ContainerRequest request, final HawkCredentials credentials) throws ServerError
   {
-    // TODO Auto-generated method stub
-    return null;
+    return Optional.absent();
   }
 }

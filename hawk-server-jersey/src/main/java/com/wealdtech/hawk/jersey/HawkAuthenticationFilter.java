@@ -1,8 +1,9 @@
 package com.wealdtech.hawk.jersey;
 
-import java.net.URI;
+import javax.ws.rs.core.Context;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.wealdtech.DataError;
@@ -10,23 +11,29 @@ import com.wealdtech.ServerError;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkServer;
 import com.wealdtech.hawk.HawkServerConfiguration;
+import com.wealdtech.jersey.exceptions.InternalServerException;
+import com.wealdtech.jersey.exceptions.UnauthorizedException;
 
 /**
  * Authentication filter using the Hawk protocol.
- * This filter authenticates a request,
  * @param <T>
  */
 public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
 {
-  private transient final HawkServer server;
+  private transient final HawkCredentialsProvider provider;
 
-//  private transient final HawkCredentialsProvider provider;
+  private transient final HawkAuthenticator<T> authenticator;
 
-//  private transient final Authenticator<HawkCredentials, T> authenticator;
+  @Context
+  private transient HttpServletRequest servletrequest;
 
-  public HawkAuthenticationFilter(final HawkServerConfiguration configuration)
+  @Inject
+  public HawkAuthenticationFilter(final HawkServerConfiguration configuration,
+                                  final HawkAuthenticator<T> authenticator,
+                                  final HawkCredentialsProvider provider)
   {
-    this.server = new HawkServer(configuration);
+    this.authenticator = authenticator;
+    this.provider = provider;
   }
 
   @Override
@@ -35,43 +42,27 @@ public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
     T result = null;
     try
     {
-      result = authenticate(request);
+      // Obtain parameters available from the request
+      final ImmutableMap<String, String> authorizationheaders = HawkServer.splitAuthorizationHeader(request.getHeaderValue(ContainerRequest.AUTHORIZATION));
+      // We need to obtain our own stored copy of the requestor's credentials
+      // given the keyId parameter passed in as part of the authorization header
+      final HawkCredentials credentials = this.provider.getCredentials(authorizationheaders.get("keyId"));
+      // Now that we have the credentials we can authenticate the request
+      result = authenticator.authenticate(request, credentials).orNull();
     }
     catch (DataError de)
     {
       // A data error means that the request was not authenticated successfully using the supplied information
+      throw new UnauthorizedException(de);
     }
     catch (ServerError se)
     {
       // A server error means that there was a server-side problem whilst attempting to authenticate the request
+      throw new InternalServerException(se);
     }
 
     // At this point the request has been authenticated successfully.
 
     return request;
-  }
-
-  private T authenticate(final ContainerRequest request) throws DataError, ServerError
-  {
-    // Obtain parameters available from the request
-    final URI uri = request.getRequestUri();
-    final String method = request.getMethod();
-    final ImmutableMap<String, String> authorizationheaders = HawkServer.splitAuthorizationHeader(request.getHeaderValue(ContainerRequest.AUTHORIZATION));
-
-    // We need to obtain our own stored copy of the requestor's credentials
-    // given the keyId parameter passed in as part of the authorization header
-    final HawkCredentials credentials = fetchCredentials(authorizationheaders.get("keyId"));
-
-    server.authenticate(credentials, uri, method, authorizationheaders);
-    return null;
-  }
-
-  private HawkCredentials fetchCredentials(final String keyId) throws DataError
-  {
-    return new HawkCredentials.Builder()
-                              .keyId("dh37fgj492je")
-                              .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                              .algorithm("hmac-sha-256")
-                              .build();
   }
 }
