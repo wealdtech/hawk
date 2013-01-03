@@ -35,10 +35,10 @@ public class testHawkClient
   public void setUp() throws Exception
   {
     this.testcredentials = new HawkCredentials.Builder()
-        .keyId("dh37fgj492je")
-        .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-        .algorithm("hmac-sha-256")
-        .build();
+                                              .keyId("dh37fgj492je")
+                                              .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
+                                              .algorithm("hmac-sha-256")
+                                              .build();
     this.validurl2 = new URL("http://localhost:18234/testpath");
     this.validurl1 = new URL("http://localhost:18234/testpath/subpath?param1=val1&param2=val2");
   }

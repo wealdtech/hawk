@@ -16,8 +16,6 @@
 
 package test.com.wealdtech.hawk;
 
-import static org.testng.Assert.*;
-
 import java.net.URL;
 
 import org.testng.annotations.BeforeClass;
@@ -28,6 +26,8 @@ import com.wealdtech.ServerError;
 import com.wealdtech.hawk.Hawk;
 import com.wealdtech.hawk.HawkCredentials;
 
+import static org.testng.Assert.assertEquals;
+
 public class TestHawk
 {
   private HawkCredentials testhc1;
@@ -37,7 +37,11 @@ public class TestHawk
   @BeforeClass
   public void setUp() throws Exception
   {
-    this.testhc1 = new HawkCredentials.Builder().keyId("testkeyid").key("testkey").algorithm("hmac-sha-256").build();
+    this.testhc1 = new HawkCredentials.Builder()
+                                      .keyId("testkeyid")
+                                      .key("testkey")
+                                      .algorithm("hmac-sha-256")
+                                      .build();
     this.testurl1 = new URL("http://www.example.com/test/path");
     this.testurl2 = new URL("https://www.example.com/test/path/two?one=1&two=two");
   }
