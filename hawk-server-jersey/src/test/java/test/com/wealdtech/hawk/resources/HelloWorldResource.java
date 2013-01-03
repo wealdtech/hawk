@@ -8,10 +8,12 @@ import javax.ws.rs.Produces;
  * (Very) simple resource for testing
  */
 @Path("helloworld")
-public class HelloWorldResource {
-	@GET
-	@Produces("text/plain")
-	public String getHelloWorld() {
-		return "Hello world";
-	}
+public class HelloWorldResource
+{
+  @GET
+  @Produces("text/plain")
+  public String getHelloWorld()
+  {
+    return "Hello world";
+  }
 }

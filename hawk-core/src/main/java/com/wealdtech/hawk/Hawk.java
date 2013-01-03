@@ -16,8 +16,6 @@
 
 package com.wealdtech.hawk;
 
-import static com.wealdtech.Preconditions.*;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.MessageDigest;
@@ -27,6 +25,8 @@ import java.util.Locale;
 import com.google.common.io.BaseEncoding;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
+
+import static com.wealdtech.Preconditions.checkNotNull;
 
 /**
  * The Hawk class provides helper methods for calculating the MAC, required by
@@ -118,8 +118,7 @@ public class Hawk
    *           if there is an issue with the server that prevents creation of
    *           the MAC
    */
-  private static String calculateMac(final HawkCredentials credentials,
-                                     final String text) throws DataError, ServerError
+  private static String calculateMac(final HawkCredentials credentials, final String text) throws DataError, ServerError
   {
     try
     {

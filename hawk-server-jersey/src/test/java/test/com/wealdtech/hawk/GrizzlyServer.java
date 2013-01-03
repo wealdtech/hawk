@@ -6,6 +6,8 @@ import java.net.URISyntaxException;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 
+import org.glassfish.grizzly.http.server.HttpServer;
+
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;

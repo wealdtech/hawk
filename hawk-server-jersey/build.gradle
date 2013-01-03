@@ -1,6 +1,7 @@
 dependencies {
     compile project(':hawk-core')
     compile project(':hawk-server')
+    compile('com.wealdtech:wealdtech-jersey-server:1.0.0-SNAPSHOT') { changing=true }
 //    compile 'org.eclipse.jetty:jetty-server:8.1.+'
 //    compile 'org.eclipse.jetty:jetty-servlet:8.1.+'
     compile('com.wealdtech:wealdtech-jersey:1.0.0-SNAPSHOT') { changing=true }

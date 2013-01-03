@@ -35,9 +35,9 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   public final String algorithm;
 
   private final ImmutableMap<String, String> SUPPORTEDALGORITHMS = new ImmutableMap.Builder<String, String>()
-      .put("hmac-sha-1", "SHA-1")
-      .put("hmac-sha-256", "SHA-256")
-      .build();
+                                                                                   .put("hmac-sha-1", "SHA-1")
+                                                                                   .put("hmac-sha-256", "SHA-256")
+                                                                                   .build();
 
   private HawkCredentials(final String keyId, final String key, final String algorithm) throws DataError
   {
@@ -49,7 +49,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
 
   /**
    * Carry out validation of the object as part of creation routine.
-   * 
+   *
    * @throws DataError
    *           if there is an issue with the data that prevents creation of the
    *           credentials
@@ -72,7 +72,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
 
   /**
    * Obtain the key ID.
-   * 
+   *
    * @return the key ID
    */
   public String getKeyId()
@@ -82,7 +82,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
 
   /**
    * Obtain the key.
-   * 
+   *
    * @return the Key ID. Note that the key ID is a shared secret, and should be
    *         protected accordingly
    */
@@ -93,7 +93,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
 
   /**
    * Obtain the algorithm used to calculate the MAC
-   * 
+   *
    * @return the algorithm used to calculate the MAC
    */
   public String getAlgorithm()
@@ -104,7 +104,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   /**
    * Obtain the algorithm used to calculate the MAC, using the name as known by
    * Java cryptography functions.
-   * 
+   *
    * @return the algorithm used to calculate the MAC
    */
   public String getJavaAlgorithm()
@@ -116,11 +116,8 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   @Override
   public String toString()
   {
-    return Objects.toStringHelper(this)
-        .add("keyId", this.getKeyId())
-        .add("key", this.getKey())
-        .add("algorithm", this.getAlgorithm())
-        .toString();
+    return Objects.toStringHelper(this).add("keyId", this.getKeyId()).add("key", this.getKey())
+        .add("algorithm", this.getAlgorithm()).toString();
   }
 
   @Override
@@ -132,19 +129,14 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   @Override
   public int hashCode()
   {
-    return Objects.hashCode(this.getKeyId(),
-        this.getKey(),
-        this.getAlgorithm());
+    return Objects.hashCode(this.getKeyId(), this.getKey(), this.getAlgorithm());
   }
 
   @Override
   public int compareTo(final HawkCredentials that)
   {
-    return ComparisonChain.start()
-        .compare(this.getKeyId(), that.getKeyId())
-        .compare(this.getKey(), that.getKey())
-        .compare(this.getAlgorithm(), that.getAlgorithm())
-        .result();
+    return ComparisonChain.start().compare(this.getKeyId(), that.getKeyId()).compare(this.getKey(), that.getKey())
+        .compare(this.getAlgorithm(), that.getAlgorithm()).result();
   }
 
   /**
@@ -166,7 +158,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
     /**
      * Start a new builder, initializing the values with those from an existing
      * set of credentials.
-     * 
+     *
      * @param prior
      *          the prior credentials
      */
@@ -179,7 +171,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
 
     /**
      * Set the key ID.
-     * 
+     *
      * @param keyId
      *          the key ID
      * @return the builder
@@ -192,7 +184,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
 
     /**
      * Set the key.
-     * 
+     *
      * @param key
      *          the key
      * @return the builder
@@ -205,7 +197,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
 
     /**
      * Set the algorithm used to calculate the MAC.
-     * 
+     *
      * @param algorithm
      *          the algorithm used to calculate the MAC
      * @return the builder
@@ -218,7 +210,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
 
     /**
      * Build the Hawk credentials.
-     * 
+     *
      * @return the Hawk credentials
      * @throws DataError
      *           if there is an issue with the data that prevents creation of

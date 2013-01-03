@@ -28,6 +28,8 @@ import com.wealdtech.ServerError;
 import com.wealdtech.hawk.Hawk;
 import com.wealdtech.hawk.HawkCredentials;
 
+import static org.testng.Assert.assertEquals;
+
 public class TestHawk
 {
   private HawkCredentials testhc1;
@@ -37,7 +39,11 @@ public class TestHawk
   @BeforeClass
   public void setUp() throws Exception
   {
-    this.testhc1 = new HawkCredentials.Builder().keyId("testkeyid").key("testkey").algorithm("hmac-sha-256").build();
+    this.testhc1 = new HawkCredentials.Builder()
+                                      .keyId("testkeyid")
+                                      .key("testkey")
+                                      .algorithm("hmac-sha-256")
+                                      .build();
     this.testuri1 = new URI("http://www.example.com/test/path");
     this.testuri2 = new URI("https://www.example.com/test/path/two?one=1&two=two");
   }
