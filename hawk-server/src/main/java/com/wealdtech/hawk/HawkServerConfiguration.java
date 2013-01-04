@@ -27,7 +27,7 @@ public class HawkServerConfiguration
 
   /**
    * Create a configuration with values for all options.
-   * 
+   *
    * @param ntpServer
    *          the name of an NTP server, or <code>null</code> for the default
    * @param timestampSkew

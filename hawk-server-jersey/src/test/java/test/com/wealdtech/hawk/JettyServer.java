@@ -34,15 +34,9 @@ public class JettyServer
 
   public void start() throws Exception // NOPMD
   {
-    // TODO configuration
-//    final int port = configuration.getPort();
     final int port = 8080;
     LOGGER.info("Starting http server on port {}", port);
     this.server = new Server(port);
-
-    // TODO Metrics
-//    final ServletContextHandler admin = new ServletContextHandler(this.server, "/admin", ServletContextHandler.SESSIONS);
-//    admin.addServlet(AdminServlet.class, "/*");
 
     final ServletContextHandler context = new ServletContextHandler(this.server, "/");
     context.addEventListener(new GuiceServletContextListener()

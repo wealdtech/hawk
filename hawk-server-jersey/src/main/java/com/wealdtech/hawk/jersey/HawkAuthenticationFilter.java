@@ -4,14 +4,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
-import com.wealdtech.hawk.HawkCredentials;
-import com.wealdtech.hawk.HawkServer;
+import com.wealdtech.jersey.auth.Authenticator;
 import com.wealdtech.jersey.exceptions.InternalServerException;
 import com.wealdtech.jersey.exceptions.UnauthorizedException;
 
@@ -21,19 +19,15 @@ import com.wealdtech.jersey.exceptions.UnauthorizedException;
  */
 public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
 {
-  private transient final HawkCredentialsProvider provider;
-
-  private transient final HawkAuthenticator<T> authenticator;
+  private transient final Authenticator<T> authenticator;
 
   @Context
   private transient HttpServletRequest servletrequest;
 
   @Inject
-  public HawkAuthenticationFilter(final HawkAuthenticator<T> authenticator,
-                                  final HawkCredentialsProvider provider)
+  public HawkAuthenticationFilter(final Authenticator<T> authenticator)
   {
     this.authenticator = authenticator;
-    this.provider = provider;
   }
 
   @Override
@@ -42,13 +36,7 @@ public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
     Optional<T> result;
     try
     {
-      // Obtain parameters available from the request
-      final ImmutableMap<String, String> authorizationheaders = HawkServer.splitAuthorizationHeader(request.getHeaderValue(ContainerRequest.AUTHORIZATION));
-      // We need to obtain our own stored copy of the requestor's credentials
-      // given the keyId parameter passed in as part of the authorization header
-      final HawkCredentials credentials = this.provider.getCredentials(authorizationheaders.get("id"));
-      // Now that we have the credentials we can authenticate the request
-      result = authenticator.authenticate(request, credentials);
+      result = authenticator.authenticate(request);
     }
     catch (DataError de)
     {

@@ -1,17 +1,16 @@
 package test.com.wealdtech.hawk.jersey;
 
-import test.com.wealdtech.hawk.TestUser;
+import test.com.wealdtech.hawk.model.ExampleUser;
 
 import com.google.inject.Inject;
 import com.wealdtech.hawk.jersey.HawkAuthenticationFilter;
-import com.wealdtech.hawk.jersey.HawkAuthenticator;
-import com.wealdtech.hawk.jersey.HawkCredentialsProvider;
+import com.wealdtech.jersey.auth.Authenticator;
 
-public class HawkTestUserAuthenticationFilter extends HawkAuthenticationFilter<TestUser>
+public class HawkTestUserAuthenticationFilter extends HawkAuthenticationFilter<ExampleUser>
 {
   @Inject
-  public HawkTestUserAuthenticationFilter(HawkAuthenticator<TestUser> authenticator, HawkCredentialsProvider provider)
+  public HawkTestUserAuthenticationFilter(final Authenticator<ExampleUser> authenticator)
   {
-    super(authenticator, provider);
+    super(authenticator);
   }
 }

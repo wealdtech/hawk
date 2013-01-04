@@ -5,7 +5,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 
-import test.com.wealdtech.hawk.TestUser;
+import test.com.wealdtech.hawk.model.ExampleUser;
 
 /**
  * (Very) simple resource for testing
@@ -14,7 +14,7 @@ import test.com.wealdtech.hawk.TestUser;
 public class HelloWorldResource
 {
   @Context
-  TestUser user;
+  ExampleUser user;
 
   @GET
   @Produces("text/plain")

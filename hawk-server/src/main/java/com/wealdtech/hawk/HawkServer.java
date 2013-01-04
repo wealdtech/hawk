@@ -60,6 +60,15 @@ public class HawkServer
     this.configuration = configuration;
   }
 
+  /**
+   * Authenticate.
+   * @param credentials
+   * @param uri
+   * @param method
+   * @param authorizationheaders
+   * @throws DataError if the authentication fails for any reason
+   * @throws ServerError if there is a problem with the server whilst authenticating
+   */
   public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationheaders) throws DataError, ServerError
   {
     // Ensure that the timestamp passed in is within suitable bounds
@@ -117,7 +126,7 @@ public class HawkServer
     return (res == 0);
   }
 
-  public static ImmutableMap<String, String> splitAuthorizationHeader(final String authorizationheader) throws DataError
+  public ImmutableMap<String, String> splitAuthorizationHeader(final String authorizationheader) throws DataError
   {
     checkNotNull(authorizationheader);
     List<String> headerfields = Lists.newArrayList(HAWKSPLITTER.split(authorizationheader));

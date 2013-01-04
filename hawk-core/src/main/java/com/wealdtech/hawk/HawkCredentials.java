@@ -32,6 +32,9 @@ import com.wealdtech.errors.ErrorInfoMap;
  */
 public class HawkCredentials implements Comparable<HawkCredentials>
 {
+  public static final String HMAC_SHA_1 = "hmac-sha-256";
+  public static final String HMAC_SHA_256 = "hmac-sha-256";
+
   public final String keyId;
   public final String key;
   public final String algorithm;

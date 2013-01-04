@@ -42,6 +42,7 @@ public class DummyHttpServer
 {
   public DummyHttpServer(final HawkCredentials credentials) throws Exception
   {
+
     InetSocketAddress addr = new InetSocketAddress(18234);
     HttpServer server = HttpServer.create(addr, 0);
 
@@ -53,8 +54,9 @@ public class DummyHttpServer
   // A handler that does nothing other than authentication
   private class AuthenticateHandler implements HttpHandler
   {
-    private final HawkCredentials credentials;
-    private final HawkServer server;
+    private transient final HawkServer server;
+    private transient final HawkCredentials credentials;
+
 
     public AuthenticateHandler(final HawkCredentials credentials)
     {
@@ -66,8 +68,7 @@ public class DummyHttpServer
     public void handle(final HttpExchange exchange) throws IOException
     {
       // Obtain parameters available from the request
-      URI uri;
-
+      URI uri = null;
       try
       {
         uri = new URI("http://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
@@ -79,12 +80,10 @@ public class DummyHttpServer
         exchange.sendResponseHeaders(401, 0);
       }
 
-      final String method = exchange.getRequestMethod();
-      final ImmutableMap<String, String> authorizationHeaders;
-
+      ImmutableMap<String, String> authorizationHeaders = ImmutableMap.of();
       try
       {
-        authorizationHeaders = HawkServer.splitAuthorizationHeader(exchange.getRequestHeaders().getFirst("Authorization"));
+        authorizationHeaders = this.server.splitAuthorizationHeader(exchange.getRequestHeaders().getFirst("Authorization"));
       }
       catch (DataError de)
       {
@@ -92,10 +91,6 @@ public class DummyHttpServer
         addAuthenticateHeader(exchange);
         exchange.sendResponseHeaders(401, 0);
       }
-
-      // We need to obtain our own stored copy of the requestor's credentials
-      // given the keyId parameter passed in as part of the authorization header
-      final HawkCredentials credentials = fetchCredentials(authorizationHeaders.get("keyId"));
 
       try
       {
