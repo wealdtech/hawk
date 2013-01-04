@@ -236,14 +236,14 @@ public class HawkCredentials implements Comparable<HawkCredentials>
     ErrorInfoMap.put(new ErrorInfo("HawkCredentials: Key ID is NULL",
                                    "I was passed incorrect authentication information so cannot proceed with the request",
                                    "Hawk credentials mandate a key ID",
-                                   "http://www.wealdtech.com/help/HawkCredentials: Key ID is NULL"));
+                                   "http://www.wealdtech.com/help/HawkCredentials:+Key+ID+is+NULL"));
     ErrorInfoMap.put(new ErrorInfo("HawkCredentials: Key is NULL",
                                    "I was passed incorrect authentication information so cannot proceed with the request",
                                    "Hawk credentials mandate a key",
-                                   "http://www.wealdtech.com/help/HawkCredentials: Key is NULL"));
+                                   "http://www.wealdtech.com/help/HawkCredentials:+Key+is+NULL"));
     ErrorInfoMap.put(new ErrorInfo("HawkCredentials: Unknown algorithm",
                                    "I was passed incorrect authentication information so cannot proceed with the request",
                                    "Hawk credentials mandate a key",
-                                   "http://www.wealdtech.com/help/HawkCredentials: Unknown algorithm"));
+                                   "http://www.wealdtech.com/help/HawkCredentials:+Unknown+algorithm"));
   }
 }

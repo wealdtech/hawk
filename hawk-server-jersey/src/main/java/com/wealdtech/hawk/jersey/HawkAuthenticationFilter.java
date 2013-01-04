@@ -1,7 +1,9 @@
 package com.wealdtech.hawk.jersey;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.sun.jersey.spi.container.ContainerRequest;
@@ -10,7 +12,6 @@ import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkServer;
-import com.wealdtech.hawk.HawkServerConfiguration;
 import com.wealdtech.jersey.exceptions.InternalServerException;
 import com.wealdtech.jersey.exceptions.UnauthorizedException;
 
@@ -28,8 +29,7 @@ public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
   private transient HttpServletRequest servletrequest;
 
   @Inject
-  public HawkAuthenticationFilter(final HawkServerConfiguration configuration,
-                                  final HawkAuthenticator<T> authenticator,
+  public HawkAuthenticationFilter(final HawkAuthenticator<T> authenticator,
                                   final HawkCredentialsProvider provider)
   {
     this.authenticator = authenticator;
@@ -39,16 +39,16 @@ public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
   @Override
   public ContainerRequest filter(final ContainerRequest request)
   {
-    T result = null;
+    Optional<T> result;
     try
     {
       // Obtain parameters available from the request
       final ImmutableMap<String, String> authorizationheaders = HawkServer.splitAuthorizationHeader(request.getHeaderValue(ContainerRequest.AUTHORIZATION));
       // We need to obtain our own stored copy of the requestor's credentials
       // given the keyId parameter passed in as part of the authorization header
-      final HawkCredentials credentials = this.provider.getCredentials(authorizationheaders.get("keyId"));
+      final HawkCredentials credentials = this.provider.getCredentials(authorizationheaders.get("id"));
       // Now that we have the credentials we can authenticate the request
-      result = authenticator.authenticate(request, credentials).orNull();
+      result = authenticator.authenticate(request, credentials);
     }
     catch (DataError de)
     {
@@ -61,7 +61,17 @@ public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
       throw new InternalServerException(se);
     }
 
+    // At this point authentication is complete and we can check the result
+    if (!result.isPresent())
+    {
+      // No result returned; authentication did not result in a valid principal
+      throw new UnauthorizedException("Invalid user");
+    }
+
     // At this point the request has been authenticated successfully.
+    // Stash the object returned form the authenticator so that it can be
+    // accessed by resources, providerd etc.
+    this.servletrequest.setAttribute("com.wealdtech.principal", result.get());
 
     return request;
   }
