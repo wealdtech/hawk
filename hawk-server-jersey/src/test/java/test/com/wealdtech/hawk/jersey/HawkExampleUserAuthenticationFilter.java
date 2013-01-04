@@ -14,36 +14,27 @@
  *   limitations under the License.
  */
 
-package test.com.wealdtech.hawk.resources;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
+package test.com.wealdtech.hawk.jersey;
 
 import test.com.wealdtech.hawk.model.ExampleUser;
 
-/**
- * Simple resource for testing Hawk authentication and
- * authenticated user injection.
- */
-@Path("helloworld")
-public class HelloWorldResource
-{
-  @Context
-  ExampleUser authenticatedUser;
+import com.google.inject.Inject;
+import com.wealdtech.hawk.jersey.HawkAuthenticationFilter;
+import com.wealdtech.jersey.auth.Authenticator;
 
-  @GET
-  @Produces("text/plain")
-  public String getHelloWorld()
+/**
+ * A filter to intercept all incoming requests and authenticate them using Hawk.
+ */
+public class HawkExampleUserAuthenticationFilter extends HawkAuthenticationFilter<ExampleUser>
+{
+
+  /**
+   * Set up the filter with a suitable authenticator
+   * @param authenticator An authenticator
+   */
+  @Inject
+  public HawkExampleUserAuthenticationFilter(final Authenticator<ExampleUser> authenticator)
   {
-    if (this.authenticatedUser == null)
-    {
-      return "Hello world";
-    }
-    else
-    {
-      return "Hello " + this.authenticatedUser.getName();
-    }
+    super(authenticator);
   }
 }
