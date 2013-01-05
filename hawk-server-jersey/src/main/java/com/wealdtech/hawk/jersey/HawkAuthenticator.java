@@ -26,7 +26,6 @@ import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkServer;
-import com.wealdtech.hawk.HawkServerConfiguration;
 import com.wealdtech.jersey.auth.Authenticator;
 import com.wealdtech.jersey.auth.PrincipalProvider;
 
@@ -40,14 +39,14 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
 
   /**
    * Create a new authenticator for Hawk.
-   * @param configuration configuration of the Hawk server
+   * @param server a the Hawk server
    * @param provider a provider for Hawk credentials
    */
   @Inject
-  public HawkAuthenticator(final HawkServerConfiguration configuration,
+  public HawkAuthenticator(final HawkServer server,
                            final PrincipalProvider<T, String> provider)
   {
-    this.server = new HawkServer(configuration);
+    this.server = server;
     this.provider = provider;
   }
 

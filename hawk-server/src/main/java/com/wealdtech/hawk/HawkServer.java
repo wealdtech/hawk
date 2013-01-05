@@ -23,10 +23,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Splitter;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.wealdtech.DataError;
@@ -40,6 +44,7 @@ public class HawkServer
   private static final Pattern FIELDPATTERN = Pattern.compile("([^=]*)\\s*=\\s*\"([^\"]*)[,\"\\s]*");
 
   private final HawkServerConfiguration configuration;
+  private LoadingCache<String, Boolean> nonces;
 
   /**
    * Create an instance of the Hawk server
@@ -47,6 +52,7 @@ public class HawkServer
   public HawkServer()
   {
     this.configuration = new HawkServerConfiguration();
+    initializeCache();
   }
 
   /**
@@ -58,6 +64,20 @@ public class HawkServer
   public HawkServer(final HawkServerConfiguration configuration)
   {
     this.configuration = configuration;
+    initializeCache();
+  }
+  private final void initializeCache()
+  {
+    // TODO The cache does not have a maximum size, which could lead to a DDOS.
+    // Consider the security/space trade-off
+    this.nonces = CacheBuilder.newBuilder()
+                              .expireAfterWrite(this.configuration.getTimestampSkew() * 2, TimeUnit.SECONDS)
+                              .build(new CacheLoader<String, Boolean>() {
+                                @Override
+                                public Boolean load(String key) {
+                                  return false;
+                                }
+                              });
   }
 
   /**
@@ -75,7 +95,7 @@ public class HawkServer
     confirmTimestampWithinBounds(authorizationheaders.get("ts"));
 
     // Ensure that this is not a replay of a previous request
-    // TODO
+    confirmUniqueNonce(authorizationheaders.get("nonce"));
 
     final String mac = Hawk.calculateMAC(credentials, Long.valueOf(authorizationheaders.get("ts")), uri, authorizationheaders.get("nonce"), method, authorizationheaders.get("ext"));
     if (!timeConstantEquals(mac, authorizationheaders.get("mac")))
@@ -84,7 +104,16 @@ public class HawkServer
     }
   }
 
-  private void confirmTimestampWithinBounds(String ts) throws DataError
+  private void confirmUniqueNonce(final String nonce) throws DataError
+  {
+    if (this.nonces.getUnchecked(nonce) == true)
+    {
+      throw new DataError("Duplicate nonce");
+    }
+    this.nonces.put(nonce, true);
+  }
+
+  private void confirmTimestampWithinBounds(final String ts) throws DataError
   {
     checkNotNull(ts, "No timestamp supplied");
     Long timestamp;

@@ -23,7 +23,6 @@ import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 import com.wealdtech.hawk.HawkServer;
-import com.wealdtech.hawk.HawkServerConfiguration;
 
 /**
  * Response filter providing a WWW-Authenticate header
@@ -36,9 +35,9 @@ public class HawkUnauthorizedFilter implements ContainerResponseFilter
   private transient final HawkServer server;
 
   @Inject
-  public HawkUnauthorizedFilter(final HawkServerConfiguration configuration)
+  public HawkUnauthorizedFilter(final HawkServer server)
   {
-    this.server = new HawkServer(configuration);
+    this.server = server;
   }
 
   @Override
