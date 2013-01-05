@@ -75,7 +75,7 @@ public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
     // At this point the request has been authenticated successfully.
     // Stash the object returned form the authenticator so that it can be
     // accessed by resources, providerd etc.
-    this.servletrequest.setAttribute("com.wealdtech.principal", result.get());
+    this.servletrequest.setAttribute("com.wealdtech.authenticatedprincipal", result.get());
 
     return request;
   }

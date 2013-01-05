@@ -16,6 +16,8 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +33,6 @@ import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.errors.ErrorInfo;
 import com.wealdtech.errors.ErrorInfoMap;
-
-import static com.wealdtech.Preconditions.checkNotNull;
 
 public class HawkServer
 {
@@ -72,7 +72,7 @@ public class HawkServer
   public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationheaders) throws DataError, ServerError
   {
     // Ensure that the timestamp passed in is within suitable bounds
-    // TODO
+    confirmTimestampWithinBounds(authorizationheaders.get("ts"));
 
     // Ensure that this is not a replay of a previous request
     // TODO
@@ -81,6 +81,25 @@ public class HawkServer
     if (!timeConstantEquals(mac, authorizationheaders.get("mac")))
     {
       throw new DataError("Failed to authenticate");
+    }
+  }
+
+  private void confirmTimestampWithinBounds(String ts) throws DataError
+  {
+    checkNotNull(ts, "No timestamp supplied");
+    Long timestamp;
+    try
+    {
+      timestamp = Long.valueOf(ts);
+    }
+    catch (Exception e)
+    {
+      throw new DataError("Invalid timestamp format");
+    }
+    long now = System.currentTimeMillis() / 1000;
+    if (Math.abs(now - timestamp) > configuration.getTimestampSkew())
+    {
+      throw new DataError("Anachronistic timestamp");
     }
   }
 

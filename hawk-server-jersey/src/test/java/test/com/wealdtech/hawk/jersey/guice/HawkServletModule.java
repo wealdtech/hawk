@@ -30,6 +30,7 @@ import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
+import com.wealdtech.hawk.jersey.HawkUnauthorizedFilter;
 import com.wealdtech.jersey.filters.RequestLoggingFilter;
 import com.wealdtech.jersey.filters.ServerHeadersFilter;
 
@@ -60,7 +61,7 @@ public class HawkServletModule extends ServletModule
 
     // TODO add to configuration
     final String requestFilters = joinClassNames(RequestLoggingFilter.class, HawkExampleUserAuthenticationFilter.class, GZIPContentEncodingFilter.class);
-    final String responseFilters = joinClassNames(RequestLoggingFilter.class, ServerHeadersFilter.class, GZIPContentEncodingFilter.class);
+    final String responseFilters = joinClassNames(RequestLoggingFilter.class, HawkUnauthorizedFilter.class, ServerHeadersFilter.class, GZIPContentEncodingFilter.class);
 
     params.put(PackagesResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, requestFilters);
     params.put(PackagesResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, responseFilters);
