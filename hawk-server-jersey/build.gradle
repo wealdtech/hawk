@@ -1,6 +1,5 @@
 dependencies {
     compile project(':hawk-core')
-    compile project(':hawk-server')
     compile('com.wealdtech:wealdtech-core:1.0.0-SNAPSHOT') { changing=true }
     compile('com.wealdtech:wealdtech-configuration:1.0.0-SNAPSHOT') { changing=true }
     compile('com.wealdtech:wealdtech-jersey-server:1.0.0-SNAPSHOT') { changing=true }
@@ -13,8 +12,6 @@ dependencies {
     compile 'javax.ws.rs:jsr311-api:1.1.1'
     testCompile 'org.eclipse.jetty:jetty-server:8.1.+'
     testCompile 'org.eclipse.jetty:jetty-servlet:8.1.+'
-    testCompile project(':hawk-client')
-
 }
 
 uploadArchives {
