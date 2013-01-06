@@ -71,7 +71,7 @@ public class HawkServletModule extends ServletModule
   }
 
   /**
-   * Set the list of packages thatwe will search for providers and the like
+   * Set the list of packages that we will search for providers and the like
    * @param additionalPackages The packages above and beyond our standard list
    */
   private void setPackages(final String... additionalPackages)

@@ -28,7 +28,7 @@ import com.wealdtech.jersey.auth.PrincipalProvider;
 
 /**
  * A Guice module to configure Hawk authentication with the ExampleUser as the
- * underyling principal.
+ * underlying principal.
  */
 public class HawkConfigurationModule extends ServletModule
 {
