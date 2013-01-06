@@ -22,7 +22,7 @@ import org.testng.annotations.BeforeClass;
 
 import com.wealdtech.hawk.HawkCredentials;
 
-public class testHawkServer
+public class TestHawkServer
 {
   private HawkCredentials testcredentials;
   private URI validuri1, validuri2, invaliduri1, invaliduri2;

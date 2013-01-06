@@ -38,6 +38,10 @@ import com.wealdtech.ServerError;
 import com.wealdtech.errors.ErrorInfo;
 import com.wealdtech.errors.ErrorInfoMap;
 
+/**
+ * The Hawk server. Note that this is not an HTTP server in itself, but provides
+ * the backbone of any Hawk implementation within an HTTP server.
+ */
 public class HawkServer
 {
   private static final Splitter HAWKSPLITTER = Splitter.onPattern("\\s+").limit(2);
@@ -47,7 +51,7 @@ public class HawkServer
   private LoadingCache<String, Boolean> nonces;
 
   /**
-   * Create an instance of the Hawk server
+   * Create an instance of the Hawk server with default configuration.
    */
   public HawkServer()
   {
@@ -56,7 +60,7 @@ public class HawkServer
   }
 
   /**
-   * Create an instance of the Hawk server with custom configuration
+   * Create an instance of the Hawk server with custom configuration.
    *
    * @param configuration
    *          the specific configuration
@@ -81,12 +85,12 @@ public class HawkServer
   }
 
   /**
-   * Authenticate.
-   * @param credentials
-   * @param uri
-   * @param method
-   * @param authorizationheaders
-   * @throws DataError if the authentication fails for any reason
+   * Authenticate a request using Hawk.
+   * @param credentials the Hawk credentials against which to authenticate
+   * @param uri the URI of the request
+   * @param method the method of the request
+   * @param authorizationheaders the Hawk authentication headers
+   * @throws DataError if the authentication fails due to incorrect or missing data
    * @throws ServerError if there is a problem with the server whilst authenticating
    */
   public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationheaders) throws DataError, ServerError
@@ -176,15 +180,15 @@ public class HawkServer
 
   public ImmutableMap<String, String> splitAuthorizationHeader(final String authorizationheader) throws DataError
   {
-    checkNotNull(authorizationheader);
+    checkNotNull(authorizationheader, "No authorization header");
     List<String> headerfields = Lists.newArrayList(HAWKSPLITTER.split(authorizationheader));
     if (headerfields.size() != 2)
     {
-      throw new DataError("Authorization header missing");
+      throw new DataError("HawkServer: Authorization header missing");
     }
     if (!"hawk".equals(headerfields.get(0).toLowerCase(Locale.ENGLISH)))
     {
-      throw new DataError("Not a Hawk authorization header");
+      throw new DataError("HawkServer: Not a Hawk authorization header");
     }
 
     Map<String, String> fields = new HashMap<>();
@@ -201,9 +205,13 @@ public class HawkServer
   // Error messages
   static
   {
-    ErrorInfoMap.put(new ErrorInfo("errorCode",
-                                   "userMessage",
-                                   "developerMessage",
-                                   "moreInfo"));
+    ErrorInfoMap.put(new ErrorInfo("HawkServer: Authorization header missing",
+                                   "I was passed incorrect authentication information so cannot proceed with the request",
+                                   "Attempt to authenticate using Hawk without a suitable Authentication header",
+                                   "http://www.wealdtech.com/help/HawkCredentials:+Authorization+header+missing"));
+    ErrorInfoMap.put(new ErrorInfo("HawkServer: Not a Hawk authorization header",
+                                   "I was passed incorrect authentication information so cannot proceed with the request",
+                                   "Attempt to authenticate using Hawk using a non-Hawk Authentication header",
+                                   "http://www.wealdtech.com/help/HawkCredentials:+Not+a+Hawk+authorization+header"));
   }
 }
