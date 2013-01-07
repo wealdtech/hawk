@@ -18,6 +18,8 @@ package com.wealdtech.hawk;
 
 import java.net.URI;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.utils.StringUtils;
@@ -26,9 +28,18 @@ public class HawkClient
 {
   private final HawkCredentials credentials;
 
+  private final String pathPrefix;
+
   public HawkClient(final HawkCredentials credentials)
   {
+    this(credentials, null);
+  }
+
+  @Inject
+  public HawkClient(final HawkCredentials credentials, @Named(value="hawkpathprefix") final String pathPrefix)
+  {
     this.credentials = credentials;
+    this.pathPrefix = pathPrefix;
   }
 
   /**
@@ -66,5 +77,11 @@ public class HawkClient
     sb.append('"');
 
     return sb.toString();
+  }
+
+  public boolean isValidFor(final String path)
+  {
+    return ((this.pathPrefix == null) ||
+            (path.startsWith(this.pathPrefix)));
   }
 }

@@ -18,15 +18,19 @@ package com.wealdtech.hawk.jersey;
 
 import java.net.URI;
 
+import com.google.common.net.HttpHeaders;
 import com.google.inject.Inject;
+import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.filter.ClientFilter;
 import com.wealdtech.hawk.HawkClient;
 
 /**
  * Request filter providing an Authorization header
  * for requests to Hawk applications.
  */
-public class HawkAuthorizationFilter implements ContainerRequestFilter
+public class HawkAuthorizationFilter extends ClientFilter
 {
   private transient final HawkClient client;
 
@@ -37,11 +41,14 @@ public class HawkAuthorizationFilter implements ContainerRequestFilter
   }
 
   @Override
-  public ClientRequest filter(ClientRequest request)
+  public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException
   {
-    final URI uri = request.getRequestUri();
-    final String method = request.getMethod();
-    request.getHttpHeaders().add("Authorization", this.client.generateAuthorizationHeader(uri, method, null));
-    return request;
+    if ((!cr.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) &&
+        (client.isValidFor(cr.getURI().getRawPath())))
+    {
+      final URI uri = cr.getURI();
+      final String method = cr.getMethod();
+      cr.getHeaders().add(HttpHeaders.AUTHORIZATION, this.client.generateAuthorizationHeader(uri, method, null));
+    }
+    return getNext().handle(cr);}
   }
-}
