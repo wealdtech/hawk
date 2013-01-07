@@ -28,8 +28,11 @@ import com.wealdtech.jersey.providers.AbstractInjectableProvider;
 /**
  * A sample provider using the information obtained during the authentication
  * process.
- * <p>To access the user add the following as either a method argument or class field:
- * <p><code>@Context ExampleUser authenticatedUser</code>
+ * <p>
+ * To access the user add the following as either a method argument or class
+ * field:
+ * <p>
+ * <code>@Context ExampleUser authenticatedUser</code>
  */
 @Provider
 public class ExampleUserProvider extends AbstractInjectableProvider<ExampleUser>

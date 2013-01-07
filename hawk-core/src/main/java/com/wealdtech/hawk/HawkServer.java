@@ -16,8 +16,6 @@
 
 package com.wealdtech.hawk;
 
-import static com.wealdtech.Preconditions.*;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +33,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
-import com.wealdtech.errors.ErrorInfo;
-import com.wealdtech.errors.ErrorInfoMap;
+
+import static com.wealdtech.Preconditions.checkNotNull;
 
 /**
  * The Hawk server. Note that this is not an HTTP server in itself, but provides
@@ -104,7 +102,7 @@ public class HawkServer
     final String mac = Hawk.calculateMAC(credentials, Long.valueOf(authorizationheaders.get("ts")), uri, authorizationheaders.get("nonce"), method, authorizationheaders.get("ext"));
     if (!timeConstantEquals(mac, authorizationheaders.get("mac")))
     {
-      throw new DataError("Failed to authenticate");
+      throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
     }
   }
 
@@ -112,14 +110,14 @@ public class HawkServer
   {
     if (this.nonces.getUnchecked(nonce) == true)
     {
-      throw new DataError("Duplicate nonce");
+      throw new DataError.Bad("The nonce supplied is the same as one seen previously");
     }
     this.nonces.put(nonce, true);
   }
 
   private void confirmTimestampWithinBounds(final String ts) throws DataError
   {
-    checkNotNull(ts, "No timestamp supplied");
+    checkNotNull(ts, "The timestamp was not supplied");
     Long timestamp;
     try
     {
@@ -127,12 +125,12 @@ public class HawkServer
     }
     catch (Exception e)
     {
-      throw new DataError("Invalid timestamp format");
+      throw new DataError.Bad("The timestamp is in the wrong format; we expect seconds since the epoch");
     }
     long now = System.currentTimeMillis() / 1000;
     if (Math.abs(now - timestamp) > configuration.getTimestampSkew())
     {
-      throw new DataError("Anachronistic timestamp");
+      throw new DataError.Bad("The timestamp is too far from the current time to be acceptable");
     }
   }
 
@@ -184,11 +182,11 @@ public class HawkServer
     List<String> headerfields = Lists.newArrayList(HAWKSPLITTER.split(authorizationheader));
     if (headerfields.size() != 2)
     {
-      throw new DataError("HawkServer: Authorization header missing");
+      throw new DataError.Bad("The authorization header does not contain the expected number of fields");
     }
     if (!"hawk".equals(headerfields.get(0).toLowerCase(Locale.ENGLISH)))
     {
-      throw new DataError("HawkServer: Not a Hawk authorization header");
+      throw new DataError.Bad("The authorization header is not a Hawk authorization header");
     }
 
     Map<String, String> fields = new HashMap<>();
@@ -200,18 +198,5 @@ public class HawkServer
       fields.put(key, value);
     }
     return ImmutableMap.copyOf(fields);
-  }
-
-  // Error messages
-  static
-  {
-    ErrorInfoMap.put(new ErrorInfo("HawkServer: Authorization header missing",
-                                   "I was passed incorrect authentication information so cannot proceed with the request",
-                                   "Attempt to authenticate using Hawk without a suitable Authentication header",
-                                   "http://www.wealdtech.com/help/HawkCredentials:+Authorization+header+missing"));
-    ErrorInfoMap.put(new ErrorInfo("HawkServer: Not a Hawk authorization header",
-                                   "I was passed incorrect authentication information so cannot proceed with the request",
-                                   "Attempt to authenticate using Hawk using a non-Hawk Authentication header",
-                                   "http://www.wealdtech.com/help/HawkCredentials:+Not+a+Hawk+authorization+header"));
   }
 }

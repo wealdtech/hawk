@@ -64,7 +64,7 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
     if (principal == null)
     {
       // Could not find the principal, reject this authentication request
-      throw new DataError("Failed to authenticate request");
+      throw new DataError.Authentication("Failed to authenticate request");
     }
     final HawkCredentials credentials = principal.getHawkCredentials();
     authenticatePrincipal(credentials, uri, method, authorizationHeaders);

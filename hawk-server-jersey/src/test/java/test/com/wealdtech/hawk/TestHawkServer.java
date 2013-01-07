@@ -28,13 +28,13 @@ import com.wealdtech.hawk.HawkCredentials;
 
 public class TestHawkServer
 {
-  private HawkCredentials testcredentials;
-  private URI validuri1, validuri2, invaliduri1, invaliduri2;
+  private HawkCredentials testgoodcredentials;
+  private URI validuri1;
 
   @BeforeClass
   public void setUp() throws Exception
   {
-    this.testcredentials = new HawkCredentials.Builder()
+    this.testgoodcredentials = new HawkCredentials.Builder()
                                               .keyId("dh37fgj492je")
                                               .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
                                               .algorithm("hmac-sha-256")
@@ -43,9 +43,9 @@ public class TestHawkServer
   }
 
   @Test
-  public void testBasic() throws Exception
+  public void testSimpleAuth() throws Exception
   {
-    final HawkClient testclient = new HawkClient(this.testcredentials);
+    final HawkClient testclient = new HawkClient(this.testgoodcredentials);
     final String authorizationheader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
     System.out.println(authorizationheader);
     HttpURLConnection connection = (HttpURLConnection)this.validuri1.toURL().openConnection();

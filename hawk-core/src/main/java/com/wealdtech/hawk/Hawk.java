@@ -129,13 +129,13 @@ public class Hawk
       }
       catch (UnsupportedEncodingException uee)
       {
-        throw new ServerError("Unable to encode with UTF-8!", uee);
+        throw new ServerError("Unable to encode with UTF-8", uee);
       }
       return BaseEncoding.base64().encode(md.digest());
     }
     catch (NoSuchAlgorithmException nsae)
     {
-      throw new DataError("Unknown encryption algorithm \"" + credentials.getAlgorithm() + "\"", nsae);
+      throw new DataError.Bad("Unknown encryption algorithm", nsae);
     }
   }
 }

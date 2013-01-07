@@ -24,14 +24,14 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.wealdtech.DataError;
 import com.wealdtech.hawk.HawkCredentials;
-import com.wealdtech.jersey.auth.PrincipalProvider;
+import com.wealdtech.hawk.jersey.HawkPrincipalProvider;
 
 /**
  * Example service to provide a user definition given a key.
  * <p>In this case, the key is the Hawk key ID as passed in
- * by every authenticated request.
+ * by every the Hawk-authenticated request.
  */
-public class ExampleUserService implements PrincipalProvider<ExampleUser, String>
+public class ExampleUserService extends HawkPrincipalProvider<ExampleUser>
 {
   private transient final Map<String, ExampleUser> usermap;
 
@@ -44,12 +44,12 @@ public class ExampleUserService implements PrincipalProvider<ExampleUser, String
                                                               .algorithm(HawkCredentials.HMAC_SHA_256).build();
     ExampleUser user1 = new ExampleUser("Steve", user1hawkcredentials);
     this.usermap.put(user1hawkcredentials.getKeyId(), user1);
-//    HawkCredentials user2hawkcredentials = new HawkCredentials.Builder()
-//                                                              .keyId("")
-//                                                              .key("")
-//                                                              .algorithm(HawkCredentials.HMAC_SHA_256).build();
-//    ExampleUser user2 = new ExampleUser("John", user2hawkcredentials);
-//    this.usermap.put(user2hawkcredentials.getKeyId(), user2);
+    HawkCredentials user2hawkcredentials = new HawkCredentials.Builder()
+                                                              .keyId("jns7y9824hus")
+                                                              .key("mb708923nzgr87t4fsnt48ufnjt4y98zjkby98t43tw")
+                                                              .algorithm(HawkCredentials.HMAC_SHA_256).build();
+    ExampleUser user2 = new ExampleUser("John", user2hawkcredentials);
+    this.usermap.put(user2hawkcredentials.getKeyId(), user2);
   }
 
   /**

@@ -20,8 +20,6 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 import com.wealdtech.DataError;
-import com.wealdtech.errors.ErrorInfo;
-import com.wealdtech.errors.ErrorInfoMap;
 
 /**
  * HawkCredentials contains the information required to authenticate requests
@@ -63,15 +61,15 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   {
     if (this.keyId == null)
     {
-      throw new DataError("HawkCredentials: Key ID is NULL");
+      throw new DataError.Missing("The key ID is required");
     }
     if (this.key == null)
     {
-      throw new DataError("HawkCredentials: Key is NULL");
+      throw new DataError.Bad("The key ID does not contain any information");
     }
     if (!SUPPORTEDALGORITHMS.containsKey(algorithm))
     {
-      throw new DataError("HawkCredentials: Unknown algorithm");
+      throw new DataError.Bad("Unknown encryption algorithm");
     }
   }
 
@@ -231,22 +229,5 @@ public class HawkCredentials implements Comparable<HawkCredentials>
     {
       return new HawkCredentials(this.keyId, this.key, this.algorithm);
     }
-  }
-
-  // Error information
-  static
-  {
-    ErrorInfoMap.put(new ErrorInfo("HawkCredentials: Key ID is NULL",
-                                   "I was passed incorrect authentication information so cannot proceed with the request",
-                                   "Hawk credentials mandate a key ID",
-                                   "http://www.wealdtech.com/help/HawkCredentials:+Key+ID+is+NULL"));
-    ErrorInfoMap.put(new ErrorInfo("HawkCredentials: Key is NULL",
-                                   "I was passed incorrect authentication information so cannot proceed with the request",
-                                   "Hawk credentials mandate a key",
-                                   "http://www.wealdtech.com/help/HawkCredentials:+Key+is+NULL"));
-    ErrorInfoMap.put(new ErrorInfo("HawkCredentials: Unknown algorithm",
-                                   "I was passed incorrect authentication information so cannot proceed with the request",
-                                   "Hawk credentials mandate a key",
-                                   "http://www.wealdtech.com/help/HawkCredentials:+Unknown+algorithm"));
   }
 }
