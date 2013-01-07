@@ -29,6 +29,8 @@ import com.wealdtech.hawk.HawkServer;
 import com.wealdtech.jersey.auth.Authenticator;
 import com.wealdtech.jersey.auth.PrincipalProvider;
 
+import static com.wealdtech.Preconditions.checkNotNull;
+
 /**
  * Authenticate a request using Hawk.
  */
@@ -58,6 +60,10 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
   public Optional<T> authenticate(final ContainerRequest request) throws DataError, ServerError
   {
     final ImmutableMap<String, String> authorizationHeaders = server.splitAuthorizationHeader(request.getHeaderValue(ContainerRequest.AUTHORIZATION));
+    checkNotNull(authorizationHeaders.get("id"), "Missing required Hawk authorization header \"id\"");
+    checkNotNull(authorizationHeaders.get("ts"), "Missing required Hawk authorization header \"ts\"");
+    checkNotNull(authorizationHeaders.get("mac"), "Missing required Hawk authorization header \"mac\"");
+    checkNotNull(authorizationHeaders.get("nonce"), "Missing required Hawk authorization header \"nonce\"");
     final URI uri = request.getRequestUri();
     final String method = request.getMethod();
     final T principal = provider.get(authorizationHeaders.get("id")).orNull();
@@ -66,7 +72,7 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
       // Could not find the principal, reject this authentication request
       throw new DataError.Authentication("Failed to authenticate request");
     }
-    final HawkCredentials credentials = principal.getHawkCredentials();
+    final HawkCredentials credentials = principal.getHawkCredentials(authorizationHeaders.get("id"));
     authenticatePrincipal(credentials, uri, method, authorizationHeaders);
     return Optional.fromNullable(principal);
   }

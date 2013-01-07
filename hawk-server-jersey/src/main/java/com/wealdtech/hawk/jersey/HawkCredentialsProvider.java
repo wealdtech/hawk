@@ -20,5 +20,10 @@ import com.wealdtech.hawk.HawkCredentials;
 
 public interface HawkCredentialsProvider
 {
-  public HawkCredentials getHawkCredentials();
+  /**
+   * Obtain the Hawk credentials from a principal
+   * @param keyId the Hawk key ID
+   * @return the Hawk credentials, or <code>null</code> if they could not be found
+   */
+  public HawkCredentials getHawkCredentials(final String keyId);
 }

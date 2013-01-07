@@ -41,8 +41,12 @@ public class ExampleUser implements HawkCredentialsProvider
   }
 
   @Override
-  public HawkCredentials getHawkCredentials()
+  public HawkCredentials getHawkCredentials(final String keyId)
   {
-    return this.hawkCredentials;
+    if (this.hawkCredentials.getKeyId().equals(keyId))
+    {
+      return this.hawkCredentials;
+    }
+    return null;
   }
 }
