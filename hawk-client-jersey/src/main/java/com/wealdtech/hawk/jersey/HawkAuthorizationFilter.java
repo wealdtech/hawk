@@ -26,6 +26,8 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
 import com.wealdtech.hawk.HawkClient;
 
+import static com.wealdtech.Preconditions.checkNotNull;
+
 /**
  * Request filter providing an Authorization header
  * for requests to Hawk applications.
@@ -37,6 +39,7 @@ public class HawkAuthorizationFilter extends ClientFilter
   @Inject
   public HawkAuthorizationFilter(final HawkClient client)
   {
+    checkNotNull(client, "Hawk athorization filter requires a hawk client");
     this.client = client;
   }
 

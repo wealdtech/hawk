@@ -131,7 +131,7 @@ public class Hawk
       {
         throw new ServerError("Unable to encode with UTF-8", uee);
       }
-      return BaseEncoding.base64().encode(md.digest());
+      return BaseEncoding.base64().encode(md.digest(credentials.getKey().getBytes()));
     }
     catch (NoSuchAlgorithmException nsae)
     {
