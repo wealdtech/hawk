@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<filteredResources>
+		<filter>
+			<id>1357146686412</id>
+			<name/>
+			<type>10</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-test-output</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1357146686414</id>
+			<name/>
+			<type>10</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-build</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1357146686417</id>
+			<name/>
+			<type>6</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-build.gradle</arguments>
+			</matcher>
+		</filter>
+	</filteredResources>
+	<name>hawk-server-jersey</name>
+	<comment/>
+	<projects/>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments/>
+		</buildCommand>
+	</buildSpec>
+	<linkedResources/>
+</projectDescription>

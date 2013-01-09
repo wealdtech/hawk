@@ -16,19 +16,23 @@
 
 package test.com.wealdtech.hawk;
 
-import static org.testng.Assert.*;
-
 import org.testng.annotations.Test;
 
 import com.wealdtech.DataError;
 import com.wealdtech.hawk.HawkCredentials;
+
+import static org.testng.Assert.*;
 
 public class TestHawkCredential
 {
   @Test
   public void testModel() throws DataError
   {
-    final HawkCredentials testhc1 = new HawkCredentials.Builder().keyId("testkeyid").key("testkey").algorithm("hmac-sha-256").build();
+    final HawkCredentials testhc1 = new HawkCredentials.Builder()
+                                                       .keyId("testkeyid")
+                                                       .key("testkey")
+                                                       .algorithm("hmac-sha-256")
+                                                       .build();
     assertEquals(testhc1.getKeyId(), "testkeyid");
     assertEquals(testhc1.getKey(), "testkey");
     assertEquals(testhc1.getAlgorithm(), "hmac-sha-256");
