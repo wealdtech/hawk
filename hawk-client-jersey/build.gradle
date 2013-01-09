@@ -1,0 +1,20 @@
+dependencies {
+    compile project(':hawk-core')
+    compile('com.wealdtech:wealdtech-core:1.0.0-SNAPSHOT') { changing=true }
+    compile('com.wealdtech:wealdtech-configuration:1.0.0-SNAPSHOT') { changing=true }
+    compile 'com.sun.jersey:jersey-core:1.16'
+    compile 'com.sun.jersey:jersey-client:1.16'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.project {
+                pom.artifactId = 'hawk-client-jersey'
+                name 'Hawk client for Jersey'
+                description 'Java implementation of Hawk protocol - client for Jersey'
+            }
+        }
+    }
+}
+

@@ -5,15 +5,19 @@ subprojects {
     apply plugin: 'signing'
 
     repositories {
+        mavenLocal()
         mavenCentral()
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
-//        mavenLocal()
+    }
+
+    dependencies {
+        testCompile 'org.testng:testng:6.+'
     }
 
     group = 'com.wealdtech.hawk'
-    version = '0.1.0-SNAPSHOT'
+    version = '0.2.0-SNAPSHOT'
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'

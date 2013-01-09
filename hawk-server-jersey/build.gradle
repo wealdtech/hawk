@@ -1,0 +1,28 @@
+dependencies {
+    compile project(':hawk-core')
+    compile('com.wealdtech:wealdtech-core:1.0.0-SNAPSHOT') { changing=true }
+    compile('com.wealdtech:wealdtech-configuration:1.0.0-SNAPSHOT') { changing=true }
+    compile('com.wealdtech:wealdtech-jersey-server:1.0.0-SNAPSHOT') { changing=true }
+    compile 'com.sun.jersey:jersey-core:1.16'
+    compile 'com.sun.jersey:jersey-server:1.16'
+    compile 'com.sun.jersey:jersey-servlet:1.16'
+    compile 'com.sun.jersey:jersey-json:1.16'
+    compile 'com.sun.jersey.contribs:jersey-guice:1.16'
+    compile 'javax.servlet:javax.servlet-api:3.0.+'
+    compile 'javax.ws.rs:jsr311-api:1.1.1'
+    testCompile 'org.eclipse.jetty:jetty-server:8.1.+'
+    testCompile 'org.eclipse.jetty:jetty-servlet:8.1.+'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.project {
+                pom.artifactId = 'hawk-server-jersey'
+                name 'Hawk Server for Jersey'
+                description 'Java implementation of Hawk protocol - server for Jersey'
+            }
+        }
+    }
+}
+
