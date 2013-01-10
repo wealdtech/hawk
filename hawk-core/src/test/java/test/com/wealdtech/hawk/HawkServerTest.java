@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.wealdtech.DataError;
+import com.wealdtech.hawk.Hawk;
 import com.wealdtech.hawk.HawkClient;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkServerConfiguration;
@@ -33,11 +34,12 @@ public class HawkServerTest
 {
   private HawkCredentials testcredentials1, testcredentials2;
   private URI validuri1, validuri2;
+  private static final String BASEBEWITURI = "http://localhost:18234/helloworld";
 
   // Helper
   private HttpURLConnection connect(final URI uri, final String authorizationHeader) throws Exception
   {
-    final HttpURLConnection connection = (HttpURLConnection)this.validuri1.toURL().openConnection();
+    final HttpURLConnection connection = (HttpURLConnection)uri.toURL().openConnection();
     connection.setRequestMethod("GET");
     if (authorizationHeader != null)
     {
@@ -178,6 +180,25 @@ public class HawkServerTest
   }
 
   @Test
+  public void testAuthorizationHeader() throws Exception
+  {
+    // Test correct implementation
+    SimpleHttpServer server = new SimpleHttpServer(this.testcredentials1, null);
+
+    try
+    {
+      final HawkClient testclient = new HawkClient(this.testcredentials1);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
+      final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+      assertEquals(connection.getResponseCode(), 200);
+    }
+    finally
+    {
+      server.stop();
+    }
+  }
+
+  @Test
   public void testInvalidAuthorizationHeader1() throws Exception
   {
     // Ensure that an authorization header with the wrong header is caught
@@ -277,4 +298,81 @@ public class HawkServerTest
     }
   }
 
+  @Test
+  public void testInvalidAuthorizationHeader6() throws Exception
+  {
+    // Ensure that an authorization header with an invalid mac is caught
+    SimpleHttpServer server = new SimpleHttpServer(this.testcredentials1, null);
+
+    try
+    {
+      final HawkClient testclient = new HawkClient(this.testcredentials1);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri2, "get", null);
+      authorizationHeader = authorizationHeader.replaceAll("id=", "invalid=");
+      final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+      assertEquals(connection.getResponseCode(), 401);
+    }
+    finally
+    {
+      server.stop();
+    }
+  }
+  @Test
+  public void testBewit() throws Exception
+  {
+    // Test a valid bewit
+    SimpleHttpServer server = new SimpleHttpServer(this.testcredentials1, null);
+
+    try
+    {
+      final String bewit = Hawk.generateBewit(this.testcredentials1, new URI(BASEBEWITURI), 600L, null);
+      URI testUri = new URI(BASEBEWITURI + "?bewit=" + bewit);
+      final HttpURLConnection connection = connect(testUri, null);
+      assertEquals(connection.getResponseCode(), 200);
+    }
+    finally
+    {
+      server.stop();
+    }
+  }
+
+  @Test
+  public void testExpiredBewit() throws Exception
+  {
+    // Test an expired bewit
+    SimpleHttpServer server = new SimpleHttpServer(this.testcredentials1, null);
+
+    try
+    {
+      final String bewit = Hawk.generateBewit(this.testcredentials1, new URI(BASEBEWITURI), 1L, null);
+      URI testUri = new URI(BASEBEWITURI + "?bewit=" + bewit);
+      Thread.sleep(2000);
+      final HttpURLConnection connection = connect(testUri, null);
+      assertEquals(connection.getResponseCode(), 401);
+    }
+    finally
+    {
+      server.stop();
+    }
+  }
+
+  @Test
+  public void testInvalidBewit() throws Exception
+  {
+    // Test an invalid bewit
+    SimpleHttpServer server = new SimpleHttpServer(this.testcredentials1, null);
+
+    try
+    {
+      final String bewit = Hawk.generateBewit(this.testcredentials1, this.validuri1, 120L, null);
+      URI testUri = new URI(BASEBEWITURI + "?bewit=" + bewit);
+      Thread.sleep(2000);
+      final HttpURLConnection connection = connect(testUri, null);
+      assertEquals(connection.getResponseCode(), 401);
+    }
+    finally
+    {
+      server.stop();
+    }
+  }
 }

@@ -284,7 +284,6 @@ public class HawkServer
       throw new DataError.Bad("The query string did not contain a bewit");
     }
     final String bewit = m.group(1);
-    System.err.println("Bewit is " + bewit);
     return  bewit;
   }
 

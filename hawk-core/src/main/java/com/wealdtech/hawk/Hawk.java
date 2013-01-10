@@ -111,11 +111,11 @@ public class Hawk
       sb.append(method.toUpperCase(Locale.ENGLISH));
     }
     sb.append('\n');
-    sb.append(uri.getPath());
+    sb.append(uri.getRawPath());
     if (uri.getQuery() != null)
     {
       sb.append('?');
-      sb.append(uri.getQuery());
+      sb.append(uri.getRawQuery());
     }
     sb.append('\n');
     sb.append(uri.getHost().toLowerCase(Locale.ENGLISH));
@@ -240,7 +240,7 @@ public class Hawk
         // N.B. we don't pass the iae as the cause of this exception because
         // this happens during invocation, and in that case the enum handler
         // will report the root cause exception rather than the one we throw.
-        throw new DataError.Bad("Hawk authenticatino type \"" + authType + "\" is invalid");
+        throw new DataError.Bad("Hawk authentication type \"" + authType + "\" is invalid");
       }
     }
   }

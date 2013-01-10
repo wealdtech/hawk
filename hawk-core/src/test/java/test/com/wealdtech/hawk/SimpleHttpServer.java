@@ -86,10 +86,17 @@ public class SimpleHttpServer
 
     private void handleAuthenticationBewit(final HttpExchange exchange) throws IOException
     {
+      if (!exchange.getRequestMethod().equals("GET"))
+      {
+        System.out.println("Not authenticated: HTTP method " + exchange.getRequestMethod() + " not supported with bewit");
+        addAuthenticateHeader(exchange);
+        exchange.sendResponseHeaders(401, 0);
+      }
+
       URI uri = null;
       try
       {
-        uri = new URI("http://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
+        uri = new URI(exchange.getRequestURI().getScheme() + "://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
       }
       catch (URISyntaxException use)
       {
@@ -125,7 +132,7 @@ public class SimpleHttpServer
       URI uri = null;
       try
       {
-        uri = new URI("http://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
+        uri = new URI(exchange.getRequestURI().getScheme() + "://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
       }
       catch (URISyntaxException use)
       {
