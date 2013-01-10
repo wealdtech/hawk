@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 import com.wealdtech.hawk.HawkClient;
 import com.wealdtech.hawk.HawkCredentials;
 
-public class TestHawkServer
+public class HawkServerTest
 {
   private HawkCredentials testgoodcredentials;
   private URI validuri1;
