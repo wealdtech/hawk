@@ -58,7 +58,7 @@ public class HawkClient
   {
     long timestamp = System.currentTimeMillis() / 1000;
     final String nonce = StringUtils.generateRandomString(6);
-    final String mac = Hawk.calculateMAC(this.credentials, timestamp, uri, nonce, method, ext);
+    final String mac = Hawk.calculateMAC(this.credentials, Hawk.AuthType.CORE, timestamp, uri, nonce, method, ext);
 
     final StringBuilder sb = new StringBuilder(1024);
     sb.append("Hawk id=\"");

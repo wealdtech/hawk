@@ -74,6 +74,53 @@ public class SimpleHttpServer
     @Override
     public void handle(final HttpExchange exchange) throws IOException
     {
+      if (exchange.getRequestURI().toString().contains("bewit="))
+      {
+        handleAuthenticationBewit(exchange);
+      }
+      else
+      {
+        handleAuthenticationHeader(exchange);
+      }
+    }
+
+    private void handleAuthenticationBewit(final HttpExchange exchange) throws IOException
+    {
+      URI uri = null;
+      try
+      {
+        uri = new URI("http://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
+      }
+      catch (URISyntaxException use)
+      {
+        System.out.println("Not authenticated: " + use.getLocalizedMessage());
+        addAuthenticateHeader(exchange);
+        exchange.sendResponseHeaders(401, 0);
+      }
+
+      try
+      {
+        server.authenticate(this.credentials, uri);
+        System.out.println("Authenticated by bewit");
+        exchange.sendResponseHeaders(200, 0);
+      }
+      catch (DataError de)
+      {
+        System.out.println("Not authenticated: " + de.getLocalizedMessage());
+        addAuthenticateHeader(exchange);
+        exchange.sendResponseHeaders(401, 0);
+      }
+      catch (ServerError se)
+      {
+        System.out.println("Not authenticated: " + se.getLocalizedMessage());
+        addAuthenticateHeader(exchange);
+        exchange.sendResponseHeaders(500, 0);
+      }
+
+    }
+
+    private void handleAuthenticationHeader(final HttpExchange exchange) throws IOException
+    {
       // Obtain parameters available from the request
       URI uri = null;
       try
@@ -101,8 +148,8 @@ public class SimpleHttpServer
 
       try
       {
-        server.authenticate(credentials, uri, exchange.getRequestMethod(), authorizationHeaders);
-        System.out.println("Authenticated");
+        server.authenticate(this.credentials, uri, exchange.getRequestMethod(), authorizationHeaders);
+        System.out.println("Authenticated by header");
         exchange.sendResponseHeaders(200, 0);
       }
       catch (DataError de)

@@ -39,6 +39,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
 {
   private String ntpServer = "pool.ntp.org";
   private Long timestampSkew = 60L;
+  private Boolean bewitAllowed = true;
 
   /**
    * Create a configuration with values for all options.
@@ -48,10 +49,14 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
    * @param timestampSkew
    *          the maximum number of seconds of skew to allow between client and
    *          server, or <code>null</code> for the default
+   * @param bewitAllowed
+   *          whether or not to allow bewits, or <code>null</code> for the default
+   *
    */
   @JsonCreator
   private HawkServerConfiguration(@JsonProperty("ntpserver") final String ntpServer,
-                                  @JsonProperty("timestampskew") final Long timestampSkew) throws DataError
+                                  @JsonProperty("timestampskew") final Long timestampSkew,
+                                  @JsonProperty("bewitallowed") final Boolean bewitAllowed) throws DataError
   {
     if (ntpServer != null)
     {
@@ -61,6 +66,10 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     {
       this.timestampSkew = timestampSkew;
     }
+    if (bewitAllowed != null)
+    {
+      this.bewitAllowed = bewitAllowed;
+    }
     validate();
   }
 
@@ -69,6 +78,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     checkNotNull(this.ntpServer, "The NTP server is required");
     checkNotNull(this.timestampSkew, "The timestamp skew is required");
     checkArgument((this.timestampSkew >= 0), "The timestamp may not be negative");
+    checkNotNull(this.bewitAllowed, "Allowance of bewits is required");
   }
 
   public String getNtpServer()
@@ -81,6 +91,11 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     return this.timestampSkew;
   }
 
+  public Boolean isBewitAllowed()
+  {
+    return this.bewitAllowed;
+  }
+
   // Standard object methods follow
   @Override
   public String toString()
@@ -88,6 +103,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     return Objects.toStringHelper(this)
                   .add("ntpServer", this.getNtpServer())
                   .add("timestampSkew", this.getTimestampSkew())
+                  .add("bewitAllowed", this.isBewitAllowed())
                   .toString();
   }
 
@@ -109,6 +125,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     return ComparisonChain.start()
                           .compare(this.getNtpServer(), that.getNtpServer())
                           .compare(this.getTimestampSkew(), that.getTimestampSkew())
+                          .compare(this.isBewitAllowed(), that.isBewitAllowed())
                           .result();
   }
 
@@ -116,6 +133,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   {
     String ntpServer;
     Long timestampSkew;
+    Boolean bewitAllowed;
 
     /**
      * Generate a new builder.
@@ -132,6 +150,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     {
       this.ntpServer = prior.ntpServer;
       this.timestampSkew = prior.timestampSkew;
+      this.bewitAllowed = prior.bewitAllowed;
     }
 
     public Builder ntpServer(final String ntpServer)
@@ -144,11 +163,17 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     {
       this.timestampSkew = timestampSkew;
       return this;
-
     }
+
+    public Builder bewitAllowed(final Boolean bewitAllowed)
+    {
+      this.bewitAllowed = bewitAllowed;
+      return this;
+    }
+
     public HawkServerConfiguration build() throws DataError
     {
-      return new HawkServerConfiguration(this.ntpServer, this.timestampSkew);
+      return new HawkServerConfiguration(this.ntpServer, this.timestampSkew, this.bewitAllowed);
     }
   }
 }
