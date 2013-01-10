@@ -33,22 +33,29 @@ import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkServer;
+import com.wealdtech.hawk.HawkServerConfiguration;
 
 /**
  * Simple HTTP server that does nothing other than check the Hawk authentication
  * parameters and return any empty response with appropriate response code.
  */
-public class DummyHttpServer
+public class SimpleHttpServer
 {
-  public DummyHttpServer(final HawkCredentials credentials) throws Exception
+  private final HttpServer server;
+  public SimpleHttpServer(final HawkCredentials credentials, final HawkServerConfiguration configuration) throws Exception
   {
 
     InetSocketAddress addr = new InetSocketAddress(18234);
-    HttpServer server = HttpServer.create(addr, 0);
+    this.server = HttpServer.create(addr, 0);
 
-    server.createContext("/", new AuthenticateHandler(credentials));
-    server.setExecutor(Executors.newCachedThreadPool());
-    server.start();
+    this.server.createContext("/", new AuthenticateHandler(credentials, configuration));
+    this.server.setExecutor(Executors.newCachedThreadPool());
+    this.server.start();
+  }
+
+  public void stop()
+  {
+    this.server.stop(0);
   }
 
   // A handler that does nothing other than authentication
@@ -58,10 +65,10 @@ public class DummyHttpServer
     private transient final HawkCredentials credentials;
 
 
-    public AuthenticateHandler(final HawkCredentials credentials)
+    public AuthenticateHandler(final HawkCredentials credentials, final HawkServerConfiguration configuration)
     {
       this.credentials = credentials;
-      this.server = new HawkServer();
+      this.server = new HawkServer(configuration);
     }
 
     @Override
@@ -100,13 +107,13 @@ public class DummyHttpServer
       }
       catch (DataError de)
       {
-        System.out.println("Not authenticated (data error)");
+        System.out.println("Not authenticated: " + de.getLocalizedMessage());
         addAuthenticateHeader(exchange);
         exchange.sendResponseHeaders(401, 0);
       }
       catch (ServerError se)
       {
-        System.out.println("Not authenticated (server error)");
+        System.out.println("Not authenticated: " + se.getLocalizedMessage());
         addAuthenticateHeader(exchange);
         exchange.sendResponseHeaders(500, 0);
       }
@@ -131,7 +138,7 @@ public class DummyHttpServer
                                                        .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
                                                        .algorithm("hmac-sha-256")
                                                        .build();
-      new DummyHttpServer(credentials);
+      new SimpleHttpServer(credentials, null);
       while (true)
       {
         Thread.sleep(60000);

@@ -21,6 +21,8 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 import com.wealdtech.DataError;
 
+import static com.wealdtech.Preconditions.checkNotNull;
+
 /**
  * HawkCredentials contains the information required to authenticate requests
  * requests between a client and server.
@@ -59,14 +61,8 @@ public class HawkCredentials implements Comparable<HawkCredentials>
    */
   private void validate() throws DataError
   {
-    if (this.keyId == null)
-    {
-      throw new DataError.Missing("The key ID is required");
-    }
-    if (this.key == null)
-    {
-      throw new DataError.Bad("The key ID does not contain any information");
-    }
+    checkNotNull(this.keyId, "The key ID is required");
+    checkNotNull(this.key, "The key is required");
     if (!SUPPORTEDALGORITHMS.containsKey(algorithm))
     {
       throw new DataError.Bad("Unknown encryption algorithm");

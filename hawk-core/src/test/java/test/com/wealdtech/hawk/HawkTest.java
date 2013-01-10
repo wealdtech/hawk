@@ -16,8 +16,6 @@
 
 package test.com.wealdtech.hawk;
 
-import static org.testng.Assert.*;
-
 import java.net.URI;
 
 import org.testng.annotations.BeforeClass;
@@ -30,7 +28,7 @@ import com.wealdtech.hawk.HawkCredentials;
 
 import static org.testng.Assert.assertEquals;
 
-public class TestHawk
+public class HawkTest
 {
   private HawkCredentials testhc1;
   private URI testuri1;
@@ -52,21 +50,21 @@ public class TestHawk
   public void testMAC() throws DataError, ServerError
   {
     String testmac1 = Hawk.calculateMAC(this.testhc1, 12345L, this.testuri1, "testnonce", "GET", null);
-    assertEquals(testmac1, "TQcJRRT6IlUStBw9VmyALdHM/2HmO5cqc20jPXsCMoM=");
+    assertEquals(testmac1, "rRqrRxa6nbacbSGRPOFSygr6AXCtfa119LRAFedXY0M=");
   }
 
   @Test
   public void testHttpsMAC() throws DataError, ServerError
   {
     String testmac1 = Hawk.calculateMAC(this.testhc1, 54321L, this.testuri2, "testnonce", "POST", null);
-    assertEquals(testmac1, "b2rbmwxNmtK3Q+s1O4Ac7EJQgOjNJcmeE3LEUegq8x4=");
+    assertEquals(testmac1, "XHHRCaKhtlmjWxn6xsizLxgF2zd/tSqCSEu7l02GOq4=");
   }
 
   @Test
   public void testExtDataMAC() throws DataError, ServerError
   {
     String testmac1 = Hawk.calculateMAC(this.testhc1, 12345L, this.testuri1, "testnonce", "GET", "Extra data");
-    assertEquals(testmac1, "CGxOiUfSKmdVfk030DE454MQ6jW/dKlSLi5iIz9IC/I=");
+    assertEquals(testmac1, "HSvuj0v2YMAaLItL6DNWxrNLB/ab1vdmR3pfmZKgY/k=");
   }
 
 }
