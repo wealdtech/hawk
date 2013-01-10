@@ -1,5 +1,5 @@
 /*
- *    Copyright 2012 Weald Technology Trading Limited
+ *    Copyright 2012, 2013 Weald Technology Trading Limited
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import com.wealdtech.hawk.HawkCredentials;
 
 import static org.testng.Assert.*;
 
-public class TestHawkCredential
+public class HawkCredentialsTest
 {
   @Test
   public void testModel() throws DataError

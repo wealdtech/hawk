@@ -82,6 +82,6 @@ public class HawkClient
   public boolean isValidFor(final String path)
   {
     return ((this.pathPrefix == null) ||
-            (path.startsWith(this.pathPrefix)));
+            ((path == null) || (path.startsWith(this.pathPrefix))));
   }
 }

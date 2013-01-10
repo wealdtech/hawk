@@ -53,7 +53,7 @@ public class HawkServer
    */
   public HawkServer()
   {
-    this.configuration = new HawkServerConfiguration();
+    this.configuration = new HawkServerConfiguration.Builder().build();
     initializeCache();
   }
 
@@ -65,7 +65,14 @@ public class HawkServer
    */
   public HawkServer(final HawkServerConfiguration configuration)
   {
-    this.configuration = configuration;
+    if (configuration == null)
+    {
+      this.configuration = new HawkServerConfiguration.Builder().build();
+    }
+    else
+    {
+      this.configuration = configuration;
+    }
     initializeCache();
   }
   private final void initializeCache()
@@ -93,6 +100,12 @@ public class HawkServer
    */
   public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationheaders) throws DataError, ServerError
   {
+    // Ensure that the required fields are present
+    checkNotNull(authorizationheaders.get("ts"), "The timestamp was not supplied");
+    checkNotNull(authorizationheaders.get("nonce"), "The nonce was not supplied");
+    checkNotNull(authorizationheaders.get("id"), "The id was not supplied");
+    checkNotNull(authorizationheaders.get("mac"), "The mac was not supplied");
+
     // Ensure that the timestamp passed in is within suitable bounds
     confirmTimestampWithinBounds(authorizationheaders.get("ts"));
 
@@ -117,7 +130,6 @@ public class HawkServer
 
   private void confirmTimestampWithinBounds(final String ts) throws DataError
   {
-    checkNotNull(ts, "The timestamp was not supplied");
     Long timestamp;
     try
     {
