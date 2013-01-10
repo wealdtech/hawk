@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
+	<name>hawk-server-jersey</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
 	<filteredResources>
 		<filter>
 			<id>1357146686412</id>
-			<name/>
+			<name></name>
 			<type>10</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
@@ -12,7 +26,7 @@
 		</filter>
 		<filter>
 			<id>1357146686414</id>
-			<name/>
+			<name></name>
 			<type>10</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
@@ -21,7 +35,7 @@
 		</filter>
 		<filter>
 			<id>1357146686417</id>
-			<name/>
+			<name></name>
 			<type>6</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
@@ -29,17 +43,4 @@
 			</matcher>
 		</filter>
 	</filteredResources>
-	<name>hawk-server-jersey</name>
-	<comment/>
-	<projects/>
-	<natures>
-		<nature>org.eclipse.jdt.core.javanature</nature>
-	</natures>
-	<buildSpec>
-		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments/>
-		</buildCommand>
-	</buildSpec>
-	<linkedResources/>
 </projectDescription>

@@ -34,16 +34,16 @@ import com.google.inject.servlet.GuiceServletContextListener;
 /**
  * A simple Jetty container to test Jersey Hawk authentication
  */
-public class JettyServer
+public class SampleJettyServer
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger(JettyServer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SampleJettyServer.class);
 
   private transient Server server;
 
   private transient final Injector injector;
 
   @Inject
-  public JettyServer(final Injector injector)
+  public SampleJettyServer(final Injector injector)
   {
     this.injector = injector;
   }
@@ -60,14 +60,18 @@ public class JettyServer
       @Override
       protected Injector getInjector()
       {
-        return JettyServer.this.injector;
+        return SampleJettyServer.this.injector;
       }
     });
     context.addFilter(GuiceFilter.class, "/*", null);
     context.addServlet(DefaultServlet.class, "/");
 
     this.server.start();
-    this.server.join();
+  }
+
+  public void stop() throws Exception
+  {
+    this.server.stop();
   }
 
   public static void main(final String[] args) throws Exception
@@ -76,7 +80,7 @@ public class JettyServer
     final Injector injector = Guice.createInjector(new HawkConfigurationModule(),
                                                    new HawkServletModule("test.com.wealdtech.hawk.providers",
                                                                          "test.com.wealdtech.hawk.resources"));
-    final JettyServer webserver = injector.getInstance(JettyServer.class);
+    final SampleJettyServer webserver = injector.getInstance(SampleJettyServer.class);
     webserver.start();
   }
 }
