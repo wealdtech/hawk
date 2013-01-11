@@ -26,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.testng.collections.Maps;
+
 import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -131,22 +133,14 @@ public class HawkServer
   public void authenticate(final HawkCredentials credentials, final URI uri)
   {
     final String bewit = extractBewit(uri);
-    checkNotNull(bewit, ("The bewit was not supplied"));
-    final String decodedBewit = new String(BaseEncoding.base64().decode(bewit));
-    List<String> bewitfields = Lists.newArrayList(BEWITSPLITTER.split(decodedBewit));
-    checkState((bewitfields.size() == 4), "The bewit did not contain the correct number of values");
-    final String id = bewitfields.get(0);
-    checkState((credentials.getKeyId().equals(id)), "The id in the bewit is not recognised");
-    final Long expiry = Long.parseLong(bewitfields.get(1));
-    checkState((System.currentTimeMillis() / 1000 <= expiry), "The bewit has expired");
-    final String mac = bewitfields.get(2);
-    final String ext = bewitfields.get(3);
-
+    final ImmutableMap<String, String> bewitFields = splitBewit(bewit);
+    checkState((credentials.getKeyId().equals(bewitFields.get("id"))), "The id in the bewit is not recognised");
+    final Long expiry = Long.parseLong(bewitFields.get("expiry"));
 
     final URI strippedUri = stripBewit(uri);
 
-    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, ext);
-    if (!timeConstantEquals(calculatedMac, mac))
+    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, bewitFields.get("ext"));
+    if (!timeConstantEquals(calculatedMac, bewitFields.get("mac")))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
     }
@@ -265,6 +259,28 @@ public class HawkServer
       fields.put(key, value);
     }
     return ImmutableMap.copyOf(fields);
+  }
+
+  /**
+   * Split a base64-encoded bewit into individual fields.
+   * @param bewit the base64-encoded bewit
+   * @return a map of bewit parameters
+   * @throws DataError If the bewit is invalid in some way
+   */
+  public ImmutableMap<String, String> splitBewit(final String bewit) throws DataError
+  {
+    checkNotNull(bewit, "No bewit");
+    final String decodedBewit = new String(BaseEncoding.base64().decode(bewit));
+    List<String> bewitfields = Lists.newArrayList(BEWITSPLITTER.split(decodedBewit));
+    checkState((bewitfields.size() == 4), "The bewit did not contain the correct number of values");
+    checkState((System.currentTimeMillis() / 1000 <= Long.parseLong(bewitfields.get(1))), "The bewit has expired");
+
+    Map<String, String> bewitMap = Maps.newHashMap();
+    bewitMap.put("id", bewitfields.get(0));
+    bewitMap.put("expiry", bewitfields.get(1));
+    bewitMap.put("mac", bewitfields.get(2));
+    bewitMap.put("ext", bewitfields.get(3));
+    return ImmutableMap.copyOf(bewitMap);
   }
 
   /**

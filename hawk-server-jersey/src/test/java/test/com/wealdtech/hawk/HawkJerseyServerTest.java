@@ -29,6 +29,7 @@ import test.com.wealdtech.hawk.jersey.guice.HawkServletModule;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.wealdtech.hawk.Hawk;
 import com.wealdtech.hawk.HawkClient;
 import com.wealdtech.hawk.HawkCredentials;
 
@@ -43,7 +44,7 @@ public class HawkJerseyServerTest
   // Helper
   private HttpURLConnection connect(final URI uri, final String authorizationHeader) throws Exception
   {
-    final HttpURLConnection connection = (HttpURLConnection)this.validuri1.toURL().openConnection();
+    final HttpURLConnection connection = (HttpURLConnection)uri.toURL().openConnection();
     connection.setRequestMethod("GET");
     connection.setRequestProperty("Authorization", authorizationHeader);
     connection.setDoOutput(true);
@@ -82,6 +83,55 @@ public class HawkJerseyServerTest
     final HawkClient testclient = new HawkClient(this.testgoodcredentials);
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
     HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+    assertEquals(connection.getResponseCode(), 200);
+  }
+
+  @Test
+  public void testFailedAuth() throws Exception
+  {
+    // Test failed auth due to bad MAC
+    final HawkCredentials badCredentials = new HawkCredentials.Builder(this.testgoodcredentials)
+                                                              .key("bad")
+                                                              .build();
+    final HawkClient testclient = new HawkClient(badCredentials);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
+    HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+    assertEquals(connection.getResponseCode(), 401);
+  }
+
+  @Test
+  public void testInvalidAuth1() throws Exception
+  {
+    // Test authentication with unknown key ID
+    final HawkCredentials badCredentials = new HawkCredentials.Builder(this.testgoodcredentials)
+                                                              .keyId("unknown")
+                                                              .build();
+    final HawkClient testclient = new HawkClient(badCredentials);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
+    HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+    assertEquals(connection.getResponseCode(), 401);
+  }
+
+  @Test
+  public void testInvalidAuth2() throws Exception
+  {
+    // Test authentication with differing algorithms
+    final HawkCredentials badCredentials = new HawkCredentials.Builder(this.testgoodcredentials)
+                                                              .algorithm("hmac-sha-1")
+                                                              .build();
+    final HawkClient testclient = new HawkClient(badCredentials);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
+    HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+    assertEquals(connection.getResponseCode(), 401);
+  }
+
+  @Test
+  public void testValidBewit() throws Exception
+  {
+    // Test a valid bewit
+    final String bewit = Hawk.generateBewit(this.testgoodcredentials, this.validuri1, 600L, null);
+    URI testUri = new URI(this.validuri1.toString() + "?bewit=" + bewit);
+    final HttpURLConnection connection = connect(testUri, null);
     assertEquals(connection.getResponseCode(), 200);
   }
 }
