@@ -17,6 +17,7 @@
 package test.com.wealdtech.hawk.resources;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -36,6 +37,20 @@ public class HelloWorldResource
   @GET
   @Produces("text/plain")
   public String getHelloWorld()
+  {
+    if (this.authenticatedUser == null)
+    {
+      return "Hello world";
+    }
+    else
+    {
+      return "Hello " + this.authenticatedUser.getName();
+    }
+  }
+
+  @PUT
+  @Produces("text/plain")
+  public String getHelloWorldPut()
   {
     if (this.authenticatedUser == null)
     {
