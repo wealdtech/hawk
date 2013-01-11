@@ -32,6 +32,6 @@ If you are not using either of these then for now you will need to build your ow
       <version>0.4.0</version>
     </dependency>
 
-[Using Hawk with Jersey server][hawk-server-jersey/README.md]
-[Using Hawk with Jersey client][hawk-client-jersey/README.md]
-[Building your own Hawk client or server][hawk-core/README.md]
+[Using Hawk with Jersey server](hawk-server-jersey/README.md)
+[Using Hawk with Jersey client](hawk-client-jersey/README.md)
+[Building your own Hawk client or server](hawk-core/README.md)
