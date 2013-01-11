@@ -58,7 +58,7 @@ public class HawkJerseyServerTest
     this.testgoodcredentials = new HawkCredentials.Builder()
                                               .keyId("dh37fgj492je")
                                               .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                              .algorithm("hmac-sha-256")
+                                              .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
                                               .build();
     this.validuri1 = new URI("http://localhost:8080/helloworld");
 
@@ -117,7 +117,7 @@ public class HawkJerseyServerTest
   {
     // Test authentication with differing algorithms
     final HawkCredentials badCredentials = new HawkCredentials.Builder(this.testgoodcredentials)
-                                                              .algorithm("hmac-sha-1")
+                                                              .algorithm(HawkCredentials.Algorithm.HMAC_SHA_1)
                                                               .build();
     final HawkClient testclient = new HawkClient(badCredentials);
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);

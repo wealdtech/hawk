@@ -66,13 +66,13 @@ public class HawkClientTest
     this.testcredentials1 = new HawkCredentials.Builder()
                                                .keyId("dh37fgj492je")
                                                .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                               .algorithm("hmac-sha-256")
+                                               .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
                                                .build();
     this.server = new SimpleHttpServer(this.testcredentials1, null);
     this.testcredentials2 = new HawkCredentials.Builder()
                                                .keyId("kbmdu72h12xt")
                                                .key("nzvxvljms2n239w7alsaduanpet109apbisuda0bt79")
-                                               .algorithm("hmac-sha-256")
+                                               .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
                                                .build();
     this.validuri1 = new URI("http://localhost:18234/testpath/subpath?param1=val1&param2=val2");
     this.validuri2 = new URI("http://localhost:18234/v1/usergroups/");

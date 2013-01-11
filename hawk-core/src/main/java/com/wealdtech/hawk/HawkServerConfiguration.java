@@ -33,7 +33,7 @@ import static com.wealdtech.Preconditions.*;
  * <li>timestampSkew: the maximum difference between client and server
  * timestamps, in seconds, for a request to be considered valid. Defaults to 60</li>
  * This is configured as a standard Jackson object and can be realized as part
- * of a {@link com.wealdtech.configuration.ConfigurationSource}.
+ * of a ConfigurationSource.
  */
 public class HawkServerConfiguration implements Comparable<HawkServerConfiguration>
 {
@@ -42,7 +42,9 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   private Boolean bewitAllowed = true;
 
   /**
-   * Create a configuration with values for all options.
+   * Create a configuration with specified values for all options.
+   * Note that this should not be called directly, and the Builder should be
+   * used for instantiation.
    *
    * @param ntpServer
    *          the name of an NTP server, or <code>null</code> for the default
@@ -51,7 +53,6 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
    *          server, or <code>null</code> for the default
    * @param bewitAllowed
    *          whether or not to allow bewits, or <code>null</code> for the default
-   *
    */
   @JsonCreator
   private HawkServerConfiguration(@JsonProperty("ntpserver") final String ntpServer,
@@ -153,24 +154,45 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
       this.bewitAllowed = prior.bewitAllowed;
     }
 
+    /**
+     * Override the default NTP server.
+     * @param ntpServer the new NTP server
+     * @return The builder
+     */
     public Builder ntpServer(final String ntpServer)
     {
       this.ntpServer = ntpServer;
       return this;
     }
 
+    /**
+     * Override the default timestamp skew.
+     * @param timestampSkew the new timestamp skew
+     * @return The builder
+     */
     public Builder timestampSkew(final Long timestampSkew)
     {
       this.timestampSkew = timestampSkew;
       return this;
     }
 
+    /**
+     * Override the default allowance of bewits.
+     * @param bewitAllowed if bewits are allowed
+     * @return The builder
+     */
     public Builder bewitAllowed(final Boolean bewitAllowed)
     {
       this.bewitAllowed = bewitAllowed;
       return this;
     }
 
+    /**
+     * Create a new Hawk server configuration from the defaults
+     * and overrides provided.
+     * @return The Hawk server configuration
+     * @throws DataError If the data provided is invalid for a Hawk server configuration
+     */
     public HawkServerConfiguration build() throws DataError
     {
       return new HawkServerConfiguration(this.ntpServer, this.timestampSkew, this.bewitAllowed);

@@ -38,7 +38,7 @@ public class HawkTest
     this.testhc1 = new HawkCredentials.Builder()
                                       .keyId("dh37fgj492je")
                                       .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                      .algorithm("hmac-sha-256")
+                                      .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
                                       .build();
     this.testuri1 = new URI("http://www.example.com/test/path");
     this.testuri2 = new URI("https://www.example.com/test/path/two?one=1&two=two");

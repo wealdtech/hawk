@@ -31,7 +31,7 @@ public class HawkCredentialsTest
     final HawkCredentials testhc1 = new HawkCredentials.Builder()
                                                        .keyId("testkeyid")
                                                        .key("testkey")
-                                                       .algorithm("hmac-sha-256")
+                                                       .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
                                                        .build();
     assertEquals(testhc1.getKeyId(), "testkeyid");
     assertEquals(testhc1.getKey(), "testkey");
@@ -58,7 +58,7 @@ public class HawkCredentialsTest
   {
     try
     {
-      new HawkCredentials.Builder().keyId(null).key("testkey").algorithm("hmac-sha-256").build();
+      new HawkCredentials.Builder().keyId(null).key("testkey").algorithm(HawkCredentials.Algorithm.HMAC_SHA_256).build();
       // Should not reach here
       fail();
     }
@@ -73,7 +73,7 @@ public class HawkCredentialsTest
   {
     try
     {
-      new HawkCredentials.Builder().keyId("testkeyid").key(null).algorithm("hmac-sha-256").build();
+      new HawkCredentials.Builder().keyId("testkeyid").key(null).algorithm(HawkCredentials.Algorithm.HMAC_SHA_256).build();
       // Should not reach here
       fail();
     }
@@ -89,21 +89,6 @@ public class HawkCredentialsTest
     try
     {
       new HawkCredentials.Builder().keyId("testkeyid").key("testkey").algorithm(null).build();
-      // Should not reach here
-      fail();
-    }
-    catch (DataError de)
-    {
-      // Good
-    }
-  }
-
-  @Test
-  public void testInvalidAlgorithm() throws DataError
-  {
-    try
-    {
-      new HawkCredentials.Builder().keyId("testkeyid").key("testkey").algorithm("md2").build();
       // Should not reach here
       fail();
     }

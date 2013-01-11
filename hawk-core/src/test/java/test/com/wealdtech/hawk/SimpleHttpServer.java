@@ -190,7 +190,7 @@ public class SimpleHttpServer
       HawkCredentials credentials = new HawkCredentials.Builder()
                                                        .keyId("dh37fgj492je")
                                                        .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                                       .algorithm("hmac-sha-256")
+                                                       .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
                                                        .build();
       new SimpleHttpServer(credentials, null);
       while (true)

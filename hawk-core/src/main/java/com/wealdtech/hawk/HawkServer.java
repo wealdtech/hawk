@@ -26,14 +26,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.testng.collections.Maps;
-
 import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.BaseEncoding;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
@@ -168,6 +167,7 @@ public class HawkServer
     }
   }
 
+  // Confirm that the request nonce has not already been seen within the allowable time period
   private void confirmUniqueNonce(final String nonce) throws DataError
   {
     if (this.nonces.getUnchecked(nonce) == true)
@@ -177,6 +177,7 @@ public class HawkServer
     this.nonces.put(nonce, true);
   }
 
+  // Confirm that the request timestamp is within an acceptable range of current time
   private void confirmTimestampWithinBounds(final String ts) throws DataError
   {
     Long timestamp;
@@ -214,6 +215,7 @@ public class HawkServer
     return sb.toString();
   }
 
+  // Avoid any weakness through fast-path comparison of strings
   private static boolean timeConstantEquals(final String first, final String second)
   {
     if ((first == null) || (second == null))
@@ -237,6 +239,12 @@ public class HawkServer
     return (res == 0);
   }
 
+  /**
+   * Split an authorization header into individual fields.
+   * @param authorizationheader the Hawk authorization header
+   * @return A map of authorization parameters
+   * @throws DataError If the authorization header is invalid in some way
+   */
   public ImmutableMap<String, String> splitAuthorizationHeader(final String authorizationheader) throws DataError
   {
     checkNotNull(authorizationheader, "No authorization header");
@@ -264,7 +272,7 @@ public class HawkServer
   /**
    * Split a base64-encoded bewit into individual fields.
    * @param bewit the base64-encoded bewit
-   * @return a map of bewit parameters
+   * @return A map of bewit parameters
    * @throws DataError If the bewit is invalid in some way
    */
   public ImmutableMap<String, String> splitBewit(final String bewit) throws DataError
@@ -286,7 +294,7 @@ public class HawkServer
   /**
    * Extract a bewit from a URI.
    * @param uri the URI from which to pull the bewit
-   * @return the bewit
+   * @return The bewit
    * @throws DataError if there is an issue with the data that prevents obtaining the bewit
    */
   public String extractBewit(final URI uri)

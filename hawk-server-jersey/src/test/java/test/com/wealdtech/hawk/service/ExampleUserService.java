@@ -41,13 +41,13 @@ public class ExampleUserService extends HawkPrincipalProvider<ExampleUser>
     HawkCredentials user1hawkcredentials = new HawkCredentials.Builder()
                                                               .keyId("dh37fgj492je")
                                                               .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                                              .algorithm(HawkCredentials.HMAC_SHA_256).build();
+                                                              .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256).build();
     ExampleUser user1 = new ExampleUser("Steve", user1hawkcredentials);
     this.usermap.put(user1hawkcredentials.getKeyId(), user1);
     HawkCredentials user2hawkcredentials = new HawkCredentials.Builder()
                                                               .keyId("jns7y9824hus")
                                                               .key("mb708923nzgr87t4fsnt48ufnjt4y98zjkby98t43tw")
-                                                              .algorithm(HawkCredentials.HMAC_SHA_256).build();
+                                                              .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256).build();
     ExampleUser user2 = new ExampleUser("John", user2hawkcredentials);
     this.usermap.put(user2hawkcredentials.getKeyId(), user2);
   }

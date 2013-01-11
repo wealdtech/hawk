@@ -45,12 +45,12 @@ public class HawkClient
   /**
    * Generate the value for the Hawk authorization header.
    *
-   * @param uri
-   * @param method
-   * @param ext
-   * @return
-   * @throws DataError
-   * @throws ServerError
+   * @param uri the URI for the request
+   * @param method the request for the method
+   * @param ext extra data, or <code>null</code> if none
+   * @return The value for the Hawk authorization header.
+   * @throws DataError If there is a problem with the data passed in which makes it impossible to generate a valid authorization header
+   * @throws ServerError If there is a server problem whilst generating the authorization header
    */
   public String generateAuthorizationHeader(final URI uri,
                                             final String method,

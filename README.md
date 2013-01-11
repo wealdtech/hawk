@@ -12,7 +12,7 @@ Hawk uses Jersey for its reference implementation.  If you are using the Jersey 
 
 Comments and Suggestions
 ========================
-The Hawk libraries will attempt to keep up-to-date with the[/hueniverse/hawk](the main release of Hawk).  If you have any comments or suggestions on the protocol them please raise them there.  If you have any comments or suggestions on this Java implementation then please raise them here.
+The Hawk libraries will attempt to keep up-to-date with [the main release of Hawk](/hueniverse/hawk).  If you have any comments or suggestions on the protocol them please raise them there.  If you have any comments or suggestions on this Java implementation then please raise them here.
 
 Copyright and License
 ======================
