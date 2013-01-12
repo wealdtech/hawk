@@ -255,4 +255,44 @@ public class Hawk
       }
     }
   }
+
+  public enum PayloadValidation
+  {
+    /**
+     * Never validate the payload regardless of if there is a payload hash present
+     */
+    NEVER,
+    /**
+     * Validate if there is a payload hash present, continue if not
+     */
+    IFPRESENT,
+    /**
+     * Validate if there is a payload hash present, fail if not
+     */
+    MANDATORY;
+
+    @Override
+    @JsonValue
+    public String toString()
+    {
+        return super.toString().toLowerCase(Locale.ENGLISH).replaceAll("_", "-");
+    }
+
+    @JsonCreator
+    public static PayloadValidation parse(final String payloadValidation) throws DataError
+    {
+      try
+      {
+        return valueOf(payloadValidation.toUpperCase(Locale.ENGLISH).replaceAll("-", "_"));
+      }
+      catch (IllegalArgumentException iae)
+      {
+        // N.B. we don't pass the iae as the cause of this exception because
+        // this happens during invocation, and in that case the enum handler
+        // will report the root cause exception rather than the one we throw.
+        throw new DataError.Bad("Hawk algorithm \"" + payloadValidation + "\" is invalid");
+      }
+    }
+  }
+
 }

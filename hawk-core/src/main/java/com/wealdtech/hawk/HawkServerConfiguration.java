@@ -16,22 +16,26 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.wealdtech.DataError;
-
-import static com.wealdtech.Preconditions.*;
+import com.wealdtech.hawk.Hawk.PayloadValidation;
 
 /**
  * Configuration for a Hawk server. The Hawk server has a number of
  * configuration parameters. These are as follows:
  * <ul>
  * <li>ntpServer: the name of an NTP server to send to the client in the case of
- * a bad request. Defaults to 'pool.ntp.org'</li>
+ * a bad request. Defaults to <code>pool.ntp.org</code></li>
  * <li>timestampSkew: the maximum difference between client and server
- * timestamps, in seconds, for a request to be considered valid. Defaults to 60</li>
+ * timestamps, in seconds, for a request to be considered valid. Defaults to <code>60</code></li>
+ * <li>bewitAllowed: if authentication of URLs using bewits is allowed.  Defaults to <code>true</code></li>
+ * <li>payloadValidation: how to handle payload validation.  Defaults to <code>IFPRESENT</code></li>
+ * </ul>
  * This is configured as a standard Jackson object and can be realized as part
  * of a ConfigurationSource.
  */
@@ -40,6 +44,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   private String ntpServer = "pool.ntp.org";
   private Long timestampSkew = 60L;
   private Boolean bewitAllowed = true;
+  private PayloadValidation payloadValidation = PayloadValidation.IFPRESENT;
 
   /**
    * Create a configuration with specified values for all options.
@@ -53,11 +58,14 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
    *          server, or <code>null</code> for the default
    * @param bewitAllowed
    *          whether or not to allow bewits, or <code>null</code> for the default
+   * @param payloadValidation
+   *          how to validate against payloads, or <code>null</code> for the default
    */
   @JsonCreator
   private HawkServerConfiguration(@JsonProperty("ntpserver") final String ntpServer,
                                   @JsonProperty("timestampskew") final Long timestampSkew,
-                                  @JsonProperty("bewitallowed") final Boolean bewitAllowed) throws DataError
+                                  @JsonProperty("bewitallowed") final Boolean bewitAllowed,
+                                  @JsonProperty("payloadvalidation") final PayloadValidation payloadValidation) throws DataError
   {
     if (ntpServer != null)
     {
@@ -70,6 +78,10 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     if (bewitAllowed != null)
     {
       this.bewitAllowed = bewitAllowed;
+    }
+    if (payloadValidation != null)
+    {
+      this.payloadValidation = payloadValidation;
     }
     validate();
   }
@@ -97,6 +109,11 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     return this.bewitAllowed;
   }
 
+  public PayloadValidation getPayloadValidation()
+  {
+    return this.payloadValidation;
+  }
+
   // Standard object methods follow
   @Override
   public String toString()
@@ -105,6 +122,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
                   .add("ntpServer", this.getNtpServer())
                   .add("timestampSkew", this.getTimestampSkew())
                   .add("bewitAllowed", this.isBewitAllowed())
+                  .add("payloadValidation", this.getPayloadValidation())
                   .toString();
   }
 
@@ -117,7 +135,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   @Override
   public int hashCode()
   {
-    return Objects.hashCode(this.getNtpServer(), this.getTimestampSkew());
+    return Objects.hashCode(this.getNtpServer(), this.getTimestampSkew(), this.isBewitAllowed(), this.getPayloadValidation());
   }
 
   @Override
@@ -127,6 +145,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
                           .compare(this.getNtpServer(), that.getNtpServer())
                           .compare(this.getTimestampSkew(), that.getTimestampSkew())
                           .compare(this.isBewitAllowed(), that.isBewitAllowed())
+                          .compare(this.getPayloadValidation(), that.getPayloadValidation())
                           .result();
   }
 
@@ -135,6 +154,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     String ntpServer;
     Long timestampSkew;
     Boolean bewitAllowed;
+    PayloadValidation payloadValidation;
 
     /**
      * Generate a new builder.
@@ -152,6 +172,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
       this.ntpServer = prior.ntpServer;
       this.timestampSkew = prior.timestampSkew;
       this.bewitAllowed = prior.bewitAllowed;
+      this.payloadValidation = prior.payloadValidation;
     }
 
     /**
@@ -188,6 +209,17 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     }
 
     /**
+     * Override the default handling of payload validation.
+     * @param payloadValidation
+     * @return The builder
+     */
+    public Builder payloadValidation(final PayloadValidation payloadValidation)
+    {
+      this.payloadValidation = payloadValidation;
+      return this;
+    }
+
+    /**
      * Create a new Hawk server configuration from the defaults
      * and overrides provided.
      * @return The Hawk server configuration
@@ -195,7 +227,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
      */
     public HawkServerConfiguration build() throws DataError
     {
-      return new HawkServerConfiguration(this.ntpServer, this.timestampSkew, this.bewitAllowed);
+      return new HawkServerConfiguration(this.ntpServer, this.timestampSkew, this.bewitAllowed, this.payloadValidation);
     }
   }
 }
