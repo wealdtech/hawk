@@ -8,10 +8,10 @@ dependencies {
     compile 'com.sun.jersey:jersey-servlet:1.16'
     compile 'com.sun.jersey:jersey-json:1.16'
     compile 'com.sun.jersey.contribs:jersey-guice:1.16'
-    compile 'javax.servlet:javax.servlet-api:3.0.+'
+    compile 'javax.servlet:javax.servlet-api:3.0.1'
     compile 'javax.ws.rs:jsr311-api:1.1.1'
-    testCompile 'org.eclipse.jetty:jetty-server:8.1.+'
-    testCompile 'org.eclipse.jetty:jetty-servlet:8.1.+'
+    testCompile 'org.eclipse.jetty:jetty-server:8.1.8.v20121106'
+    testCompile 'org.eclipse.jetty:jetty-servlet:8.1.8.v20121106'
 }
 
 uploadArchives {

@@ -17,6 +17,7 @@
 package com.wealdtech.hawk;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -31,10 +32,12 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.io.BaseEncoding;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 
-import static com.wealdtech.Preconditions.checkNotNull;
+import static com.wealdtech.Preconditions.*;
 
 /**
  * The Hawk server. Note that this is not an HTTP server in itself, but provides
@@ -42,8 +45,11 @@ import static com.wealdtech.Preconditions.checkNotNull;
  */
 public class HawkServer
 {
-  private static final Splitter HAWKSPLITTER = Splitter.onPattern("\\s+").limit(2);
+  private static final Splitter WHITESPACESPLITTER = Splitter.onPattern("\\s+").limit(2);
   private static final Pattern FIELDPATTERN = Pattern.compile("([^=]*)\\s*=\\s*\"([^\"]*)[,\"\\s]*");
+  private static final Pattern BEWITPATTERN = Pattern.compile("bewit=([^&]*)");
+  private static final Splitter BEWITSPLITTER = Splitter.on('\\');
+  private static final String BEWITREMOVEALMATCH = "bewit=[^&]*";
 
   private final HawkServerConfiguration configuration;
   private LoadingCache<String, Boolean> nonces;
@@ -75,6 +81,7 @@ public class HawkServer
     }
     initializeCache();
   }
+
   private final void initializeCache()
   {
     // TODO The cache does not have a maximum size, which could lead to a DDOS.
@@ -112,13 +119,55 @@ public class HawkServer
     // Ensure that this is not a replay of a previous request
     confirmUniqueNonce(authorizationheaders.get("nonce"));
 
-    final String mac = Hawk.calculateMAC(credentials, Long.valueOf(authorizationheaders.get("ts")), uri, authorizationheaders.get("nonce"), method, authorizationheaders.get("ext"));
+    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.CORE, Long.valueOf(authorizationheaders.get("ts")), uri, authorizationheaders.get("nonce"), method, authorizationheaders.get("ext"));
     if (!timeConstantEquals(mac, authorizationheaders.get("mac")))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
     }
   }
 
+  /**
+   * Authenticate a request using a Hawk bewit.
+   */
+  public void authenticate(final HawkCredentials credentials, final URI uri)
+  {
+    final String bewit = extractBewit(uri);
+    final ImmutableMap<String, String> bewitFields = splitBewit(bewit);
+    checkState((credentials.getKeyId().equals(bewitFields.get("id"))), "The id in the bewit is not recognised");
+    final Long expiry = Long.parseLong(bewitFields.get("expiry"));
+
+    final URI strippedUri = stripBewit(uri);
+
+    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, bewitFields.get("ext"));
+    if (!timeConstantEquals(calculatedMac, bewitFields.get("mac")))
+    {
+      throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
+    }
+  }
+
+  // Strip the bewit query parameter from a URI
+  private URI stripBewit(final URI uri)
+  {
+    String uristr = uri.toString().replaceAll(BEWITREMOVEALMATCH, "");
+    // If the bewit was the first parameter...
+    uristr = uristr.replaceAll("\\?&", "?");
+    // If the bewit was the only parameter...
+    uristr = uristr.replaceAll("\\?$", "");
+    // If the bewit was a middle parameter...
+    uristr = uristr.replaceAll("&&", "&");
+    // If the bewit was the last parameter...
+    uristr = uristr.replaceAll("&$", "");
+    try
+    {
+      return new URI(uristr);
+    }
+    catch (URISyntaxException use)
+    {
+      throw new ServerError("Failed to remove bewit from query string");
+    }
+  }
+
+  // Confirm that the request nonce has not already been seen within the allowable time period
   private void confirmUniqueNonce(final String nonce) throws DataError
   {
     if (this.nonces.getUnchecked(nonce) == true)
@@ -128,6 +177,7 @@ public class HawkServer
     this.nonces.put(nonce, true);
   }
 
+  // Confirm that the request timestamp is within an acceptable range of current time
   private void confirmTimestampWithinBounds(final String ts) throws DataError
   {
     Long timestamp;
@@ -165,6 +215,7 @@ public class HawkServer
     return sb.toString();
   }
 
+  // Avoid any weakness through fast-path comparison of strings
   private static boolean timeConstantEquals(final String first, final String second)
   {
     if ((first == null) || (second == null))
@@ -188,10 +239,16 @@ public class HawkServer
     return (res == 0);
   }
 
+  /**
+   * Split an authorization header into individual fields.
+   * @param authorizationheader the Hawk authorization header
+   * @return A map of authorization parameters
+   * @throws DataError If the authorization header is invalid in some way
+   */
   public ImmutableMap<String, String> splitAuthorizationHeader(final String authorizationheader) throws DataError
   {
     checkNotNull(authorizationheader, "No authorization header");
-    List<String> headerfields = Lists.newArrayList(HAWKSPLITTER.split(authorizationheader));
+    List<String> headerfields = Lists.newArrayList(WHITESPACESPLITTER.split(authorizationheader));
     if (headerfields.size() != 2)
     {
       throw new DataError.Bad("The authorization header does not contain the expected number of fields");
@@ -211,4 +268,47 @@ public class HawkServer
     }
     return ImmutableMap.copyOf(fields);
   }
+
+  /**
+   * Split a base64-encoded bewit into individual fields.
+   * @param bewit the base64-encoded bewit
+   * @return A map of bewit parameters
+   * @throws DataError If the bewit is invalid in some way
+   */
+  public ImmutableMap<String, String> splitBewit(final String bewit) throws DataError
+  {
+    checkNotNull(bewit, "No bewit");
+    final String decodedBewit = new String(BaseEncoding.base64().decode(bewit));
+    List<String> bewitfields = Lists.newArrayList(BEWITSPLITTER.split(decodedBewit));
+    checkState((bewitfields.size() == 4), "The bewit did not contain the correct number of values");
+    checkState((System.currentTimeMillis() / 1000 <= Long.parseLong(bewitfields.get(1))), "The bewit has expired");
+
+    Map<String, String> bewitMap = Maps.newHashMap();
+    bewitMap.put("id", bewitfields.get(0));
+    bewitMap.put("expiry", bewitfields.get(1));
+    bewitMap.put("mac", bewitfields.get(2));
+    bewitMap.put("ext", bewitfields.get(3));
+    return ImmutableMap.copyOf(bewitMap);
+  }
+
+  /**
+   * Extract a bewit from a URI.
+   * @param uri the URI from which to pull the bewit
+   * @return The bewit
+   * @throws DataError if there is an issue with the data that prevents obtaining the bewit
+   */
+  public String extractBewit(final URI uri)
+  {
+    checkNotNull(uri, "URI is required but not supplied");
+    final String uristr = uri.toString();
+
+    Matcher m = BEWITPATTERN.matcher(uristr);
+    if (!m.find())
+    {
+      throw new DataError.Bad("The query string did not contain a bewit");
+    }
+    final String bewit = m.group(1);
+    return  bewit;
+  }
+
 }

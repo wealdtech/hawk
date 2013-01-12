@@ -13,11 +13,11 @@ subprojects {
     }
 
     dependencies {
-        testCompile 'org.testng:testng:6.+'
+        testCompile 'org.testng:testng:6.8'
     }
 
     group = 'com.wealdtech.hawk'
-    version = '0.2.0-SNAPSHOT'
+    version = '0.4.0'
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'

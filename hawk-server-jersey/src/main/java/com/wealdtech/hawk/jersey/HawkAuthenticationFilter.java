@@ -56,12 +56,12 @@ public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
     }
     catch (DataError de)
     {
-      // A data error means that the request was not authenticated successfully using the supplied information
+      // A data error means that the authentication attempt failed due to bad data
       throw new UnauthorizedException(de);
     }
     catch (ServerError se)
     {
-      // A server error means that there was a server-side problem whilst attempting to authenticate the request
+      // A server error means that the authentication attempt failed due to a server problem
       throw new InternalServerException(se);
     }
 
@@ -69,12 +69,12 @@ public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
     if (!result.isPresent())
     {
       // No result returned; authentication did not result in a valid principal
-      throw new UnauthorizedException("Invalid user");
+      throw new UnauthorizedException("Unknown or invalid authentication");
     }
 
     // At this point the request has been authenticated successfully.
-    // Stash the object returned form the authenticator so that it can be
-    // accessed by resources, providerd etc.
+    // Store the object returned form the authenticator so that it can be
+    // accessed by resources, providers etc.
     this.servletrequest.setAttribute("com.wealdtech.authenticatedprincipal", result.get());
 
     return request;

@@ -29,7 +29,7 @@ import com.wealdtech.hawk.HawkServer;
 import com.wealdtech.jersey.auth.Authenticator;
 import com.wealdtech.jersey.auth.PrincipalProvider;
 
-import static com.wealdtech.Preconditions.checkNotNull;
+import static com.wealdtech.Preconditions.*;
 
 /**
  * Authenticate a request using Hawk.
@@ -53,11 +53,58 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
   }
 
   /**
-   * Authenticate a specific request.
-   * <p>The request will
+   * Authenticate a request.
+   * <p>Authentication can be with an authentication header or a query string, so
+   * decide which it is and handle it appropriately.
+   * @param request the HTTP request
+   * @return the authenticated principal, or <code>Optional.absent()</code> if the request was not authenticated
+   * @throws DataError if there is a problem with the data that prevents the authentication attempt
+   * @throws ServerError if there is an internal problem during the authentication attempt
    */
   @Override
   public Optional<T> authenticate(final ContainerRequest request) throws DataError, ServerError
+  {
+    if (request.getQueryParameters().containsKey("bewit"))
+    {
+      return authenticateFromBewit(request);
+    }
+    else
+    {
+      return authenticateFromHeader(request);
+    }
+  }
+
+  /**
+   * Authenticate a request from a bewit.
+   * @param request the HTTP request
+   * @return the authenticated principal, or <code>Optional.absent()</code> if the request was not authenticated
+   * @throws DataError if there is a problem with the data that prevents the authentication attempt
+   * @throws ServerError if there is an internal problem during the authentication attempt
+   */
+  private Optional<T> authenticateFromBewit(final ContainerRequest request) throws DataError, ServerError
+  {
+    checkState((request.getMethod().equals("GET")), "HTTP method %s not supported with bewit", request.getMethod());
+    final String bewit = server.extractBewit(request.getRequestUri());
+    final ImmutableMap<String, String> bewitFields = server.splitBewit(bewit);
+    final Optional<T> principal = provider.get(bewitFields.get("id"));
+    if (principal == null)
+    {
+      // Could not find the principal, reject this authentication request
+      return Optional.absent();
+    }
+    final HawkCredentials credentials = principal.get().getHawkCredentials(bewitFields.get("id"));
+    this.server.authenticate(credentials, request.getRequestUri());
+    return principal;
+  }
+
+  /**
+   * Authenticate a request from an authentication header.
+   * @param request the HTTP request
+   * @return the authenticated principal, or <code>Optional.absent()</code> if the request was not authenticated
+   * @throws DataError if there is a problem with the data that prevents the authentication attempt
+   * @throws ServerError if there is an internal problem during the authentication attempt
+   */
+  private Optional<T> authenticateFromHeader(final ContainerRequest request) throws DataError, ServerError
   {
     final ImmutableMap<String, String> authorizationHeaders = server.splitAuthorizationHeader(request.getHeaderValue(ContainerRequest.AUTHORIZATION));
     checkNotNull(authorizationHeaders.get("id"), "Missing required Hawk authorization header \"id\"");
@@ -66,27 +113,14 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
     checkNotNull(authorizationHeaders.get("nonce"), "Missing required Hawk authorization header \"nonce\"");
     final URI uri = request.getRequestUri();
     final String method = request.getMethod();
-    final T principal = provider.get(authorizationHeaders.get("id")).orNull();
-    if (principal == null)
+    final Optional<T> principal = provider.get(authorizationHeaders.get("id"));
+    if (!principal.isPresent())
     {
       // Could not find the principal, reject this authentication request
-      throw new DataError.Authentication("Failed to authenticate request");
+      return Optional.absent();
     }
-    final HawkCredentials credentials = principal.getHawkCredentials(authorizationHeaders.get("id"));
-    authenticatePrincipal(credentials, uri, method, authorizationHeaders);
-    return Optional.fromNullable(principal);
-  }
-
-  /**
-   * Authenticate a user given all of the required information
-   * @param credentials
-   * @return
-   */
-  public final void authenticatePrincipal(final HawkCredentials credentials,
-                                          final URI uri,
-                                          final String method,
-                                          final ImmutableMap<String, String>authorizationHeaders) throws DataError, ServerError
-  {
-    server.authenticate(credentials, uri, method, authorizationHeaders);
+    final HawkCredentials credentials = principal.get().getHawkCredentials(authorizationHeaders.get("id"));
+    this.server.authenticate(credentials, uri, method, authorizationHeaders);
+    return principal;
   }
 }

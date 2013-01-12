@@ -27,12 +27,9 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.ObjectArrays;
 import com.google.inject.servlet.ServletModule;
-import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.api.core.PackagesResourceConfig;
-import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import com.wealdtech.hawk.jersey.HawkUnauthorizedFilter;
-import com.wealdtech.jersey.filters.RequestLoggingFilter;
 import com.wealdtech.jersey.filters.ServerHeadersFilter;
 
 /**
@@ -58,11 +55,10 @@ public class HawkServletModule extends ServletModule
   {
     final Map<String, String> params = new HashMap<String, String>();
     params.put(PackagesResourceConfig.PROPERTY_PACKAGES, this.packages);
-    params.put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE.toString());
 
-    // TODO add to configuration
-    final String requestFilters = joinClassNames(RequestLoggingFilter.class, HawkExampleUserAuthenticationFilter.class, GZIPContentEncodingFilter.class);
-    final String responseFilters = joinClassNames(RequestLoggingFilter.class, HawkUnauthorizedFilter.class, ServerHeadersFilter.class, GZIPContentEncodingFilter.class);
+    // Add the authentication filter to requests and the unauthorized filter to responses
+    final String requestFilters = joinClassNames(HawkExampleUserAuthenticationFilter.class);
+    final String responseFilters = joinClassNames(HawkUnauthorizedFilter.class, ServerHeadersFilter.class);
 
     params.put(PackagesResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, requestFilters);
     params.put(PackagesResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, responseFilters);
