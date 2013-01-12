@@ -33,6 +33,7 @@ import com.wealdtech.hawk.HawkServerConfiguration;
 public class HawkServerTest
 {
   private HawkCredentials testcredentials1, testcredentials2;
+  private HawkClient testclient;
   private URI validuri1, validuri2;
   private static final String BASEBEWITURI = "http://localhost:18234/helloworld";
 
@@ -58,13 +59,14 @@ public class HawkServerTest
                                                .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
                                                .algorithm(HawkCredentials.Algorithm.SHA256)
                                                .build();
-  this.testcredentials2 = new HawkCredentials.Builder()
-                                             .keyId("kbmdu72h12xt")
-                                             .key("nzvxvljms2n239w7alsaduanpet109apbisuda0bt79")
-                                             .algorithm(HawkCredentials.Algorithm.SHA256)
-                                             .build();
-  this.validuri1 = new URI("http://localhost:18234/testpath/subpath?param1=val1&param2=val2");
-  this.validuri2 = new URI("http://localhost:18234/v1/usergroups/");
+    this.testcredentials2 = new HawkCredentials.Builder()
+                                               .keyId("kbmdu72h12xt")
+                                               .key("nzvxvljms2n239w7alsaduanpet109apbisuda0bt79")
+                                               .algorithm(HawkCredentials.Algorithm.SHA256)
+                                               .build();
+    this.testclient = new HawkClient.Builder().credentials(this.testcredentials1).build();
+    this.validuri1 = new URI("http://localhost:18234/testpath/subpath?param1=val1&param2=val2");
+    this.validuri2 = new URI("http://localhost:18234/v1/usergroups/");
   }
 
   @Test
@@ -112,7 +114,6 @@ public class HawkServerTest
 
     SimpleHttpServer server = new SimpleHttpServer(this.testcredentials1, configuration);
 
-    final HawkClient testclient = new HawkClient(this.testcredentials1);
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
     Thread.sleep(2000L);
     try
@@ -136,7 +137,6 @@ public class HawkServerTest
 
     SimpleHttpServer server = new SimpleHttpServer(this.testcredentials1, configuration);
 
-    final HawkClient testclient = new HawkClient(this.testcredentials1);
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "post", null, null);
     try
     {
@@ -187,7 +187,6 @@ public class HawkServerTest
 
     try
     {
-      final HawkClient testclient = new HawkClient(this.testcredentials1);
       String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
       assertEquals(connection.getResponseCode(), 200);
@@ -206,7 +205,6 @@ public class HawkServerTest
 
     try
     {
-      final HawkClient testclient = new HawkClient(this.testcredentials1);
       String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
       authorizationHeader = authorizationHeader.replaceAll("Hawk", "Eagle");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
@@ -226,7 +224,6 @@ public class HawkServerTest
 
     try
     {
-      final HawkClient testclient = new HawkClient(this.testcredentials1);
       String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
       authorizationHeader = authorizationHeader.replaceAll("nonce=", "invalid=");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
@@ -246,7 +243,6 @@ public class HawkServerTest
 
     try
     {
-      final HawkClient testclient = new HawkClient(this.testcredentials1);
       String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
       authorizationHeader = authorizationHeader.replaceAll("ts=", "invalid=");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
@@ -266,7 +262,6 @@ public class HawkServerTest
 
     try
     {
-      final HawkClient testclient = new HawkClient(this.testcredentials1);
       String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
       authorizationHeader = authorizationHeader.replaceAll("mac=", "invalid=");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
@@ -286,7 +281,6 @@ public class HawkServerTest
 
     try
     {
-      final HawkClient testclient = new HawkClient(this.testcredentials1);
       String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
       authorizationHeader = authorizationHeader.replaceAll("id=", "invalid=");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
@@ -306,7 +300,6 @@ public class HawkServerTest
 
     try
     {
-      final HawkClient testclient = new HawkClient(this.testcredentials1);
       String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri2, "get", null, null);
       authorizationHeader = authorizationHeader.replaceAll("id=", "invalid=");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);

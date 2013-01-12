@@ -31,7 +31,7 @@ public class TestHawkClient
                                                                .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
                                                                .algorithm(HawkCredentials.Algorithm.SHA256)
                                                                .build();
-    this.hawkClient = new HawkClient(hawkCredentials);
+    this.hawkClient = new HawkClient.Builder().credentials(hawkCredentials).build();
 
     final ClientConfig clientconfig = new DefaultClientConfig();
     this.client = Client.create(clientconfig);

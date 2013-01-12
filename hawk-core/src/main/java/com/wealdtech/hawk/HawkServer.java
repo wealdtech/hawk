@@ -38,6 +38,7 @@ import com.google.common.collect.Maps;
 import com.google.common.io.BaseEncoding;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
+import com.wealdtech.hawk.Hawk.PayloadValidation;
 
 /**
  * The Hawk server. Note that this is not an HTTP server in itself, but provides
@@ -113,6 +114,11 @@ public class HawkServer
     checkNotNull(authorizationheaders.get("id"), "The id was not supplied");
     checkNotNull(authorizationheaders.get("mac"), "The mac was not supplied");
 
+    if (this.configuration.getPayloadValidation().equals(PayloadValidation.MANDATORY))
+    {
+      checkNotNull(authorizationheaders.get("hash"), "The payload hash was not supplied");
+    }
+
     // Ensure that the timestamp passed in is within suitable bounds
     confirmTimestampWithinBounds(authorizationheaders.get("ts"));
 
@@ -128,6 +134,8 @@ public class HawkServer
 
   /**
    * Authenticate a request using a Hawk bewit.
+   * @param credentials the Hawk credentials against which to authenticate
+   * @param uri the URI of the request
    */
   public void authenticate(final HawkCredentials credentials, final URI uri)
   {
@@ -170,10 +178,7 @@ public class HawkServer
   // Confirm that the request nonce has not already been seen within the allowable time period
   private void confirmUniqueNonce(final String nonce) throws DataError
   {
-    if (this.nonces.getUnchecked(nonce) == true)
-    {
-      throw new DataError.Bad("The nonce supplied is the same as one seen previously");
-    }
+    checkState((this.nonces.getUnchecked(nonce) == false), "The nonce supplied is the same as one seen previously");
     this.nonces.put(nonce, true);
   }
 
@@ -190,10 +195,7 @@ public class HawkServer
       throw new DataError.Bad("The timestamp is in the wrong format; we expect seconds since the epoch");
     }
     long now = System.currentTimeMillis() / 1000;
-    if (Math.abs(now - timestamp) > configuration.getTimestampSkew())
-    {
-      throw new DataError.Bad("The timestamp is too far from the current time to be acceptable");
-    }
+    checkState((Math.abs(now - timestamp) <= configuration.getTimestampSkew()), "The timestamp is too far from the current time to be acceptable");
   }
 
   /**
@@ -249,14 +251,8 @@ public class HawkServer
   {
     checkNotNull(authorizationheader, "No authorization header");
     List<String> headerfields = Lists.newArrayList(WHITESPACESPLITTER.split(authorizationheader));
-    if (headerfields.size() != 2)
-    {
-      throw new DataError.Bad("The authorization header does not contain the expected number of fields");
-    }
-    if (!"hawk".equals(headerfields.get(0).toLowerCase(Locale.ENGLISH)))
-    {
-      throw new DataError.Bad("The authorization header is not a Hawk authorization header");
-    }
+    checkState((headerfields.size() == 2), "The authorization header does not contain the expected number of fields");
+    checkState(("hawk".equals(headerfields.get(0).toLowerCase(Locale.ENGLISH))), "The authorization header is not a Hawk authorization header");
 
     Map<String, String> fields = new HashMap<>();
     Matcher m = FIELDPATTERN.matcher(headerfields.get(1));
@@ -303,10 +299,7 @@ public class HawkServer
     final String uristr = uri.toString();
 
     Matcher m = BEWITPATTERN.matcher(uristr);
-    if (!m.find())
-    {
-      throw new DataError.Bad("The query string did not contain a bewit");
-    }
+    checkState(m.find(), "The query string did not contain a bewit");
     final String bewit = m.group(1);
     return  bewit;
   }

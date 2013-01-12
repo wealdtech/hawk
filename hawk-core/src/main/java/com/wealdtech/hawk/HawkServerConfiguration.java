@@ -92,6 +92,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     checkNotNull(this.timestampSkew, "The timestamp skew is required");
     checkArgument((this.timestampSkew >= 0), "The timestamp may not be negative");
     checkNotNull(this.bewitAllowed, "Allowance of bewits is required");
+    checkNotNull(this.payloadValidation, "Payload validation setting is required");
   }
 
   public String getNtpServer()
@@ -164,8 +165,8 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     }
 
     /**
-     * Generate build with all values set from a prior configuration.
-     * @param prior the prior configuration
+     * Generate build with all values set from a prior object.
+     * @param prior the prior object
      */
     public Builder(final HawkServerConfiguration prior)
     {
@@ -176,7 +177,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     }
 
     /**
-     * Override the default NTP server.
+     * Override the existing NTP server.
      * @param ntpServer the new NTP server
      * @return The builder
      */
@@ -187,7 +188,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     }
 
     /**
-     * Override the default timestamp skew.
+     * Override the existing timestamp skew.
      * @param timestampSkew the new timestamp skew
      * @return The builder
      */
@@ -198,7 +199,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     }
 
     /**
-     * Override the default allowance of bewits.
+     * Override the existing allowance of bewits.
      * @param bewitAllowed if bewits are allowed
      * @return The builder
      */
@@ -209,7 +210,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     }
 
     /**
-     * Override the default handling of payload validation.
+     * Override the existing handling of payload validation.
      * @param payloadValidation
      * @return The builder
      */

@@ -65,7 +65,7 @@ public class HawkClientTest
   @Test
   public void testValidRequest() throws Exception
   {
-    final HawkClient testclient = new HawkClient(this.testcredentials1);
+    final HawkClient testclient = new HawkClient.Builder().credentials(this.testcredentials1).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
     final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
@@ -75,7 +75,7 @@ public class HawkClientTest
   public void testBlankExt() throws Exception
   {
     // Test with blank EXT data
-    final HawkClient testclient = new HawkClient(this.testcredentials1);
+    final HawkClient testclient = new HawkClient.Builder().credentials(this.testcredentials1).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, "");
     final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
@@ -85,7 +85,7 @@ public class HawkClientTest
   public void testValidExt() throws Exception
   {
     // Test with EXT data
-    final HawkClient testclient = new HawkClient(this.testcredentials1);
+    final HawkClient testclient = new HawkClient.Builder().credentials(this.testcredentials1).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, "some data");
     final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
@@ -95,7 +95,7 @@ public class HawkClientTest
   public void testIncorrectMethod() throws Exception
   {
     // Mismatch of HTTP method
-    final HawkClient testclient = new HawkClient(this.testcredentials1);
+    final HawkClient testclient = new HawkClient.Builder().credentials(this.testcredentials1).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "post", null, null);
     final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 401);
@@ -105,7 +105,7 @@ public class HawkClientTest
   public void testDuplicateNonce() throws Exception
   {
     // Attempt repeat requests
-    final HawkClient testclient = new HawkClient(this.testcredentials1);
+    final HawkClient testclient = new HawkClient.Builder().credentials(this.testcredentials1).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
     final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
@@ -117,19 +117,19 @@ public class HawkClientTest
   public void testPrefix() throws Exception
   {
     // Check client path prefix
-    final HawkClient client1 = new HawkClient(this.testcredentials1);
+    final HawkClient client1 = new HawkClient.Builder().credentials(this.testcredentials1).build();
     assertTrue(client1.isValidFor("/test/test2"));
     assertTrue(client1.isValidFor(null));
 
-    final HawkClient client2 = new HawkClient(this.testcredentials1, "/foo");
+    final HawkClient client2 = new HawkClient.Builder().credentials(this.testcredentials1).pathPrefix("/foo").build();
     assertTrue(client2.isValidFor("/foo"));
     assertFalse(client2.isValidFor("/test/test2"));
 
-    final HawkClient client3 = new HawkClient(this.testcredentials1, "/test/");
+    final HawkClient client3 = new HawkClient.Builder().credentials(this.testcredentials1).pathPrefix("/test/").build();
     assertTrue(client3.isValidFor("/test/test2"));
     assertFalse(client3.isValidFor("/testtest2"));
 
-    final HawkClient client4 = new HawkClient(this.testcredentials1, "");
+    final HawkClient client4 = new HawkClient.Builder().credentials(this.testcredentials1).pathPrefix("").build();
     assertTrue(client4.isValidFor(""));
     assertTrue(client4.isValidFor(null));
   }

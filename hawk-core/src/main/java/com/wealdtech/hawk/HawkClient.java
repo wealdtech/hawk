@@ -16,6 +16,8 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.net.URI;
 
 import com.google.inject.Inject;
@@ -26,20 +28,32 @@ import com.wealdtech.utils.StringUtils;
 
 public class HawkClient
 {
+  private final HawkClientConfiguration configuration;
   private final HawkCredentials credentials;
-
   private final String pathPrefix;
 
-  public HawkClient(final HawkCredentials credentials)
-  {
-    this(credentials, null);
-  }
-
   @Inject
-  public HawkClient(final HawkCredentials credentials, @Named(value="hawkpathprefix") final String pathPrefix)
+  private HawkClient(final HawkClientConfiguration configuration,
+                     final HawkCredentials credentials,
+                     @Named(value="hawkpathprefix") final String pathPrefix)
   {
+    if (configuration == null)
+    {
+      this.configuration = new HawkClientConfiguration();
+    }
+    else
+    {
+      this.configuration = configuration;
+    }
     this.credentials = credentials;
     this.pathPrefix = pathPrefix;
+    validate();
+  }
+
+  private void validate() throws DataError
+  {
+    checkNotNull(this.configuration, "The client configuration is required");
+    checkNotNull(this.credentials, "The credentials are required");
   }
 
   /**
@@ -69,6 +83,11 @@ public class HawkClient
     sb.append(timestamp);
     sb.append("\", nonce=\"");
     sb.append(nonce);
+    if (hash != null)
+    {
+      sb.append("\", hash=\"");
+      sb.append(hash);
+    }
     if ((ext != null) && (!"".equals(ext)))
     {
       sb.append("\", ext=\"");
@@ -85,5 +104,72 @@ public class HawkClient
   {
     return ((this.pathPrefix == null) ||
             ((path == null) || (path.startsWith(this.pathPrefix))));
+  }
+
+  public static class Builder
+  {
+    private HawkClientConfiguration configuration;
+    private HawkCredentials credentials;
+    private String pathPrefix;
+
+    /**
+     * Generate a new builder.
+     */
+    public Builder()
+    {
+    }
+
+    /**
+     * Generate build with all values set from a prior object.
+     * @param prior the prior object
+     */
+    public Builder(final HawkClient prior)
+    {
+      this.configuration = prior.configuration;
+      this.credentials = prior.credentials;
+      this.pathPrefix = prior.pathPrefix;
+    }
+
+    /**
+     * Override the existing configuration.
+     * @param configuration the new configuration
+     * @return The builder
+     */
+    public Builder configuration(final HawkClientConfiguration configuration)
+    {
+      this.configuration = configuration;
+      return this;
+    }
+
+    /**
+     * Override the existing credentials.
+     * @param credentials the new credentials
+     * @return The builder
+     */
+    public Builder credentials(final HawkCredentials credentials)
+    {
+      this.credentials = credentials;
+      return this;
+    }
+
+    /**
+     * Override the existing path prefix.
+     * @param pathPrefix the new path prefix
+     * @return The builder
+     */
+    public Builder pathPrefix(final String pathPrefix)
+    {
+      this.pathPrefix = pathPrefix;
+      return this;
+    }
+
+    /**
+     * Build the client
+     * @return a new client
+     */
+    public HawkClient build()
+    {
+      return new HawkClient(this.configuration, this.credentials, this.pathPrefix);
+    }
   }
 }

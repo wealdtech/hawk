@@ -229,7 +229,13 @@ public class Hawk
 
   public enum AuthType
   {
+    /**
+     * Authentication via an Authentication HTTP header
+     */
     HEADER,
+    /**
+     * Authentication via a bewit query parameter
+     */
     BEWIT;
 
     @Override
