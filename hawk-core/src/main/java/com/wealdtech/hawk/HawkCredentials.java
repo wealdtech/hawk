@@ -16,6 +16,10 @@
 
 package com.wealdtech.hawk;
 
+import java.util.Locale;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
@@ -32,19 +36,45 @@ import static com.wealdtech.Preconditions.checkNotNull;
  */
 public class HawkCredentials implements Comparable<HawkCredentials>
 {
-  public static final String HMAC_SHA_1 = "hmac-sha-256";
-  public static final String HMAC_SHA_256 = "hmac-sha-256";
+  public enum Algorithm
+  {
+    HMAC_SHA_1,
+    HMAC_SHA_256;
+
+    @Override
+    @JsonValue
+    public String toString()
+    {
+        return super.toString().toLowerCase(Locale.ENGLISH).replaceAll("_", "-");
+    }
+
+    @JsonCreator
+    public static Algorithm parse(final String algorithm) throws DataError
+    {
+      try
+      {
+        return valueOf(algorithm.toUpperCase(Locale.ENGLISH).replaceAll("-", "_"));
+      }
+      catch (IllegalArgumentException iae)
+      {
+        // N.B. we don't pass the iae as the cause of this exception because
+        // this happens during invocation, and in that case the enum handler
+        // will report the root cause exception rather than the one we throw.
+        throw new DataError.Bad("Hawk algorithm \"" + algorithm + "\" is invalid");
+      }
+    }
+  }
 
   public final String keyId;
   public final String key;
-  public final String algorithm;
+  public final Algorithm algorithm;
 
-  private final ImmutableMap<String, String> SUPPORTEDALGORITHMS = new ImmutableMap.Builder<String, String>()
-                                                                                   .put("hmac-sha-1", "SHA-1")
-                                                                                   .put("hmac-sha-256", "SHA-256")
-                                                                                   .build();
+  private final ImmutableMap<Algorithm, String> JAVAALGORITHMS = new ImmutableMap.Builder<Algorithm, String>()
+                                                                                 .put(Algorithm.HMAC_SHA_1, "SHA-1")
+                                                                                 .put(Algorithm.HMAC_SHA_256, "SHA-256")
+                                                                                 .build();
 
-  private HawkCredentials(final String keyId, final String key, final String algorithm) throws DataError
+  private HawkCredentials(final String keyId, final String key, final Algorithm algorithm) throws DataError
   {
     this.keyId = keyId;
     this.key = key;
@@ -63,10 +93,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   {
     checkNotNull(this.keyId, "The key ID is required");
     checkNotNull(this.key, "The key is required");
-    if (!SUPPORTEDALGORITHMS.containsKey(algorithm))
-    {
-      throw new DataError.Bad("Unknown encryption algorithm");
-    }
+    checkNotNull(this.algorithm, "The algorithm is required");
   }
 
   /**
@@ -95,7 +122,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
    *
    * @return the algorithm used to calculate the MAC
    */
-  public String getAlgorithm()
+  public Algorithm getAlgorithm()
   {
     return this.algorithm;
   }
@@ -108,7 +135,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
    */
   public String getJavaAlgorithm()
   {
-    return SUPPORTEDALGORITHMS.get(this.algorithm);
+    return JAVAALGORITHMS.get(this.algorithm);
   }
 
   // Standard object methods follow
@@ -151,7 +178,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   {
     String keyId;
     String key;
-    String algorithm;
+    Algorithm algorithm;
 
     /**
      * Start a new builder.
@@ -207,7 +234,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
      *          the algorithm used to calculate the MAC
      * @return the builder
      */
-    public Builder algorithm(final String algorithm)
+    public Builder algorithm(final Algorithm algorithm)
     {
       this.algorithm = algorithm;
       return this;

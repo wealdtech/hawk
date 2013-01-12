@@ -21,12 +21,11 @@ import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.jersey.auth.PrincipalProvider;
 
-public class HawkPrincipalProvider<T> implements PrincipalProvider<T, String>
+/**
+ * Abstract class to provide a principal given a Hawk key ID.
+ */
+public abstract class HawkPrincipalProvider<T> implements PrincipalProvider<T, String>
 {
   @Override
-  public Optional<T> get(String key) throws DataError, ServerError
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
+  public abstract Optional<T> get(String key) throws DataError, ServerError;
 }

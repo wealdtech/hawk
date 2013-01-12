@@ -16,6 +16,8 @@
 
 package test.com.wealdtech.hawk.model;
 
+import java.util.List;
+
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.jersey.HawkCredentialsProvider;
 
@@ -27,9 +29,9 @@ import com.wealdtech.hawk.jersey.HawkCredentialsProvider;
 public class ExampleUser implements HawkCredentialsProvider
 {
   private final String name;
-  private final HawkCredentials hawkCredentials;
+  private final List<HawkCredentials> hawkCredentials;
 
-  public ExampleUser(final String name, final HawkCredentials hawkCredentials)
+  public ExampleUser(final String name, final List<HawkCredentials> hawkCredentials)
   {
     this.name = name;
     this.hawkCredentials = hawkCredentials;
@@ -43,9 +45,12 @@ public class ExampleUser implements HawkCredentialsProvider
   @Override
   public HawkCredentials getHawkCredentials(final String keyId)
   {
-    if (this.hawkCredentials.getKeyId().equals(keyId))
+    for (HawkCredentials credentials : this.hawkCredentials)
     {
-      return this.hawkCredentials;
+      if (credentials.getKeyId().equals(keyId))
+      {
+        return credentials;
+      }
     }
     return null;
   }

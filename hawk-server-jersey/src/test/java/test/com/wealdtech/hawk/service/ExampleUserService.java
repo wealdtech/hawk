@@ -16,11 +16,13 @@
 
 package test.com.wealdtech.hawk.service;
 
+import java.util.List;
 import java.util.Map;
 
 import test.com.wealdtech.hawk.model.ExampleUser;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.wealdtech.DataError;
 import com.wealdtech.hawk.HawkCredentials;
@@ -38,18 +40,28 @@ public class ExampleUserService extends HawkPrincipalProvider<ExampleUser>
   public ExampleUserService() throws DataError
   {
     this.usermap = Maps.newHashMap();
-    HawkCredentials user1hawkcredentials = new HawkCredentials.Builder()
-                                                              .keyId("dh37fgj492je")
-                                                              .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                                              .algorithm(HawkCredentials.HMAC_SHA_256).build();
-    ExampleUser user1 = new ExampleUser("Steve", user1hawkcredentials);
-    this.usermap.put(user1hawkcredentials.getKeyId(), user1);
-    HawkCredentials user2hawkcredentials = new HawkCredentials.Builder()
-                                                              .keyId("jns7y9824hus")
-                                                              .key("mb708923nzgr87t4fsnt48ufnjt4y98zjkby98t43tw")
-                                                              .algorithm(HawkCredentials.HMAC_SHA_256).build();
-    ExampleUser user2 = new ExampleUser("John", user2hawkcredentials);
-    this.usermap.put(user2hawkcredentials.getKeyId(), user2);
+    HawkCredentials user1HawkCredentials1 = new HawkCredentials.Builder()
+                                                               .keyId("dh37fgj492je")
+                                                               .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
+                                                               .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
+                                                               .build();
+    HawkCredentials user1HawkCredentials2 = new HawkCredentials.Builder()
+                                                               .keyId("m971bc0s34bs")
+                                                               .key("l01xyW713Mmnvt7kKasGOaWelnoawgp9aq239vgilr")
+                                                               .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
+                                                               .build();
+    List<HawkCredentials> user1HawkCredentials = Lists.newArrayList(user1HawkCredentials1, user1HawkCredentials2);
+    ExampleUser user1 = new ExampleUser("Steve", user1HawkCredentials);
+    this.usermap.put(user1HawkCredentials1.getKeyId(), user1);
+    this.usermap.put(user1HawkCredentials2.getKeyId(), user1);
+    HawkCredentials user2HawkCredentials1 = new HawkCredentials.Builder()
+                                                               .keyId("jns7y9824hus")
+                                                               .key("mb708923nzgr87t4fsnt48ufnjt4y98zjkby98t43tw")
+                                                               .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
+                                                               .build();
+    List<HawkCredentials> user2HawkCredentials = Lists.newArrayList(user2HawkCredentials1);
+    ExampleUser user2 = new ExampleUser("John", user2HawkCredentials);
+    this.usermap.put(user2HawkCredentials1.getKeyId(), user2);
   }
 
   /**

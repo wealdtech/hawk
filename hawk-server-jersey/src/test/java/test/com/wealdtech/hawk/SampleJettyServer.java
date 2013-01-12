@@ -22,10 +22,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import test.com.wealdtech.hawk.jersey.guice.HawkConfigurationModule;
-import test.com.wealdtech.hawk.jersey.guice.HawkServletModule;
-
-import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
@@ -34,16 +30,16 @@ import com.google.inject.servlet.GuiceServletContextListener;
 /**
  * A simple Jetty container to test Jersey Hawk authentication
  */
-public class JettyServer
+public class SampleJettyServer
 {
-  private static final Logger LOGGER = LoggerFactory.getLogger(JettyServer.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SampleJettyServer.class);
 
   private transient Server server;
 
   private transient final Injector injector;
 
   @Inject
-  public JettyServer(final Injector injector)
+  public SampleJettyServer(final Injector injector)
   {
     this.injector = injector;
   }
@@ -60,23 +56,17 @@ public class JettyServer
       @Override
       protected Injector getInjector()
       {
-        return JettyServer.this.injector;
+        return SampleJettyServer.this.injector;
       }
     });
     context.addFilter(GuiceFilter.class, "/*", null);
     context.addServlet(DefaultServlet.class, "/");
 
     this.server.start();
-    this.server.join();
   }
 
-  public static void main(final String[] args) throws Exception
+  public void stop() throws Exception
   {
-    // Create an injector with our basic configuration
-    final Injector injector = Guice.createInjector(new HawkConfigurationModule(),
-                                                   new HawkServletModule("test.com.wealdtech.hawk.providers",
-                                                                         "test.com.wealdtech.hawk.resources"));
-    final JettyServer webserver = injector.getInstance(JettyServer.class);
-    webserver.start();
+    this.server.stop();
   }
 }

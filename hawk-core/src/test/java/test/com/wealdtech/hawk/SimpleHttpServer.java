@@ -74,11 +74,65 @@ public class SimpleHttpServer
     @Override
     public void handle(final HttpExchange exchange) throws IOException
     {
+      if (exchange.getRequestURI().toString().contains("bewit="))
+      {
+        handleAuthenticationBewit(exchange);
+      }
+      else
+      {
+        handleAuthenticationHeader(exchange);
+      }
+    }
+
+    private void handleAuthenticationBewit(final HttpExchange exchange) throws IOException
+    {
+      if (!exchange.getRequestMethod().equals("GET"))
+      {
+        System.out.println("Not authenticated: HTTP method " + exchange.getRequestMethod() + " not supported with bewit");
+        addAuthenticateHeader(exchange);
+        exchange.sendResponseHeaders(401, 0);
+      }
+
+      URI uri = null;
+      try
+      {
+        uri = new URI(exchange.getRequestURI().getScheme() + "://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
+      }
+      catch (URISyntaxException use)
+      {
+        System.out.println("Not authenticated: " + use.getLocalizedMessage());
+        addAuthenticateHeader(exchange);
+        exchange.sendResponseHeaders(401, 0);
+      }
+
+      try
+      {
+        server.authenticate(this.credentials, uri);
+        System.out.println("Authenticated by bewit");
+        exchange.sendResponseHeaders(200, 0);
+      }
+      catch (DataError de)
+      {
+        System.out.println("Not authenticated: " + de.getLocalizedMessage());
+        addAuthenticateHeader(exchange);
+        exchange.sendResponseHeaders(401, 0);
+      }
+      catch (ServerError se)
+      {
+        System.out.println("Not authenticated: " + se.getLocalizedMessage());
+        addAuthenticateHeader(exchange);
+        exchange.sendResponseHeaders(500, 0);
+      }
+
+    }
+
+    private void handleAuthenticationHeader(final HttpExchange exchange) throws IOException
+    {
       // Obtain parameters available from the request
       URI uri = null;
       try
       {
-        uri = new URI("http://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
+        uri = new URI(exchange.getRequestURI().getScheme() + "://" + exchange.getRequestHeaders().getFirst("Host") + exchange.getRequestURI());
       }
       catch (URISyntaxException use)
       {
@@ -101,8 +155,8 @@ public class SimpleHttpServer
 
       try
       {
-        server.authenticate(credentials, uri, exchange.getRequestMethod(), authorizationHeaders);
-        System.out.println("Authenticated");
+        server.authenticate(this.credentials, uri, exchange.getRequestMethod(), authorizationHeaders);
+        System.out.println("Authenticated by header");
         exchange.sendResponseHeaders(200, 0);
       }
       catch (DataError de)
@@ -136,7 +190,7 @@ public class SimpleHttpServer
       HawkCredentials credentials = new HawkCredentials.Builder()
                                                        .keyId("dh37fgj492je")
                                                        .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                                       .algorithm("hmac-sha-256")
+                                                       .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
                                                        .build();
       new SimpleHttpServer(credentials, null);
       while (true)
