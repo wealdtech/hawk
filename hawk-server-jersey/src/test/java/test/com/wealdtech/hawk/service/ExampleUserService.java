@@ -43,12 +43,12 @@ public class ExampleUserService extends HawkPrincipalProvider<ExampleUser>
     HawkCredentials user1HawkCredentials1 = new HawkCredentials.Builder()
                                                                .keyId("dh37fgj492je")
                                                                .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                                               .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
+                                                               .algorithm(HawkCredentials.Algorithm.SHA256)
                                                                .build();
     HawkCredentials user1HawkCredentials2 = new HawkCredentials.Builder()
                                                                .keyId("m971bc0s34bs")
                                                                .key("l01xyW713Mmnvt7kKasGOaWelnoawgp9aq239vgilr")
-                                                               .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
+                                                               .algorithm(HawkCredentials.Algorithm.SHA256)
                                                                .build();
     List<HawkCredentials> user1HawkCredentials = Lists.newArrayList(user1HawkCredentials1, user1HawkCredentials2);
     ExampleUser user1 = new ExampleUser("Steve", user1HawkCredentials);
@@ -57,7 +57,7 @@ public class ExampleUserService extends HawkPrincipalProvider<ExampleUser>
     HawkCredentials user2HawkCredentials1 = new HawkCredentials.Builder()
                                                                .keyId("jns7y9824hus")
                                                                .key("mb708923nzgr87t4fsnt48ufnjt4y98zjkby98t43tw")
-                                                               .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
+                                                               .algorithm(HawkCredentials.Algorithm.SHA256)
                                                                .build();
     List<HawkCredentials> user2HawkCredentials = Lists.newArrayList(user2HawkCredentials1);
     ExampleUser user2 = new ExampleUser("John", user2HawkCredentials);

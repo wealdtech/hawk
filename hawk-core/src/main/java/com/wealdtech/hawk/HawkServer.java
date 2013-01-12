@@ -16,6 +16,8 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -36,8 +38,6 @@ import com.google.common.collect.Maps;
 import com.google.common.io.BaseEncoding;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
-
-import static com.wealdtech.Preconditions.*;
 
 /**
  * The Hawk server. Note that this is not an HTTP server in itself, but provides
@@ -119,7 +119,7 @@ public class HawkServer
     // Ensure that this is not a replay of a previous request
     confirmUniqueNonce(authorizationheaders.get("nonce"));
 
-    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.CORE, Long.valueOf(authorizationheaders.get("ts")), uri, authorizationheaders.get("nonce"), method, authorizationheaders.get("ext"));
+    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.HEADER, Long.valueOf(authorizationheaders.get("ts")), uri, authorizationheaders.get("nonce"), method, authorizationheaders.get("hash"), authorizationheaders.get("ext"));
     if (!timeConstantEquals(mac, authorizationheaders.get("mac")))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
@@ -138,7 +138,7 @@ public class HawkServer
 
     final URI strippedUri = stripBewit(uri);
 
-    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, bewitFields.get("ext"));
+    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, null, bewitFields.get("ext"));
     if (!timeConstantEquals(calculatedMac, bewitFields.get("mac")))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");

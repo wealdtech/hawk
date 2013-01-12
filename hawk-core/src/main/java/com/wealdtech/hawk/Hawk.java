@@ -16,6 +16,8 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.MessageDigest;
@@ -27,8 +29,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.io.BaseEncoding;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
-
-import static com.wealdtech.Preconditions.*;
 
 /**
  * The Hawk class provides helper methods for calculating the MAC, required by
@@ -58,6 +58,9 @@ public class Hawk
    *          nonce a random string used to uniquely identify the request
    * @param method
    *          the HTTP method of the request
+   * @param hash
+   *          a hash of the request's payload, or <code>null</code> if payload
+   *          authentication is not required
    * @param ext
    *          optional extra data, as supplied by the requestor to differentiate
    *          the request if required
@@ -75,6 +78,7 @@ public class Hawk
                                     final URI uri,
                                     final String nonce,
                                     final String method,
+                                    final String hash,
                                     final String ext) throws DataError, ServerError
   {
     // Check that required parameters are present
@@ -83,7 +87,7 @@ public class Hawk
     checkNotNull(uri, "URI is required but not supplied");
     checkNotNull(authType, "Authentication type is required but not supplied");
 
-    if (authType.equals(AuthType.CORE))
+    if (authType.equals(AuthType.HEADER))
     {
       // Additional parameters for core authentications
       checkNotNull(nonce, "Nonce is required but not supplied");
@@ -91,13 +95,14 @@ public class Hawk
     }
 
     final StringBuilder sb = new StringBuilder(1024);
-    sb.append(authType.toString());
-    sb.append('.');
+    sb.append("hawk.");
     sb.append(HAWKVERSION);
+    sb.append('.');
+    sb.append(authType.toString());
     sb.append('\n');
     sb.append(timestamp);
     sb.append('\n');
-    if (authType.equals(AuthType.CORE))
+    if (authType.equals(AuthType.HEADER))
     {
       sb.append(nonce);
     }
@@ -121,6 +126,12 @@ public class Hawk
     sb.append(uri.getHost().toLowerCase(Locale.ENGLISH));
     sb.append('\n');
     sb.append(uri.getPort());
+    sb.append('\n');
+    if ((authType.equals(AuthType.HEADER)) &&
+        (hash == null))
+    {
+      sb.append(hash);
+    }
     sb.append('\n');
     if (ext != null)
     {
@@ -200,7 +211,7 @@ public class Hawk
 
     // Calculate expiry from ttl and current time
     Long expiry = System.currentTimeMillis() / 1000L + ttl;
-    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, uri, null, null, ext);
+    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, uri, null, null, null, ext);
 
     final StringBuffer sb = new StringBuffer(256);
     sb.append(credentials.getKeyId());
@@ -218,7 +229,7 @@ public class Hawk
 
   public enum AuthType
   {
-    CORE,
+    HEADER,
     BEWIT;
 
     @Override

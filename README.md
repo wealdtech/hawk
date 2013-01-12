@@ -3,7 +3,7 @@ hawk
 
 This is the Java implementation of the [Hawk](/hueniverse/hawk) protocol.  It attempts to provide packages for generic client and server functionality, along with specific implementations for popular Java products.
 
-The current version of the Hawk protocol supported is 0.4.0.
+The current version of the Hawk protocol supported is 0.5.0.
 
 How To Use Hawk in Your Java Project
 ====================================

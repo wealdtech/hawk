@@ -1,5 +1,7 @@
 package test.com.wealdtech.hawk.jersey;
 
+import static org.testng.Assert.*;
+
 import javax.ws.rs.core.MediaType;
 
 import org.testng.annotations.BeforeClass;
@@ -14,8 +16,6 @@ import com.wealdtech.hawk.HawkClient;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.jersey.HawkAuthorizationFilter;
 
-import static org.testng.Assert.fail;
-
 public class TestHawkClient
 {
   private transient Client client;
@@ -29,7 +29,7 @@ public class TestHawkClient
     final HawkCredentials hawkCredentials = new HawkCredentials.Builder()
                                                                .keyId("dh37fgj492je")
                                                                .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                                               .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
+                                                               .algorithm(HawkCredentials.Algorithm.SHA256)
                                                                .build();
     this.hawkClient = new HawkClient(hawkCredentials);
 

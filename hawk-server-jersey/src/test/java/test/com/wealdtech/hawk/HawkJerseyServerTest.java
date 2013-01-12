@@ -61,7 +61,7 @@ public class HawkJerseyServerTest
     this.testgoodcredentials = new HawkCredentials.Builder()
                                               .keyId("dh37fgj492je")
                                               .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                              .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
+                                              .algorithm(HawkCredentials.Algorithm.SHA256)
                                               .build();
     this.validuri1 = new URI("http://localhost:8080/helloworld");
     this.validuri2 = new URI("http://localhost:8080/helloworld?one=one&two=two");
@@ -86,7 +86,7 @@ public class HawkJerseyServerTest
   {
     // Test valid authentication with a GET request
     final HawkClient testclient = new HawkClient(this.testgoodcredentials);
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
     HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
   }
@@ -96,7 +96,7 @@ public class HawkJerseyServerTest
   {
     // Test valid authentication with a PUT request
     final HawkClient testclient = new HawkClient(this.testgoodcredentials);
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "put", null);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "put", null, null);
     final HttpURLConnection connection = (HttpURLConnection)this.validuri1.toURL().openConnection();
     connection.setRequestMethod("PUT");
     connection.setRequestProperty("Authorization", authorizationHeader);
@@ -110,7 +110,7 @@ public class HawkJerseyServerTest
   {
     // Test catching a replay of an older request
     final HawkClient testclient = new HawkClient(this.testgoodcredentials);
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
     HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
     connection = connect(this.validuri1, authorizationHeader);
@@ -122,7 +122,7 @@ public class HawkJerseyServerTest
   {
     // Test catching an anachronistic request
     final HawkClient testclient = new HawkClient(this.testgoodcredentials);
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
     Thread.sleep(61000L);
     HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 401);
@@ -136,7 +136,7 @@ public class HawkJerseyServerTest
                                                               .key("bad")
                                                               .build();
     final HawkClient testclient = new HawkClient(badCredentials);
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
     HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 401);
   }
@@ -149,7 +149,7 @@ public class HawkJerseyServerTest
                                                               .keyId("unknown")
                                                               .build();
     final HawkClient testclient = new HawkClient(badCredentials);
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
     HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 401);
   }
@@ -159,10 +159,10 @@ public class HawkJerseyServerTest
   {
     // Test authentication with differing algorithms
     final HawkCredentials badCredentials = new HawkCredentials.Builder(this.testgoodcredentials)
-                                                              .algorithm(HawkCredentials.Algorithm.HMAC_SHA_1)
+                                                              .algorithm(HawkCredentials.Algorithm.SHA1)
                                                               .build();
     final HawkClient testclient = new HawkClient(badCredentials);
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
     HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 401);
   }
@@ -240,16 +240,6 @@ public class HawkJerseyServerTest
     // Test an invalid bewit due to expiry
     final String bewit = Hawk.generateBewit(this.testgoodcredentials, this.validuri1, 1L, null);
     Thread.sleep(2000L);
-    URI testUri = new URI(this.validuri1.toString() + "?bewit=" + bewit);
-    final HttpURLConnection connection = connect(testUri, null);
-    assertEquals(connection.getResponseCode(), 401);
-  }
-
-  @Test
-  public void testInvalidBewit4() throws Exception
-  {
-    // Test an invalid bewit due to negative TTL
-    final String bewit = Hawk.generateBewit(this.testgoodcredentials, this.validuri1, -60L, null);
     URI testUri = new URI(this.validuri1.toString() + "?bewit=" + bewit);
     final HttpURLConnection connection = connect(testUri, null);
     assertEquals(connection.getResponseCode(), 401);

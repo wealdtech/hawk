@@ -16,6 +16,8 @@
 
 package test.com.wealdtech.hawk;
 
+import static org.testng.Assert.*;
+
 import java.net.URI;
 
 import org.testng.annotations.BeforeClass;
@@ -25,12 +27,10 @@ import com.wealdtech.DataError;
 import com.wealdtech.hawk.Hawk;
 import com.wealdtech.hawk.HawkCredentials;
 
-import static org.testng.Assert.*;
-
 public class HawkTest
 {
   private HawkCredentials testhc1;
-  private URI testuri1, testuri2, testuri3, testuri4;
+  private URI testuri1, testuri2, testuri3;
 
   @BeforeClass
   public void setUp() throws Exception
@@ -38,40 +38,39 @@ public class HawkTest
     this.testhc1 = new HawkCredentials.Builder()
                                       .keyId("dh37fgj492je")
                                       .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                      .algorithm(HawkCredentials.Algorithm.HMAC_SHA_256)
+                                      .algorithm(HawkCredentials.Algorithm.SHA256)
                                       .build();
     this.testuri1 = new URI("http://www.example.com/test/path");
     this.testuri2 = new URI("https://www.example.com/test/path/two?one=1&two=two");
-    this.testuri3 = new URI("http://localhost:18234/test");
-    this.testuri4 = new URI("https://www.example.com/test?param=&lt;&gt;&pound;%54%65%73%74");
+    this.testuri3 = new URI("https://www.example.com/test?param=&lt;&gt;&pound;%54%65%73%74");
   }
 
   @Test
   public void testMAC() throws Exception
   {
-    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.CORE, 12345L, this.testuri1, "testnonce", "GET", null);
-    assertEquals(testmac1, "uIWSwWqaBx058hMSmmpWYgi48mM47BzCcBbufiH+c+k=");
+    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri1, "testnonce", "GET", null, null);
+    assertEquals(testmac1, "Wdas7yJcMQ1/9NhmImXgH8vzNls41gVqGA6eEpm2BGc=");
   }
 
   @Test
   public void testHttpsMAC() throws Exception
   {
-    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.CORE, 54321L, this.testuri2, "testnonce", "POST", null);
-    assertEquals(testmac1, "4W0TUzCO/rATC8CckF3L3+6IVlut+gt8UyhJJVETb08=");
+    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 54321L, this.testuri2, "testnonce", "POST", null, null);
+    assertEquals(testmac1, "OdlSwnA96fQh10rClQwBZhBiekhgufLn0udW7B/Txf0=");
   }
 
   @Test
   public void testExtDataMAC() throws Exception
   {
-    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.CORE, 12345L, this.testuri1, "testnonce", "GET", "Extra data");
-    assertEquals(testmac1, "5YMBDj5ZZ4M6q/FR7i1+neZdg9DKm2E+Y25Khm3W6E4=");
+    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri1, "testnonce", "GET", null, "Extra data");
+    assertEquals(testmac1, "UkjxqDnxz0Hy1SCqMITJ/qXSxco60S30HKuEgkI5S0s=");
   }
 
   @Test
   public void testRaw() throws Exception
   {
-    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.CORE, 12345L, this.testuri4, "testnonce", "GET", null);
-    assertEquals(testmac1, "MdrnLPlkk7VHud2YoDXmquA+cA3k9j1NTDYSe/hiZMw=");
+    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri3, "testnonce", "GET", null, null);
+    assertEquals(testmac1, "rTBOCYVDGs96yfboWG7Z6y5id2WWEGZ2gcZKamnEvgw=");
   }
 
   @Test
