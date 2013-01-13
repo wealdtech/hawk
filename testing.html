@@ -45,7 +45,7 @@ Only set of Hawk credentials:
 </dl>
 
 <h2>Server Responses</h2>
-On a successful authentication the server will responde with "Hello <em>name</em>", where <em>name</em> is the name of the user whose credentials you used to authenticate the request.  On an unsuccessful authentication the server will return a status of 401 and a JSON output that will contain some additional information about why the authentication failed.
+On a successful authentication the server will return a status of 200 and respond with "Hello <em>name</em>", where <em>name</em> is the name of the user whose credentials you used to authenticate the request.  On an unsuccessful authentication the server will return a status of 401 and respond with JSON output that will contain some additional information about why the authentication failed.
 
 <h2>Unexpected Error Responses</h2>
 If it appears that the server is providing an incorrect response please <a href="http://github.com/wealdtech/hawk/issues">raise this as an issue</a> and it will be investigated.  When raising such issues please ensure that you provide the full authentication header or bewit being sent, as well as the text string from which the MAC is composed.

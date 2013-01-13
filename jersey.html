@@ -1,0 +1,44 @@
+---
+layout: default
+title: Using Hawk with Jersey
+---
+
+Hawk for Java provides a full Jersey client and server.  The steps required to integrate Hawk in to your Jersey application are provided below.
+
+<h1>Jersey Client</h1>
+If you are using Jersey to generate HTTP requests then you can use the Hawk Jersey client to authenticate with Hawk.  To add Hawk to your project you need to include the following dependency:
+
+<pre>
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.wealdtech.hawk&lt;/groupId&gt;
+      &lt;artifactId&gt;hawk-client-jersey&lt;/artifactId&gt;
+      &lt;version&gt;0.5.0&lt;/version&gt;
+    &lt;/dependency&gt;
+</pre>
+
+Hawk authentication is implemented as a Jersey client filter.  The first thing you will need to do is provide a set of Hawk credentials, for example:
+
+<code>
+HawkCredentials hawkCredentials = new HawkCredentials.Builder()
+                                                     .keyId("dh37fgj492je")
+                                                     .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
+                                                     .algorithm(HawkCredentials.Algorithm.SHA256)
+                                                     .build();
+</code>
+
+Once these have been configuration you can create a Hawk client:
+
+<code>
+HawkClient hawkClient = new HawkClient.Builder().credentials(hawkCredentials).build();
+</code>
+
+And finally you need to add the authorization filter to the Jersey client, for example:
+
+<code>
+Client client = Client.create(new DefaultConfig());
+client.addFilter(new HawkAuthorizationFilter(this.hawkClient));
+</code>
+
+At this point all requests sent from the client will contain a Hawk Authentication header.
+
+<h2>Client Options</h2>
