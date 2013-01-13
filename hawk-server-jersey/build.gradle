@@ -1,8 +1,8 @@
 dependencies {
     compile project(':hawk-core')
-    compile('com.wealdtech:wealdtech-core:1.0.0') { changing=true }
-    compile('com.wealdtech:wealdtech-configuration:1.0.0') { changing=true }
-    compile('com.wealdtech:wealdtech-jersey-server:1.0.0') { changing=true }
+    compile('com.wealdtech:wealdtech-core:1.1.0') { changing=true }
+    compile('com.wealdtech:wealdtech-configuration:1.1.0') { changing=true }
+    compile('com.wealdtech:wealdtech-jersey-server:1.1.0') { changing=true }
     compile 'com.sun.jersey:jersey-core:1.16'
     compile 'com.sun.jersey:jersey-server:1.16'
     compile 'com.sun.jersey:jersey-servlet:1.16'

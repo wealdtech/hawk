@@ -16,6 +16,8 @@
 
 package com.wealdtech.hawk.jersey;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.net.URI;
 
 import com.google.common.net.HttpHeaders;
@@ -25,8 +27,6 @@ import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
 import com.wealdtech.hawk.HawkClient;
-
-import static com.wealdtech.Preconditions.checkNotNull;
 
 /**
  * Request filter providing an Authorization header
@@ -51,7 +51,7 @@ public class HawkAuthorizationFilter extends ClientFilter
     {
       final URI uri = cr.getURI();
       final String method = cr.getMethod();
-      cr.getHeaders().add(HttpHeaders.AUTHORIZATION, this.client.generateAuthorizationHeader(uri, method, null));
+      cr.getHeaders().add(HttpHeaders.AUTHORIZATION, this.client.generateAuthorizationHeader(uri, method, null, null));
     }
     return getNext().handle(cr);}
   }

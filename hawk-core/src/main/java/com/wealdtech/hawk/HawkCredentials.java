@@ -38,8 +38,8 @@ public class HawkCredentials implements Comparable<HawkCredentials>
 {
   public enum Algorithm
   {
-    HMAC_SHA_1,
-    HMAC_SHA_256;
+    SHA1,
+    SHA256;
 
     @Override
     @JsonValue
@@ -70,8 +70,8 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   public final Algorithm algorithm;
 
   private final ImmutableMap<Algorithm, String> JAVAALGORITHMS = new ImmutableMap.Builder<Algorithm, String>()
-                                                                                 .put(Algorithm.HMAC_SHA_1, "SHA-1")
-                                                                                 .put(Algorithm.HMAC_SHA_256, "SHA-256")
+                                                                                 .put(Algorithm.SHA1, "SHA-1")
+                                                                                 .put(Algorithm.SHA256, "SHA-256")
                                                                                  .build();
 
   private HawkCredentials(final String keyId, final String key, final Algorithm algorithm) throws DataError
