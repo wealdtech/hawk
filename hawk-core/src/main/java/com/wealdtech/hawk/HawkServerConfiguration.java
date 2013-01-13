@@ -35,6 +35,7 @@ import com.wealdtech.hawk.Hawk.PayloadValidation;
  * timestamps, in seconds, for a request to be considered valid. Defaults to <code>60</code></li>
  * <li>bewitAllowed: if authentication of URLs using bewits is allowed.  Defaults to <code>true</code></li>
  * <li>payloadValidation: how to handle payload validation.  Defaults to <code>IFPRESENT</code></li>
+ * <li>nonceCacheSize: the maximum number of nonces to hold in cache.  Defaults to <code>10000</code></li>
  * </ul>
  * This is configured as a standard Jackson object and can be realized as part
  * of a ConfigurationSource.
@@ -45,6 +46,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   private Long timestampSkew = 60L;
   private Boolean bewitAllowed = true;
   private PayloadValidation payloadValidation = PayloadValidation.IFPRESENT;
+  private Long nonceCacheSize = 10000L;
 
   /**
    * Create a configuration with specified values for all options.
@@ -60,12 +62,15 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
    *          whether or not to allow bewits, or <code>null</code> for the default
    * @param payloadValidation
    *          how to validate against payloads, or <code>null</code> for the default
+   * @param nonceCacheSize
+   *          the maximum nubmer of nonces to hold in cache, or <code>null</code> for the default
    */
   @JsonCreator
   private HawkServerConfiguration(@JsonProperty("ntpserver") final String ntpServer,
                                   @JsonProperty("timestampskew") final Long timestampSkew,
                                   @JsonProperty("bewitallowed") final Boolean bewitAllowed,
-                                  @JsonProperty("payloadvalidation") final PayloadValidation payloadValidation) throws DataError
+                                  @JsonProperty("payloadvalidation") final PayloadValidation payloadValidation,
+                                  @JsonProperty("noncecachesize") final Long nonceCacheSize) throws DataError
   {
     if (ntpServer != null)
     {
@@ -83,6 +88,10 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     {
       this.payloadValidation = payloadValidation;
     }
+    if (nonceCacheSize != null)
+    {
+      this.nonceCacheSize = nonceCacheSize;
+    }
     validate();
   }
 
@@ -93,6 +102,8 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     checkArgument((this.timestampSkew >= 0), "The timestamp may not be negative");
     checkNotNull(this.bewitAllowed, "Allowance of bewits is required");
     checkNotNull(this.payloadValidation, "Payload validation setting is required");
+    checkNotNull(this.nonceCacheSize, "The nonce cache size is required");
+    checkArgument((this.nonceCacheSize >= 0), "The nonce cache size may not be negative");
   }
 
   public String getNtpServer()
@@ -115,6 +126,11 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     return this.payloadValidation;
   }
 
+  public Long getNonceCacheSize()
+  {
+    return this.nonceCacheSize;
+  }
+
   // Standard object methods follow
   @Override
   public String toString()
@@ -124,6 +140,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
                   .add("timestampSkew", this.getTimestampSkew())
                   .add("bewitAllowed", this.isBewitAllowed())
                   .add("payloadValidation", this.getPayloadValidation())
+                  .add("nonceCacheSize", this.getNonceCacheSize())
                   .toString();
   }
 
@@ -136,7 +153,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   @Override
   public int hashCode()
   {
-    return Objects.hashCode(this.getNtpServer(), this.getTimestampSkew(), this.isBewitAllowed(), this.getPayloadValidation());
+    return Objects.hashCode(this.getNtpServer(), this.getTimestampSkew(), this.isBewitAllowed(), this.getPayloadValidation(), this.getNonceCacheSize());
   }
 
   @Override
@@ -147,6 +164,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
                           .compare(this.getTimestampSkew(), that.getTimestampSkew())
                           .compare(this.isBewitAllowed(), that.isBewitAllowed())
                           .compare(this.getPayloadValidation(), that.getPayloadValidation())
+                          .compare(this.getNonceCacheSize(), that.getNonceCacheSize())
                           .result();
   }
 
@@ -156,6 +174,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     Long timestampSkew;
     Boolean bewitAllowed;
     PayloadValidation payloadValidation;
+    Long nonceCacheSize;
 
     /**
      * Generate a new builder.
@@ -174,6 +193,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
       this.timestampSkew = prior.timestampSkew;
       this.bewitAllowed = prior.bewitAllowed;
       this.payloadValidation = prior.payloadValidation;
+      this.nonceCacheSize = prior.nonceCacheSize;
     }
 
     /**
@@ -221,6 +241,17 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
     }
 
     /**
+     * Override the existing nonce cache size.
+     * @param nonceCacheSize the new nonce cache size
+     * @return The builder
+     */
+    public Builder nonceCacheSize(final Long nonceCacheSize)
+    {
+      this.nonceCacheSize = nonceCacheSize;
+      return this;
+    }
+
+    /**
      * Create a new Hawk server configuration from the defaults
      * and overrides provided.
      * @return The Hawk server configuration
@@ -228,7 +259,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
      */
     public HawkServerConfiguration build() throws DataError
     {
-      return new HawkServerConfiguration(this.ntpServer, this.timestampSkew, this.bewitAllowed, this.payloadValidation);
+      return new HawkServerConfiguration(this.ntpServer, this.timestampSkew, this.bewitAllowed, this.payloadValidation, this.nonceCacheSize);
     }
   }
 }

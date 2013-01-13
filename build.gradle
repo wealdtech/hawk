@@ -17,7 +17,17 @@ subprojects {
     }
 
     group = 'com.wealdtech.hawk'
-    version = '0.4.0'
+    version = '0.5.0'
+
+    task copyLibs (type: Copy) {
+        into "$buildDir/output/libs"
+        from configurations.testRuntime
+    }
+
+    task testJar (type: Jar) {
+        classifier = 'tests'
+        from sourceSets.test.output
+    }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'

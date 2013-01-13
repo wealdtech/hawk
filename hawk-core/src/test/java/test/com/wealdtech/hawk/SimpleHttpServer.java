@@ -17,6 +17,7 @@
 package test.com.wealdtech.hawk;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,11 +27,13 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.CharStreams;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
+import com.wealdtech.hawk.Hawk;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkServer;
 import com.wealdtech.hawk.HawkServerConfiguration;
@@ -153,9 +156,16 @@ public class SimpleHttpServer
         exchange.sendResponseHeaders(401, 0);
       }
 
+      String hash = null;
+      if (authorizationHeaders.get("hash") != null)
+      {
+        // Need to calculate hash of the body
+        hash = Hawk.calculateMac(this.credentials, CharStreams.toString(new InputStreamReader(exchange.getRequestBody(), "UTF-8")));
+      }
+
       try
       {
-        server.authenticate(this.credentials, uri, exchange.getRequestMethod(), authorizationHeaders);
+        server.authenticate(this.credentials, uri, exchange.getRequestMethod(), authorizationHeaders, hash);
         System.out.println("Authenticated by header");
         exchange.sendResponseHeaders(200, 0);
       }

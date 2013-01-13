@@ -44,7 +44,7 @@ public class HawkJerseyServerTest
   private SampleJettyServer webserver;
 
   // Helper
-  private HttpURLConnection connect(final URI uri, final String method, final String authorizationHeader) throws Exception
+  private HttpURLConnection connect(final URI uri, final String method, final String authorizationHeader, String body) throws Exception
   {
     final HttpURLConnection connection = (HttpURLConnection)uri.toURL().openConnection();
     connection.setRequestMethod(method);
@@ -52,8 +52,16 @@ public class HawkJerseyServerTest
     {
       connection.setRequestProperty("Authorization", authorizationHeader);
     }
-    connection.setDoOutput(true);
+    if (body != null)
+    {
+      connection.setDoOutput(true);
+    }
+    connection.setDoInput(true);
     connection.connect();
+    if (body != null)
+    {
+      connection.getOutputStream().write(body.getBytes());
+    }
     return connection;
   }
 
@@ -89,7 +97,7 @@ public class HawkJerseyServerTest
     // Test valid authentication with a GET request
     final HawkClient testclient = new HawkClient.Builder().credentials(this.goodCredentials).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
-    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader);
+    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader, null);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -99,7 +107,7 @@ public class HawkJerseyServerTest
     // Test valid authentication with a PUT request
     final HawkClient testclient = new HawkClient.Builder().credentials(this.goodCredentials).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "put", null, null);
-    HttpURLConnection connection = connect(this.validuri1, "PUT", authorizationHeader);
+    HttpURLConnection connection = connect(this.validuri1, "PUT", authorizationHeader, null);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -110,7 +118,20 @@ public class HawkJerseyServerTest
     final HawkClientConfiguration configuration = new HawkClientConfiguration.Builder().payloadValidation(PayloadValidation.MANDATORY).build();
     final HawkClient testclient = new HawkClient.Builder().credentials(this.goodCredentials).configuration(configuration).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "put", null, null);
-    HttpURLConnection connection = connect(this.validuri1, "PUT", authorizationHeader);
+    HttpURLConnection connection = connect(this.validuri1, "PUT", authorizationHeader, null);
+    assertEquals(connection.getResponseCode(), 200);
+  }
+
+  @Test
+  public void testValidAuth4() throws Exception
+  {
+    // Test valid authentication with body hash
+    final HawkClientConfiguration configuration = new HawkClientConfiguration.Builder().payloadValidation(PayloadValidation.MANDATORY).build();
+    final HawkClient testclient = new HawkClient.Builder().credentials(this.goodCredentials).configuration(configuration).build();
+    final String body = "Test body";
+    final String hash = Hawk.calculateMac(this.goodCredentials, body);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "put", hash, null);
+    HttpURLConnection connection = connect(this.validuri1, "PUT", authorizationHeader, body);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -120,9 +141,9 @@ public class HawkJerseyServerTest
     // Test catching a replay of an older request
     final HawkClient testclient = new HawkClient.Builder().credentials(this.goodCredentials).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
-    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader);
+    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader, null);
     assertEquals(connection.getResponseCode(), 200);
-    connection = connect(this.validuri1, "GET", authorizationHeader);
+    connection = connect(this.validuri1, "GET", authorizationHeader, null);
     assertEquals(connection.getResponseCode(), 401);
   }
 
@@ -133,7 +154,7 @@ public class HawkJerseyServerTest
     final HawkClient testclient = new HawkClient.Builder().credentials(this.goodCredentials).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
     Thread.sleep(61000L);
-    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader);
+    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader, null);
     assertEquals(connection.getResponseCode(), 401);
   }
 
@@ -146,7 +167,7 @@ public class HawkJerseyServerTest
                                                               .build();
     final HawkClient testclient = new HawkClient.Builder().credentials(badCredentials).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
-    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader);
+    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader, null);
     assertEquals(connection.getResponseCode(), 401);
   }
 
@@ -159,7 +180,7 @@ public class HawkJerseyServerTest
                                                               .build();
     final HawkClient testclient = new HawkClient.Builder().credentials(badCredentials).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
-    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader);
+    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader, null);
     assertEquals(connection.getResponseCode(), 401);
   }
 
@@ -172,7 +193,20 @@ public class HawkJerseyServerTest
                                                               .build();
     final HawkClient testclient = new HawkClient.Builder().credentials(badCredentials).build();
     final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
-    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader);
+    HttpURLConnection connection = connect(this.validuri1, "GET", authorizationHeader, null);
+    assertEquals(connection.getResponseCode(), 401);
+  }
+
+  @Test
+  public void testInvalidAuth3() throws Exception
+  {
+    // Test authentication with incorrect body hash
+    final HawkClientConfiguration configuration = new HawkClientConfiguration.Builder().payloadValidation(PayloadValidation.MANDATORY).build();
+    final HawkClient testclient = new HawkClient.Builder().credentials(this.goodCredentials).configuration(configuration).build();
+    final String body = "Test body";
+    final String hash = Hawk.calculateMac(this.goodCredentials, "bad body");
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "put", hash, null);
+    HttpURLConnection connection = connect(this.validuri1, "PUT", authorizationHeader, body);
     assertEquals(connection.getResponseCode(), 401);
   }
 
@@ -182,7 +216,7 @@ public class HawkJerseyServerTest
     // Test a valid bewit with a simple request
     final String bewit = Hawk.generateBewit(this.goodCredentials, this.validuri1, 600L, null);
     URI testUri = new URI(this.validuri1.toString() + "?bewit=" + bewit);
-    final HttpURLConnection connection = connect(testUri, "GET", null);
+    final HttpURLConnection connection = connect(testUri, "GET", null, null);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -192,7 +226,7 @@ public class HawkJerseyServerTest
     // Test a valid bewit appending to an existing query string
     final String bewit = Hawk.generateBewit(this.goodCredentials, this.validuri2, 600L, null);
     URI testUri = new URI(this.validuri2.toString() + "&bewit=" + bewit);
-    final HttpURLConnection connection = connect(testUri, "GET", null);
+    final HttpURLConnection connection = connect(testUri, "GET", null, null);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -203,7 +237,7 @@ public class HawkJerseyServerTest
     final URI validuri = new URI(this.validuri2.toString() + "&three=three");
     final String bewit = Hawk.generateBewit(this.goodCredentials, validuri, 600L, null);
     URI testUri = new URI(this.validuri2.toString() + "&bewit=" + bewit + "&three=three");
-    final HttpURLConnection connection = connect(testUri, "GET", null);
+    final HttpURLConnection connection = connect(testUri, "GET", null, null);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -213,7 +247,7 @@ public class HawkJerseyServerTest
     // Test a valid bewit with extra data
     final String bewit = Hawk.generateBewit(this.goodCredentials, this.validuri1, 600L, "extra");
     URI testUri = new URI(this.validuri1.toString() + "?bewit=" + bewit);
-    final HttpURLConnection connection = connect(testUri, "GET", null);
+    final HttpURLConnection connection = connect(testUri, "GET", null, null);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -223,7 +257,7 @@ public class HawkJerseyServerTest
     // Test an invalid bewit due to using the PUT method
     final String bewit = Hawk.generateBewit(this.goodCredentials, this.validuri1, 600L, null);
     URI testUri = new URI(this.validuri1.toString() + "?bewit=" + bewit);
-    final HttpURLConnection connection = connect(testUri, "PUT", null);
+    final HttpURLConnection connection = connect(testUri, "PUT", null, null);
     assertEquals(connection.getResponseCode(), 401);
   }
 
@@ -236,7 +270,7 @@ public class HawkJerseyServerTest
                                                               .build();
     final String bewit = Hawk.generateBewit(badCredentials, this.validuri1, 600L, null);
     URI testUri = new URI(this.validuri1.toString() + "?bewit=" + bewit);
-    final HttpURLConnection connection = connect(testUri, "GET", null);
+    final HttpURLConnection connection = connect(testUri, "GET", null, null);
     assertEquals(connection.getResponseCode(), 401);
   }
 
@@ -247,7 +281,7 @@ public class HawkJerseyServerTest
     final String bewit = Hawk.generateBewit(this.goodCredentials, this.validuri1, 1L, null);
     Thread.sleep(2000L);
     URI testUri = new URI(this.validuri1.toString() + "?bewit=" + bewit);
-    final HttpURLConnection connection = connect(testUri, "GET", null);
+    final HttpURLConnection connection = connect(testUri, "GET", null, null);
     assertEquals(connection.getResponseCode(), 401);
   }
 }

@@ -125,10 +125,29 @@ public class Hawk
     sb.append('\n');
     sb.append(uri.getHost().toLowerCase(Locale.ENGLISH));
     sb.append('\n');
-    sb.append(uri.getPort());
+    if (uri.getPort() == -1)
+    {
+      // Default port
+      if ("http".equals(uri.getScheme()))
+      {
+        sb.append("80");
+      }
+      else if ("https".equals(uri.getScheme()))
+      {
+        sb.append("443");
+      }
+      else
+      {
+        throw new DataError.Bad("Unknown URI scheme \"" + uri.getScheme() + "\"");
+      }
+    }
+    else
+    {
+      sb.append(uri.getPort());
+    }
     sb.append('\n');
     if ((authType.equals(AuthType.HEADER)) &&
-        (hash == null))
+        (hash != null))
     {
       sb.append(hash);
     }
@@ -157,7 +176,7 @@ public class Hawk
    *           if there is an issue with the server that prevents creation of
    *           the MAC
    */
-  private static String calculateMac(final HawkCredentials credentials, final String text) throws DataError, ServerError
+  public static String calculateMac(final HawkCredentials credentials, final String text) throws DataError, ServerError
   {
     try
     {

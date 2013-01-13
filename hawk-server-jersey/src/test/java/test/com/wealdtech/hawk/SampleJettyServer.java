@@ -22,6 +22,11 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import test.com.wealdtech.hawk.config.ApplicationModule;
+import test.com.wealdtech.hawk.jersey.guice.HawkConfigurationModule;
+import test.com.wealdtech.hawk.jersey.guice.HawkServletModule;
+
+import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
@@ -65,8 +70,24 @@ public class SampleJettyServer
     this.server.start();
   }
 
+  public void join() throws Exception
+  {
+    this.server.join();
+  }
+
   public void stop() throws Exception
   {
     this.server.stop();
+  }
+
+  public static void main(String ...args) throws Exception
+  {
+    final Injector injector = Guice.createInjector(new ApplicationModule(),
+                                                   new HawkConfigurationModule(),
+                                                   new HawkServletModule("test.com.wealdtech.hawk.providers",
+                                                                         "test.com.wealdtech.hawk.resources"));
+    SampleJettyServer webserver = injector.getInstance(SampleJettyServer.class);
+    webserver.start();
+    webserver.join();
   }
 }

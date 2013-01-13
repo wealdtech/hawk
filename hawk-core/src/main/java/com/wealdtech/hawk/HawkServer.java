@@ -85,10 +85,9 @@ public class HawkServer
 
   private final void initializeCache()
   {
-    // TODO The cache does not have a maximum size, which could lead to a DDOS.
-    // Consider the security/space trade-off
     this.nonces = CacheBuilder.newBuilder()
                               .expireAfterWrite(this.configuration.getTimestampSkew() * 2, TimeUnit.SECONDS)
+                              .maximumSize(this.configuration.getNonceCacheSize())
                               .build(new CacheLoader<String, Boolean>() {
                                 @Override
                                 public Boolean load(String key) {
@@ -102,31 +101,33 @@ public class HawkServer
    * @param credentials the Hawk credentials against which to authenticate
    * @param uri the URI of the request
    * @param method the method of the request
-   * @param authorizationheaders the Hawk authentication headers
+   * @param authorizationHeaders the Hawk authentication headers
+   * @param hash the hash of the body, if available
    * @throws DataError if the authentication fails due to incorrect or missing data
    * @throws ServerError if there is a problem with the server whilst authenticating
    */
-  public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationheaders) throws DataError, ServerError
+  public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationHeaders, final String hash) throws DataError, ServerError
   {
     // Ensure that the required fields are present
-    checkNotNull(authorizationheaders.get("ts"), "The timestamp was not supplied");
-    checkNotNull(authorizationheaders.get("nonce"), "The nonce was not supplied");
-    checkNotNull(authorizationheaders.get("id"), "The id was not supplied");
-    checkNotNull(authorizationheaders.get("mac"), "The mac was not supplied");
-
+    checkNotNull(authorizationHeaders.get("ts"), "The timestamp was not supplied");
+    checkNotNull(authorizationHeaders.get("nonce"), "The nonce was not supplied");
+    checkNotNull(authorizationHeaders.get("id"), "The id was not supplied");
+    checkNotNull(authorizationHeaders.get("mac"), "The mac was not supplied");
     if (this.configuration.getPayloadValidation().equals(PayloadValidation.MANDATORY))
     {
-      checkNotNull(authorizationheaders.get("hash"), "The payload hash was not supplied");
+      checkNotNull(authorizationHeaders.get("hash"), "The payload hash was not supplied");
+      checkNotNull(hash, "The payload hash could not be calculated");
     }
 
     // Ensure that the timestamp passed in is within suitable bounds
-    confirmTimestampWithinBounds(authorizationheaders.get("ts"));
+    confirmTimestampWithinBounds(authorizationHeaders.get("ts"));
 
     // Ensure that this is not a replay of a previous request
-    confirmUniqueNonce(authorizationheaders.get("nonce"));
+    confirmUniqueNonce(authorizationHeaders.get("nonce"));
 
-    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.HEADER, Long.valueOf(authorizationheaders.get("ts")), uri, authorizationheaders.get("nonce"), method, authorizationheaders.get("hash"), authorizationheaders.get("ext"));
-    if (!timeConstantEquals(mac, authorizationheaders.get("mac")))
+    // Ensure that the MAC is correct
+    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.HEADER, Long.valueOf(authorizationHeaders.get("ts")), uri, authorizationHeaders.get("nonce"), method, hash, authorizationHeaders.get("ext"));
+    if (!timeConstantEquals(mac, authorizationHeaders.get("mac")))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
     }

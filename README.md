@@ -8,7 +8,7 @@ The current version of the Hawk protocol supported is 0.5.
 How To Use Hawk in Your Java Project
 ====================================
 
-Hawk uses Jersey for its reference implementation.  If you are using the Jersey client for carrying out HTTP requests then you should read about [using Hawk with Jersey client](hawk-client-jersey/README.md).  If you are using the Jersey server for authenticating HTTP requests then you should read about [using Hawk with Jersey server](hawk-server-jersey/README.md).  If you do not use Jersey for your HTTP client or server you should read about [building your own Hawk client or server](hawk-core/README.md)
+Details of how to use Hawk in your Java project are available at the main Hawk site [here](http://wealdtech.github.com/hawk).
 
 Comments and Suggestions
 ========================
