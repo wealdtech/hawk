@@ -1,0 +1,69 @@
+---
+layout: default
+title: Building Your Own
+---
+
+If you are using something other than Jersey you will need to build your own client and/or server pieces for Hawk integration.  However, the core components required for carrying out Hawk authentication are available to you and this document provides a guide for the steps you need to undertake to integrate Hawk in to your own application.
+<p/>
+
+To add Hawk to your project you need to include the following dependency:
+<pre>
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.wealdtech.hawk&lt;/groupId&gt;
+      &lt;artifactId&gt;hawk-core&lt;/artifactId&gt;
+      &lt;version&gt;0.5.0&lt;/version&gt;
+    &lt;/dependency&gt;
+</pre>
+
+<h1>Clients</h1>
+If you want your clients to authenticate using Hawk then you will need to start with a set of Hawk credentials:
+
+<pre>
+HawkCredentials hawkCredentials = new HawkCredentials.Builder()
+                                                     .keyId("dh37fgj492je")
+                                                     .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
+                                                     .algorithm(HawkCredentials.Algorithm.SHA256)
+                                                     .build();
+</pre>
+
+Once these have been configuration you can create a Hawk client:
+
+<pre>
+HawkClient hawkClient = new HawkClient.Builder().credentials(hawkCredentials).build();
+</pre>
+
+And then for each request that you wish to send you need to generate an authorization header:
+
+<pre>
+String authorizationHeader = hawkClient.generateAuthorizationHeader(uri, method, body, ext);
+</pre>
+
+This string needs to be added to the outgoing HTTP request as the content of the "Authorization" header.
+
+<h1>Servers</h1>
+If you want your servers to authenticate using Hawk then you will need to catch each incoming request and process it accordingly.  During the server setup you need to create a Hawk server instance:
+
+<pre>
+HawkServer hawkServer = new HawkServer.Builder().build();
+</pre>
+
+For each incoming request you need to determine if the request contains a Hawk Authorization header or a bewit.  Once this has been determined you can parse the parameters accordingly, use the key ID passed in to obtain the relevant Hawk credentials, and use the Hawk server to carry out the authentication.  For bewits you can use the following:
+
+<pre>
+server.authenticate(credentials, requestUri);
+</pre>
+
+and for authentication headers you can use the following:
+
+<pre>
+server.authenticate(credentials, requestUri, requestMethod, authorizationHeaders, bodyHash);
+</pre>
+
+If authentication fails then you need to generate a WWW-authenticate header in your response to the client:
+
+<pre>
+String authenticate = server.generateAuthenticateHeader();
+responseHeaders.put("WWW-Authenticate", authenticateheader);
+</pre>
+
+There is a fully operational pure-Java HTTP server available for reference at <a href="https://raw.github.com/wealdtech/hawk/develop/hawk-core/src/test/java/test/com/wealdtech/hawk/SimpleHttpServer.java">SimpleHttpServer.java</a> that shows all of the above in operation.
