@@ -42,3 +42,29 @@ client.addFilter(new HawkAuthorizationFilter(this.hawkClient));
 At this point all requests sent from the client will contain a Hawk Authentication header.
 
 <h2>Client Options</h2>
+There are a number of options available to the client.  For details on these please refer to the JavaDoc, or look directly at <a href="https://raw.github.com/wealdtech/hawk/develop/hawk-core/src/main/java/com/wealdtech/hawk/HawkClientConfiguration.java">the source code for HawkClientConfiguration</a>.
+
+<h1>Jersey Server</h1>
+If you are using Jersey to serve HTTP requests then you can use the Hawk Jersey server to authenticate with Hawk.  To add Hawk to your project you need to include the following dependency:
+
+<pre>
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.wealdtech.hawk&lt;/groupId&gt;
+      &lt;artifactId&gt;hawk-server-jersey&lt;/artifactId&gt;
+      &lt;version&gt;0.5.0&lt;/version&gt;
+    &lt;/dependency&gt;
+</pre>
+
+Hawk needs two thing from your application to work correctly: a way of obtaining a principal given the Hawk credentials key ID, and a way of obtaining a full set of Hawk credentials given a key ID.  Specifically, the steps required are as follows:
+
+<ul>
+  <li>Create a service that extends HawkPrincipalProvider for your own application.  This requires a get() method that takes the Hawk key ID as an argument and returns the principal which owns that key.  An example is available in the test suite as <a href="https://raw.github.com/wealdtech/hawk/develop/hawk-server-jersey/src/test/java/test/com/wealdtech/hawk/service/ExampleUserService.java">ExampleUserService.java</a></li>
+  <li>Ensure that your principal class implements HawkCredentialsProvider so that it can return the full Hawk credentials.  An example is available in the test suite as <a href="https://raw.github.com/wealdtech/hawk/develop/hawk-server-jersey/src/test/java/test/com/wealdtech/hawk/model/ExampleUser.java">ExampleUser.java</a></li>
+</ul>
+
+Once these are in place you need to create an authentication filter to capture incoming requests and authenticate them.  If you are expecting to authenticate purely through Hawk you can just subclass the existing <a href="https://raw.github.com/wealdtech/hawk/develop/hawk-server-jersey/src/main/java/com/wealdtech/hawk/jersey/HawkAuthenticationFilter.java">HawkAuthenticationFilter.java</a>.  Note that this needs to be in Jersey's resource path for it to be picked up when Jersey starts.  An example is available in the test suite as <a href="https://raw.github.com/wealdtech/hawk/develop/hawk-server-jersey/src/test/java/test/com/wealdtech/hawk/jersey/HawkExampleUserAuthenticationFilter.java">HawkExampleUserAuthenticationFilter.java</a>.
+<p/>
+Although the various items can be instantiated maually they have also been designed to work with Guice.  To work with Guice you need to create a Guice module that contains the bindings to your principal provider and authenticator, and add them to your injector setup.  An example is available in the test suite as <a href="https://raw.github.com/wealdtech/hawk/develop/hawk-server-jersey/src/test/java/test/com/wealdtech/hawk/jersey/guice/HawkConfigurationModule.java">HawkConfigurationModule.java</a></li>
+<p/>
+If desired, you can add a Jersey provider to access your authenticated principal inside resources.  The principal is stored in the servlet request attribute "com.wealdtech.authenticatedprincipal".  An example is avaialable in the test suite as <a href="https://raw.github.com/wealdtech/hawk/develop/hawk-server-jersey/src/test/java/test/com/wealdtech/hawk/jersey/providers/ExampleUserProvider.java">ExampleUserProvider.java</a>.
+
