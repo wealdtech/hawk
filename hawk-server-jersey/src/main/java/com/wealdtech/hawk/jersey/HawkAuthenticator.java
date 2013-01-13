@@ -16,20 +16,24 @@
 
 package com.wealdtech.hawk.jersey;
 
+import static com.wealdtech.Preconditions.*;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
+import com.wealdtech.hawk.Hawk;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkServer;
 import com.wealdtech.jersey.auth.Authenticator;
 import com.wealdtech.jersey.auth.PrincipalProvider;
-
-import static com.wealdtech.Preconditions.*;
 
 /**
  * Authenticate a request using Hawk.
@@ -111,6 +115,7 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
     checkNotNull(authorizationHeaders.get("ts"), "Missing required Hawk authorization header \"ts\"");
     checkNotNull(authorizationHeaders.get("mac"), "Missing required Hawk authorization header \"mac\"");
     checkNotNull(authorizationHeaders.get("nonce"), "Missing required Hawk authorization header \"nonce\"");
+    String hash = null;
     final URI uri = request.getRequestUri();
     final String method = request.getMethod();
     final Optional<T> principal = provider.get(authorizationHeaders.get("id"));
@@ -120,7 +125,19 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
       return Optional.absent();
     }
     final HawkCredentials credentials = principal.get().getHawkCredentials(authorizationHeaders.get("id"));
-    this.server.authenticate(credentials, uri, method, authorizationHeaders);
+    if (authorizationHeaders.get("hash") != null)
+    {
+//      throw new ServerError("Authentication using body hashes is not supported");
+      try
+      {
+        hash = Hawk.calculateMac(credentials, CharStreams.toString(new InputStreamReader(request.getEntityInputStream(), "UTF-8")));
+      }
+      catch (IOException ioe)
+      {
+        throw new DataError.Bad("Failed to read the message body to calculate hash");
+      }
+    }
+    this.server.authenticate(credentials, uri, method, authorizationHeaders, hash);
     return principal;
   }
 }

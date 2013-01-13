@@ -16,6 +16,8 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -34,10 +36,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.BaseEncoding;
+import com.google.inject.Inject;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
-
-import static com.wealdtech.Preconditions.*;
+import com.wealdtech.hawk.Hawk.PayloadValidation;
 
 /**
  * The Hawk server. Note that this is not an HTTP server in itself, but provides
@@ -54,22 +56,23 @@ public class HawkServer
   private final HawkServerConfiguration configuration;
   private LoadingCache<String, Boolean> nonces;
 
-  /**
-   * Create an instance of the Hawk server with default configuration.
-   */
-  public HawkServer()
-  {
-    this.configuration = new HawkServerConfiguration.Builder().build();
-    initializeCache();
-  }
-
+//  /**
+//   * Create an instance of the Hawk server with default configuration.
+//   */
+//  public HawkServer()
+//  {
+//    this.configuration = new HawkServerConfiguration.Builder().build();
+//    initializeCache();
+//  }
+//
   /**
    * Create an instance of the Hawk server with custom configuration.
    *
    * @param configuration
    *          the specific configuration
    */
-  public HawkServer(final HawkServerConfiguration configuration)
+  @Inject
+  private HawkServer(final HawkServerConfiguration configuration)
   {
     if (configuration == null)
     {
@@ -84,10 +87,9 @@ public class HawkServer
 
   private final void initializeCache()
   {
-    // TODO The cache does not have a maximum size, which could lead to a DDOS.
-    // Consider the security/space trade-off
     this.nonces = CacheBuilder.newBuilder()
                               .expireAfterWrite(this.configuration.getTimestampSkew() * 2, TimeUnit.SECONDS)
+                              .maximumSize(this.configuration.getNonceCacheSize())
                               .build(new CacheLoader<String, Boolean>() {
                                 @Override
                                 public Boolean load(String key) {
@@ -101,26 +103,33 @@ public class HawkServer
    * @param credentials the Hawk credentials against which to authenticate
    * @param uri the URI of the request
    * @param method the method of the request
-   * @param authorizationheaders the Hawk authentication headers
+   * @param authorizationHeaders the Hawk authentication headers
+   * @param hash the hash of the body, if available
    * @throws DataError if the authentication fails due to incorrect or missing data
    * @throws ServerError if there is a problem with the server whilst authenticating
    */
-  public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationheaders) throws DataError, ServerError
+  public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationHeaders, final String hash) throws DataError, ServerError
   {
     // Ensure that the required fields are present
-    checkNotNull(authorizationheaders.get("ts"), "The timestamp was not supplied");
-    checkNotNull(authorizationheaders.get("nonce"), "The nonce was not supplied");
-    checkNotNull(authorizationheaders.get("id"), "The id was not supplied");
-    checkNotNull(authorizationheaders.get("mac"), "The mac was not supplied");
+    checkNotNull(authorizationHeaders.get("ts"), "The timestamp was not supplied");
+    checkNotNull(authorizationHeaders.get("nonce"), "The nonce was not supplied");
+    checkNotNull(authorizationHeaders.get("id"), "The id was not supplied");
+    checkNotNull(authorizationHeaders.get("mac"), "The mac was not supplied");
+    if (this.configuration.getPayloadValidation().equals(PayloadValidation.MANDATORY))
+    {
+      checkNotNull(authorizationHeaders.get("hash"), "The payload hash was not supplied");
+      checkNotNull(hash, "The payload hash could not be calculated");
+    }
 
     // Ensure that the timestamp passed in is within suitable bounds
-    confirmTimestampWithinBounds(authorizationheaders.get("ts"));
+    confirmTimestampWithinBounds(authorizationHeaders.get("ts"));
 
     // Ensure that this is not a replay of a previous request
-    confirmUniqueNonce(authorizationheaders.get("nonce"));
+    confirmUniqueNonce(authorizationHeaders.get("nonce"));
 
-    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.CORE, Long.valueOf(authorizationheaders.get("ts")), uri, authorizationheaders.get("nonce"), method, authorizationheaders.get("ext"));
-    if (!timeConstantEquals(mac, authorizationheaders.get("mac")))
+    // Ensure that the MAC is correct
+    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.HEADER, Long.valueOf(authorizationHeaders.get("ts")), uri, authorizationHeaders.get("nonce"), method, hash, authorizationHeaders.get("ext"));
+    if (!timeConstantEquals(mac, authorizationHeaders.get("mac")))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
     }
@@ -128,6 +137,8 @@ public class HawkServer
 
   /**
    * Authenticate a request using a Hawk bewit.
+   * @param credentials the Hawk credentials against which to authenticate
+   * @param uri the URI of the request
    */
   public void authenticate(final HawkCredentials credentials, final URI uri)
   {
@@ -138,7 +149,7 @@ public class HawkServer
 
     final URI strippedUri = stripBewit(uri);
 
-    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, bewitFields.get("ext"));
+    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, null, bewitFields.get("ext"));
     if (!timeConstantEquals(calculatedMac, bewitFields.get("mac")))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
@@ -170,10 +181,7 @@ public class HawkServer
   // Confirm that the request nonce has not already been seen within the allowable time period
   private void confirmUniqueNonce(final String nonce) throws DataError
   {
-    if (this.nonces.getUnchecked(nonce) == true)
-    {
-      throw new DataError.Bad("The nonce supplied is the same as one seen previously");
-    }
+    checkState((this.nonces.getUnchecked(nonce) == false), "The nonce supplied is the same as one seen previously");
     this.nonces.put(nonce, true);
   }
 
@@ -190,10 +198,7 @@ public class HawkServer
       throw new DataError.Bad("The timestamp is in the wrong format; we expect seconds since the epoch");
     }
     long now = System.currentTimeMillis() / 1000;
-    if (Math.abs(now - timestamp) > configuration.getTimestampSkew())
-    {
-      throw new DataError.Bad("The timestamp is too far from the current time to be acceptable");
-    }
+    checkState((Math.abs(now - timestamp) <= configuration.getTimestampSkew()), "The timestamp is too far from the current time to be acceptable");
   }
 
   /**
@@ -249,14 +254,8 @@ public class HawkServer
   {
     checkNotNull(authorizationheader, "No authorization header");
     List<String> headerfields = Lists.newArrayList(WHITESPACESPLITTER.split(authorizationheader));
-    if (headerfields.size() != 2)
-    {
-      throw new DataError.Bad("The authorization header does not contain the expected number of fields");
-    }
-    if (!"hawk".equals(headerfields.get(0).toLowerCase(Locale.ENGLISH)))
-    {
-      throw new DataError.Bad("The authorization header is not a Hawk authorization header");
-    }
+    checkState((headerfields.size() == 2), "The authorization header does not contain the expected number of fields");
+    checkState(("hawk".equals(headerfields.get(0).toLowerCase(Locale.ENGLISH))), "The authorization header is not a Hawk authorization header");
 
     Map<String, String> fields = new HashMap<>();
     Matcher m = FIELDPATTERN.matcher(headerfields.get(1));
@@ -303,12 +302,49 @@ public class HawkServer
     final String uristr = uri.toString();
 
     Matcher m = BEWITPATTERN.matcher(uristr);
-    if (!m.find())
-    {
-      throw new DataError.Bad("The query string did not contain a bewit");
-    }
+    checkState(m.find(), "The query string did not contain a bewit");
     final String bewit = m.group(1);
     return  bewit;
   }
 
+  public static class Builder
+  {
+    private HawkServerConfiguration configuration;
+
+    /**
+     * Generate a new builder.
+     */
+    public Builder()
+    {
+    }
+
+    /**
+     * Generate build with all values set from a prior object.
+     * @param prior the prior object
+     */
+    public Builder(final HawkServer prior)
+    {
+      this.configuration = prior.configuration;
+    }
+
+    /**
+     * Override the existing configuration.
+     * @param configuration the new configuration
+     * @return The builder
+     */
+    public Builder configuration(final HawkServerConfiguration configuration)
+    {
+      this.configuration = configuration;
+      return this;
+    }
+
+    /**
+     * Build the server
+     * @return a new server
+     */
+    public HawkServer build()
+    {
+      return new HawkServer(this.configuration);
+    }
+  }
 }
