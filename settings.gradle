@@ -1,0 +1,1 @@
+include 'hawk-core', 'hawk-server-jersey', 'hawk-client-jersey'
