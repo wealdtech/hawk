@@ -1,0 +1,128 @@
+/* Size and positioning */
+
+nav, article, aside, footer {
+  display: block;
+/*  font-family: 'Insider'; */
+  color: #003300;
+}
+
+header {
+  display: block;
+/*  font-family: 'ColumbiaSerial'; */
+  color: #003300;
+}
+
+body {
+  margin: 0 auto;
+}
+
+/* Navigation bar */
+nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 22%;
+  border-top-left-radius: 40px;
+  border-bottom-left-radius: 40px;
+  /* Should be able to specify an offset but Firefox doesn't like it so using a graphic with right and bottom padding*/
+  background: url(../images/logo-padded.png), url(../images/vleaf-cropped.png);
+  background-position: right bottom, left top;
+  background-size: 75%, 60%;
+  background-color: #336633;
+  background-repeat: no-repeat;
+}
+
+nav ul {
+  /* TODO make top padding relative */
+  padding-top: 10%;
+  padding-left: 5%;
+  padding-right: 5%;
+  margin: auto;
+  width: 90%;
+  list-style: none;
+}
+
+nav ul li a {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 36px;
+  font-size: 24px;
+  line-height: 32px;
+  text-align: left;
+  text-decoration: none;
+  color: #FFDE17;
+}
+
+nav ul li a:hover {
+  color: #FFFFFF;
+}
+
+nav ul li.selected a {
+  color: #FFFFFF;
+}
+
+nav ul li.rss a {
+  background: url("../images/icons/rss.png") left center no-repeat;
+}
+
+nav ul li.twitter a {
+  background: url("../images/icons/twitter.png") left center no-repeat;
+}
+
+
+#banner {
+  position: absolute;
+  top: 0;
+  left: 22%;
+  width: 76%;
+  height: 10%;
+  padding-left: 1%;
+  padding-right: 1%;
+  text-align: center;
+  border-top-right-radius: 40px;
+}
+
+#main {
+  position: absolute;
+  top: 10%;
+  left: 22%;
+  width: 76%;
+  height: 66%;
+  padding: 1%;
+  text-align: left;
+  font-size: 24px;
+  line-height: 32px;
+  overflow: auto;
+}
+
+footer {
+  position: absolute;
+  top: 90%;
+  left: 22%;
+  width: 76%;
+  height: 10%;
+  padding-left: 1%;
+  padding-right: 1%;
+  border-bottom-right-radius: 40px;
+  text-align: right;
+}
+
+h1 {
+  font-size: 44px;
+  line-height: 48px;
+}
+
+h2 {
+  font-size: 28px;
+  line-height: 44px;
+  padding: 22px 0;
+}
+
+p {
+  padding-bottom: 22px;
+}
+
