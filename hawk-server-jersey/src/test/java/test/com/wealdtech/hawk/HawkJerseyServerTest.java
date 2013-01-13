@@ -104,21 +104,21 @@ public class HawkJerseyServerTest
   @Test
   public void testValidAuth2() throws Exception
   {
-    // Test valid authentication with a PUT request
+    // Test valid authentication with a POST request
     final HawkClient testclient = new HawkClient.Builder().credentials(this.goodCredentials).build();
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "put", null, null);
-    HttpURLConnection connection = connect(this.validuri1, "PUT", authorizationHeader, null);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "post", null, null);
+    HttpURLConnection connection = connect(this.validuri1, "POST", authorizationHeader, null);
     assertEquals(connection.getResponseCode(), 200);
   }
 
   @Test
   public void testValidAuth3() throws Exception
   {
-    // Test valid authentication with a PUT request and body
+    // Test valid authentication with a POST request and body
     final HawkClientConfiguration configuration = new HawkClientConfiguration.Builder().payloadValidation(PayloadValidation.MANDATORY).build();
     final HawkClient testclient = new HawkClient.Builder().credentials(this.goodCredentials).configuration(configuration).build();
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "put", null, null);
-    HttpURLConnection connection = connect(this.validuri1, "PUT", authorizationHeader, null);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "post", null, null);
+    HttpURLConnection connection = connect(this.validuri1, "POST", authorizationHeader, null);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -130,8 +130,8 @@ public class HawkJerseyServerTest
     final HawkClient testclient = new HawkClient.Builder().credentials(this.goodCredentials).configuration(configuration).build();
     final String body = "Test body";
     final String hash = Hawk.calculateMac(this.goodCredentials, body);
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "put", hash, null);
-    HttpURLConnection connection = connect(this.validuri1, "PUT", authorizationHeader, body);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "post", hash, null);
+    HttpURLConnection connection = connect(this.validuri1, "POST", authorizationHeader, body);
     assertEquals(connection.getResponseCode(), 200);
   }
 

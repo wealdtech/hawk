@@ -21,7 +21,6 @@ import static com.wealdtech.Preconditions.*;
 import java.net.URI;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.utils.StringUtils;
@@ -30,12 +29,10 @@ public class HawkClient
 {
   private final HawkClientConfiguration configuration;
   private final HawkCredentials credentials;
-  private final String pathPrefix;
 
   @Inject
   private HawkClient(final HawkClientConfiguration configuration,
-                     final HawkCredentials credentials,
-                     @Named(value="hawkpathprefix") final String pathPrefix)
+                     final HawkCredentials credentials)
   {
     if (configuration == null)
     {
@@ -46,7 +43,6 @@ public class HawkClient
       this.configuration = configuration;
     }
     this.credentials = credentials;
-    this.pathPrefix = pathPrefix;
     validate();
   }
 
@@ -102,15 +98,14 @@ public class HawkClient
 
   public boolean isValidFor(final String path)
   {
-    return ((this.pathPrefix == null) ||
-            ((path == null) || (path.startsWith(this.pathPrefix))));
+    return ((this.configuration.getPathPrefix() == null) ||
+            ((path == null) || (path.startsWith(this.configuration.getPathPrefix()))));
   }
 
   public static class Builder
   {
     private HawkClientConfiguration configuration;
     private HawkCredentials credentials;
-    private String pathPrefix;
 
     /**
      * Generate a new builder.
@@ -127,7 +122,6 @@ public class HawkClient
     {
       this.configuration = prior.configuration;
       this.credentials = prior.credentials;
-      this.pathPrefix = prior.pathPrefix;
     }
 
     /**
@@ -153,23 +147,12 @@ public class HawkClient
     }
 
     /**
-     * Override the existing path prefix.
-     * @param pathPrefix the new path prefix
-     * @return The builder
-     */
-    public Builder pathPrefix(final String pathPrefix)
-    {
-      this.pathPrefix = pathPrefix;
-      return this;
-    }
-
-    /**
      * Build the client
      * @return a new client
      */
     public HawkClient build()
     {
-      return new HawkClient(this.configuration, this.credentials, this.pathPrefix);
+      return new HawkClient(this.configuration, this.credentials);
     }
   }
 }

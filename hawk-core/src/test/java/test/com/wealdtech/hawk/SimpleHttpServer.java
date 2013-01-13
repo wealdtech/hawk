@@ -71,7 +71,7 @@ public class SimpleHttpServer
     public AuthenticateHandler(final HawkCredentials credentials, final HawkServerConfiguration configuration)
     {
       this.credentials = credentials;
-      this.server = new HawkServer(configuration);
+      this.server = new HawkServer.Builder().configuration(configuration).build();
     }
 
     @Override

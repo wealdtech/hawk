@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.BaseEncoding;
+import com.google.inject.Inject;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
@@ -55,22 +56,23 @@ public class HawkServer
   private final HawkServerConfiguration configuration;
   private LoadingCache<String, Boolean> nonces;
 
-  /**
-   * Create an instance of the Hawk server with default configuration.
-   */
-  public HawkServer()
-  {
-    this.configuration = new HawkServerConfiguration.Builder().build();
-    initializeCache();
-  }
-
+//  /**
+//   * Create an instance of the Hawk server with default configuration.
+//   */
+//  public HawkServer()
+//  {
+//    this.configuration = new HawkServerConfiguration.Builder().build();
+//    initializeCache();
+//  }
+//
   /**
    * Create an instance of the Hawk server with custom configuration.
    *
    * @param configuration
    *          the specific configuration
    */
-  public HawkServer(final HawkServerConfiguration configuration)
+  @Inject
+  private HawkServer(final HawkServerConfiguration configuration)
   {
     if (configuration == null)
     {
@@ -305,4 +307,44 @@ public class HawkServer
     return  bewit;
   }
 
+  public static class Builder
+  {
+    private HawkServerConfiguration configuration;
+
+    /**
+     * Generate a new builder.
+     */
+    public Builder()
+    {
+    }
+
+    /**
+     * Generate build with all values set from a prior object.
+     * @param prior the prior object
+     */
+    public Builder(final HawkServer prior)
+    {
+      this.configuration = prior.configuration;
+    }
+
+    /**
+     * Override the existing configuration.
+     * @param configuration the new configuration
+     * @return The builder
+     */
+    public Builder configuration(final HawkServerConfiguration configuration)
+    {
+      this.configuration = configuration;
+      return this;
+    }
+
+    /**
+     * Build the server
+     * @return a new server
+     */
+    public HawkServer build()
+    {
+      return new HawkServer(this.configuration);
+    }
+  }
 }

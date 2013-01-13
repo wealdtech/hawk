@@ -29,6 +29,7 @@ import com.wealdtech.hawk.Hawk.PayloadValidation;
  * Configuration for a Hawk client. The Hawk client has a number of
  * configuration parameters. These are as follows:
  * <ul>
+ * <li>pathPrefix: the path prefix for which the client should add authentication.  Defaults to <code>null</code> for everything</li>
  * <li>payloadValidation: if payload validation should take place.  Defaults to <code>NEVER</code></li>
  * </ul>
  * This is configured as a standard Jackson object and can be realized as part
@@ -36,6 +37,7 @@ import com.wealdtech.hawk.Hawk.PayloadValidation;
  */
 public class HawkClientConfiguration implements Comparable<HawkClientConfiguration>
 {
+  private String pathPrefix = null;
   private PayloadValidation payloadValidation = PayloadValidation.NEVER;
 
   /**
@@ -50,12 +52,19 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
    * Note that this should not be called directly, and the Builder should be
    * used for instantiation.
    *
+   * @param pathPrefix
+   *          which requests to authenticate, or <code>null</code> for the default
    * @param payloadValidation
    *          how to validate against payloads, or <code>null</code> for the default
    */
   @JsonCreator
-  private HawkClientConfiguration(@JsonProperty("payloadvalidation") final PayloadValidation payloadValidation) throws DataError
+  private HawkClientConfiguration(@JsonProperty("pathprefix") final String pathPrefix,
+                                  @JsonProperty("payloadvalidation") final PayloadValidation payloadValidation) throws DataError
   {
+    if (pathPrefix != null)
+    {
+      this.pathPrefix = pathPrefix;
+    }
     if (payloadValidation != null)
     {
       this.payloadValidation = payloadValidation;
@@ -68,6 +77,11 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
     checkNotNull(this.payloadValidation, "Payload validation setting is required");
   }
 
+  public String getPathPrefix()
+  {
+    return this.pathPrefix;
+  }
+
   public PayloadValidation getPayloadValidation()
   {
     return this.payloadValidation;
@@ -78,6 +92,7 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
   public String toString()
   {
     return Objects.toStringHelper(this)
+                  .add("pathPrefix", this.getPathPrefix())
                   .add("payloadValidation", this.getPayloadValidation())
                   .toString();
   }
@@ -91,19 +106,21 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
   @Override
   public int hashCode()
   {
-    return Objects.hashCode(this.getPayloadValidation());
+    return Objects.hashCode(this.getPathPrefix(), this.getPayloadValidation());
   }
 
   @Override
   public int compareTo(final HawkClientConfiguration that)
   {
     return ComparisonChain.start()
+                          .compare(this.getPathPrefix(), that.getPathPrefix())
                           .compare(this.getPayloadValidation(), that.getPayloadValidation())
                           .result();
   }
 
   public static class Builder
   {
+    String pathPrefix;
     PayloadValidation payloadValidation;
 
     /**
@@ -119,12 +136,24 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
      */
     public Builder(final HawkClientConfiguration prior)
     {
+      this.pathPrefix = prior.pathPrefix;
       this.payloadValidation = prior.payloadValidation;
     }
 
     /**
+     * Override the default path prefix
+     * @param pathPrefix the new path prefix value
+     * @return The builder
+     */
+    public Builder pathPrefix(final String pathPrefix)
+    {
+      this.pathPrefix = pathPrefix;
+      return this;
+    }
+
+    /**
      * Override the default handling of payload validation.
-     * @param payloadValidation
+     * @param payloadValidation the new payload validation value
      * @return The builder
      */
     public Builder payloadValidation(final PayloadValidation payloadValidation)
@@ -141,7 +170,7 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
      */
     public HawkClientConfiguration build() throws DataError
     {
-      return new HawkClientConfiguration(this.payloadValidation);
+      return new HawkClientConfiguration(this.pathPrefix, this.payloadValidation);
     }
   }
 }

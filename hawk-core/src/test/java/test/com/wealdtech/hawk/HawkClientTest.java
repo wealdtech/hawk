@@ -21,10 +21,12 @@ import static org.testng.Assert.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.wealdtech.hawk.HawkClient;
+import com.wealdtech.hawk.HawkClientConfiguration;
 import com.wealdtech.hawk.HawkCredentials;
 
 public class HawkClientTest
@@ -60,6 +62,12 @@ public class HawkClientTest
                                                .build();
     this.validuri1 = new URI("http://localhost:18234/testpath/subpath?param1=val1&param2=val2");
     this.validuri2 = new URI("http://localhost:18234/v1/usergroups/");
+  }
+
+  @AfterClass
+  public void tearDown() throws Exception
+  {
+    this.server.stop();
   }
 
   @Test
@@ -121,15 +129,33 @@ public class HawkClientTest
     assertTrue(client1.isValidFor("/test/test2"));
     assertTrue(client1.isValidFor(null));
 
-    final HawkClient client2 = new HawkClient.Builder().credentials(this.testcredentials1).pathPrefix("/foo").build();
+    HawkClientConfiguration clientConfiguration = new HawkClientConfiguration.Builder()
+                                                                             .pathPrefix("/foo")
+                                                                             .build();
+    final HawkClient client2 = new HawkClient.Builder()
+                                             .credentials(this.testcredentials1)
+                                             .configuration(clientConfiguration)
+                                             .build();
     assertTrue(client2.isValidFor("/foo"));
     assertFalse(client2.isValidFor("/test/test2"));
 
-    final HawkClient client3 = new HawkClient.Builder().credentials(this.testcredentials1).pathPrefix("/test/").build();
+    clientConfiguration = new HawkClientConfiguration.Builder(clientConfiguration)
+                                                     .pathPrefix("/test/")
+                                                     .build();
+    final HawkClient client3 = new HawkClient.Builder()
+                                             .credentials(this.testcredentials1)
+                                             .configuration(clientConfiguration)
+                                             .build();
     assertTrue(client3.isValidFor("/test/test2"));
     assertFalse(client3.isValidFor("/testtest2"));
 
-    final HawkClient client4 = new HawkClient.Builder().credentials(this.testcredentials1).pathPrefix("").build();
+    clientConfiguration = new HawkClientConfiguration.Builder(clientConfiguration)
+                                                     .pathPrefix("")
+                                                     .build();
+    final HawkClient client4 = new HawkClient.Builder()
+                                             .credentials(this.testcredentials1)
+                                             .configuration(clientConfiguration)
+                                             .build();
     assertTrue(client4.isValidFor(""));
     assertTrue(client4.isValidFor(null));
   }

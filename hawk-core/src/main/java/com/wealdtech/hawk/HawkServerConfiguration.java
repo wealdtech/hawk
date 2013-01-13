@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
+import com.google.inject.Inject;
 import com.wealdtech.DataError;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
 
@@ -49,9 +50,16 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   private Long nonceCacheSize = 10000L;
 
   /**
+   * Inject a default configuration if none supplied elsewhere
+   */
+  @Inject
+  private HawkServerConfiguration()
+  {
+  }
+
+  /**
    * Create a configuration with specified values for all options.
-   * Note that this should not be called directly, and the Builder should be
-   * used for instantiation.
+   * Used by builders and ConfigurationSource.
    *
    * @param ntpServer
    *          the name of an NTP server, or <code>null</code> for the default
