@@ -1,5 +1,5 @@
 dependencies {
-    compile('com.wealdtech:wealdtech-core:1.0.0') { changing=true }
+    compile('com.wealdtech:wealdtech-core:1.1.0') { changing=true }
     compile 'com.google.guava:guava:14.0-rc1'
 }
 
