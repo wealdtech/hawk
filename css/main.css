@@ -50,8 +50,8 @@ nav ul li a {
   margin-left: 0;
   margin-right: 0;
   padding-left: 36px;
-  font-size: 24px;
-  line-height: 32px;
+  font-size: 16px;
+  line-height: 24px;
   text-align: left;
   text-decoration: none;
   color: #FFDE17;
@@ -94,8 +94,8 @@ nav ul li.twitter a {
   height: 66%;
   padding: 1%;
   text-align: left;
-  font-size: 24px;
-  line-height: 32px;
+  font-size: 16px;
+  line-height: 24px;
   overflow: auto;
 }
 
@@ -112,17 +112,16 @@ footer {
 }
 
 h1 {
-  font-size: 44px;
-  line-height: 48px;
+  font-size: 28px;
+  line-height: 32px;
 }
 
 h2 {
-  font-size: 28px;
-  line-height: 44px;
-  padding: 22px 0;
+  font-size: 24px;
+  line-height: 28px;
 }
 
 p {
-  padding-bottom: 22px;
+  padding-bottom: 14px;
 }
 
