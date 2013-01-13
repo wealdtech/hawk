@@ -18,26 +18,26 @@ If you are using Jersey to generate HTTP requests then you can use the Hawk Jers
 
 Hawk authentication is implemented as a Jersey client filter.  The first thing you will need to do is provide a set of Hawk credentials, for example:
 
-<code>
+<pre>
 HawkCredentials hawkCredentials = new HawkCredentials.Builder()
                                                      .keyId("dh37fgj492je")
                                                      .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
                                                      .algorithm(HawkCredentials.Algorithm.SHA256)
                                                      .build();
-</code>
+</pre>
 
 Once these have been configuration you can create a Hawk client:
 
-<code>
+<pre>
 HawkClient hawkClient = new HawkClient.Builder().credentials(hawkCredentials).build();
-</code>
+</pre>
 
 And finally you need to add the authorization filter to the Jersey client, for example:
 
-<code>
+<pre>
 Client client = Client.create(new DefaultConfig());
 client.addFilter(new HawkAuthorizationFilter(this.hawkClient));
-</code>
+</pre>
 
 At this point all requests sent from the client will contain a Hawk Authentication header.
 
