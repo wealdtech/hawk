@@ -1,0 +1,55 @@
+---
+layout: default
+title: Testing Your Hawk Implementation
+---
+
+<h1>Testing your Hawk Client</h1>
+Once you have a Hawk client implementation ready for testing you can run it against a server which has been set up using this Java implementation.  The full details of how to test are as follows:
+
+<h2>The Server</h2>
+The server is available at http://hawk.wealdtech.com/.  It has a single resource available, at http://hawk.wealdtech.com/helloworld, which accepts both GET and POST requests.
+
+<h2>Server Credentials</h2>
+There are two users configured on the server, Steve and John.  Their Hawk credentials are shown below, and can be used when testing authentication against the server.
+
+<h3>Steve</h3>
+First set of Hawk credentials:
+<dl>
+  <dt>Key ID</dt>
+  <dd>dh37fgj492je</dd>
+  <dt>Key</dt>
+  <dd>werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn</dd>
+  <dt>Algorithm</dt>
+  <dd>SHA-256</dd>
+</dl>
+<p/>
+Second set of Hawk credentials:
+<dl>
+  <dt>Key ID</dt>
+  <dd>m971bc0s34bs</dd>
+  <dt>Key</dt>
+  <dd>l01xyW713Mmnvt7kKasGOaWelnoawgp9aq239vgilr</dd>
+  <dt>Algorithm</dt>
+  <dd>SHA-256</dd>
+</dl>
+
+<h3>John</h3>
+Only set of Hawk credentials:
+<dl>
+  <dt>Key ID</dt>
+  <dd>jns7y9824hus</dd>
+  <dt>Key</dt>
+  <dd>mb708923nzgr87t4fsnt48ufnjt4y98zjkby98t43tw</dd>
+  <dt>Algorithm</dt>
+  <dd>SHA-256</dd>
+</dl>
+
+<h2>Server Responses</h2>
+On a successful authentication the server will responde with "Hello <em>name</em>", where <em>name</em> is the name of the user whose credentials you used to authenticate the request.  On an unsuccessful authentication the server will return a status of 401 and a JSON output that will contain some additional information about why the authentication failed.
+
+<h2>Unexpected Error Responses</h2>
+If it appears that the server is providing an incorrect response please <a href="http://github.com/wealdtech/hawk/issues">raise this as an issue</a> and it will be investigated.  When raising such issues please ensure that you provide the full authentication header or bewit being sent, as well as the text string from which the MAC is composed.
+
+<h1>Testing your Hawk Server</h1>
+This is being investigated.
+<p/>
