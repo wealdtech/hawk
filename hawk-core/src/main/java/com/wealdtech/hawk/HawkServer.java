@@ -125,7 +125,7 @@ public class HawkServer
     confirmTimestampWithinBounds(authorizationHeaders.get("ts"));
 
     // Ensure that this is not a replay of a previous request
-    confirmUniqueNonce(authorizationHeaders.get("nonce"));
+    confirmUniqueNonce(authorizationHeaders.get("nonce") + authorizationHeaders.get("ts") + authorizationHeaders.get("id"));
 
     // Ensure that the MAC is correct
     final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.HEADER, Long.valueOf(authorizationHeaders.get("ts")), uri, authorizationHeaders.get("nonce"), method, hash, authorizationHeaders.get("ext"));
