@@ -16,12 +16,13 @@
 
 package test.com.wealdtech.hawk;
 
-import static org.testng.Assert.*;
-
 import org.testng.annotations.Test;
 
 import com.wealdtech.DataError;
 import com.wealdtech.hawk.HawkCredentials;
+import com.wealdtech.hawk.HawkCredentials.Algorithm;
+
+import static org.testng.Assert.*;
 
 public class HawkCredentialsTest
 {
@@ -91,6 +92,26 @@ public class HawkCredentialsTest
       new HawkCredentials.Builder().keyId("testkeyid").key("testkey").algorithm(null).build();
       // Should not reach here
       fail();
+    }
+    catch (DataError de)
+    {
+      // Good
+    }
+  }
+
+  @Test
+  public void testValidAlgorithm() throws DataError
+  {
+    Algorithm.parse("sha256");
+  }
+
+  @Test
+  public void testInvalidAlgorithm() throws DataError
+  {
+    try
+    {
+      Algorithm.parse("invalid");
+      fail("Algoritm accepted invalid value");
     }
     catch (DataError de)
     {

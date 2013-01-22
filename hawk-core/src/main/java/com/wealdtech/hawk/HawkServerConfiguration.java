@@ -16,8 +16,6 @@
 
 package com.wealdtech.hawk;
 
-import static com.wealdtech.Preconditions.*;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
@@ -25,6 +23,8 @@ import com.google.common.collect.ComparisonChain;
 import com.google.inject.Inject;
 import com.wealdtech.DataError;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
+
+import static com.wealdtech.Preconditions.*;
 
 /**
  * Configuration for a Hawk server. The Hawk server has a number of
@@ -43,7 +43,6 @@ import com.wealdtech.hawk.Hawk.PayloadValidation;
  */
 public class HawkServerConfiguration implements Comparable<HawkServerConfiguration>
 {
-  private String ntpServer = "pool.ntp.org";
   private Long timestampSkew = 60L;
   private Boolean bewitAllowed = true;
   private PayloadValidation payloadValidation = PayloadValidation.IFPRESENT;
@@ -61,8 +60,6 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
    * Create a configuration with specified values for all options.
    * Used by builders and ConfigurationSource.
    *
-   * @param ntpServer
-   *          the name of an NTP server, or <code>null</code> for the default
    * @param timestampSkew
    *          the maximum number of seconds of skew to allow between client and
    *          server, or <code>null</code> for the default
@@ -74,16 +71,11 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
    *          the maximum nubmer of nonces to hold in cache, or <code>null</code> for the default
    */
   @JsonCreator
-  private HawkServerConfiguration(@JsonProperty("ntpserver") final String ntpServer,
-                                  @JsonProperty("timestampskew") final Long timestampSkew,
+  private HawkServerConfiguration(@JsonProperty("timestampskew") final Long timestampSkew,
                                   @JsonProperty("bewitallowed") final Boolean bewitAllowed,
                                   @JsonProperty("payloadvalidation") final PayloadValidation payloadValidation,
                                   @JsonProperty("noncecachesize") final Long nonceCacheSize) throws DataError
   {
-    if (ntpServer != null)
-    {
-      this.ntpServer = ntpServer;
-    }
     if (timestampSkew != null)
     {
       this.timestampSkew = timestampSkew;
@@ -105,18 +97,12 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
 
   private void validate() throws DataError
   {
-    checkNotNull(this.ntpServer, "The NTP server is required");
     checkNotNull(this.timestampSkew, "The timestamp skew is required");
     checkArgument((this.timestampSkew >= 0), "The timestamp may not be negative");
     checkNotNull(this.bewitAllowed, "Allowance of bewits is required");
     checkNotNull(this.payloadValidation, "Payload validation setting is required");
     checkNotNull(this.nonceCacheSize, "The nonce cache size is required");
     checkArgument((this.nonceCacheSize >= 0), "The nonce cache size may not be negative");
-  }
-
-  public String getNtpServer()
-  {
-    return this.ntpServer;
   }
 
   public Long getTimestampSkew()
@@ -144,7 +130,6 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   public String toString()
   {
     return Objects.toStringHelper(this)
-                  .add("ntpServer", this.getNtpServer())
                   .add("timestampSkew", this.getTimestampSkew())
                   .add("bewitAllowed", this.isBewitAllowed())
                   .add("payloadValidation", this.getPayloadValidation())
@@ -161,14 +146,13 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   @Override
   public int hashCode()
   {
-    return Objects.hashCode(this.getNtpServer(), this.getTimestampSkew(), this.isBewitAllowed(), this.getPayloadValidation(), this.getNonceCacheSize());
+    return Objects.hashCode(this.getTimestampSkew(), this.isBewitAllowed(), this.getPayloadValidation(), this.getNonceCacheSize());
   }
 
   @Override
   public int compareTo(final HawkServerConfiguration that)
   {
     return ComparisonChain.start()
-                          .compare(this.getNtpServer(), that.getNtpServer())
                           .compare(this.getTimestampSkew(), that.getTimestampSkew())
                           .compare(this.isBewitAllowed(), that.isBewitAllowed())
                           .compare(this.getPayloadValidation(), that.getPayloadValidation())
@@ -178,11 +162,10 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
 
   public static class Builder
   {
-    String ntpServer;
-    Long timestampSkew;
-    Boolean bewitAllowed;
-    PayloadValidation payloadValidation;
-    Long nonceCacheSize;
+    private Long timestampSkew;
+    private Boolean bewitAllowed;
+    private PayloadValidation payloadValidation;
+    private Long nonceCacheSize;
 
     /**
      * Generate a new builder.
@@ -197,22 +180,10 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
      */
     public Builder(final HawkServerConfiguration prior)
     {
-      this.ntpServer = prior.ntpServer;
       this.timestampSkew = prior.timestampSkew;
       this.bewitAllowed = prior.bewitAllowed;
       this.payloadValidation = prior.payloadValidation;
       this.nonceCacheSize = prior.nonceCacheSize;
-    }
-
-    /**
-     * Override the existing NTP server.
-     * @param ntpServer the new NTP server
-     * @return The builder
-     */
-    public Builder ntpServer(final String ntpServer)
-    {
-      this.ntpServer = ntpServer;
-      return this;
     }
 
     /**
@@ -267,7 +238,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
      */
     public HawkServerConfiguration build() throws DataError
     {
-      return new HawkServerConfiguration(this.ntpServer, this.timestampSkew, this.bewitAllowed, this.payloadValidation, this.nonceCacheSize);
+      return new HawkServerConfiguration(this.timestampSkew, this.bewitAllowed, this.payloadValidation, this.nonceCacheSize);
     }
   }
 }

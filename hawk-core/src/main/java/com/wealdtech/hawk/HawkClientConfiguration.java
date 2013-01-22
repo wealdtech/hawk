@@ -16,14 +16,15 @@
 
 package com.wealdtech.hawk;
 
-import static com.wealdtech.Preconditions.*;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Ordering;
 import com.wealdtech.DataError;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
+
+import static com.wealdtech.Preconditions.*;
 
 /**
  * Configuration for a Hawk client. The Hawk client has a number of
@@ -75,6 +76,7 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
   private void validate() throws DataError
   {
     checkNotNull(this.payloadValidation, "Payload validation setting is required");
+    checkArgument(this.pathPrefix == null || this.pathPrefix.startsWith("/"), "Path prefix must start with \"/\" if present");
   }
 
   public String getPathPrefix()
@@ -113,7 +115,7 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
   public int compareTo(final HawkClientConfiguration that)
   {
     return ComparisonChain.start()
-                          .compare(this.getPathPrefix(), that.getPathPrefix())
+                          .compare(this.getPathPrefix(), that.getPathPrefix(), Ordering.<String>natural().nullsFirst())
                           .compare(this.getPayloadValidation(), that.getPayloadValidation())
                           .result();
   }
