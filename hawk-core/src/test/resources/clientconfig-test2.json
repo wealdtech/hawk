@@ -1,0 +1,5 @@
+// Invalid configuration for a Hawk client
+{
+	"pathprefix":			5,
+	"payloadvalidation":	"never"
+}

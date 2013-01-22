@@ -16,8 +16,6 @@
 
 package com.wealdtech.hawk;
 
-import static com.wealdtech.Preconditions.*;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -28,10 +26,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -41,11 +41,13 @@ import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
 
+import static com.wealdtech.Preconditions.*;
+
 /**
  * The Hawk server. Note that this is not an HTTP server in itself, but provides
  * the backbone of any Hawk implementation within an HTTP server.
  */
-public class HawkServer
+public class HawkServer implements Comparable<HawkServer>
 {
   private static final Splitter WHITESPACESPLITTER = Splitter.onPattern("\\s+").limit(2);
   private static final Pattern FIELDPATTERN = Pattern.compile("([^=]*)\\s*=\\s*\"([^\"]*)[,\"\\s]*");
@@ -105,17 +107,18 @@ public class HawkServer
    * @param method the method of the request
    * @param authorizationHeaders the Hawk authentication headers
    * @param hash the hash of the body, if available
+   * @param hasBody <code>true</code> if the request has a body, <code>false</code> if not
    * @throws DataError if the authentication fails due to incorrect or missing data
    * @throws ServerError if there is a problem with the server whilst authenticating
    */
-  public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationHeaders, final String hash) throws DataError, ServerError
+  public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationHeaders, final String hash, final boolean hasBody) throws DataError, ServerError
   {
     // Ensure that the required fields are present
     checkNotNull(authorizationHeaders.get("ts"), "The timestamp was not supplied");
     checkNotNull(authorizationHeaders.get("nonce"), "The nonce was not supplied");
     checkNotNull(authorizationHeaders.get("id"), "The id was not supplied");
     checkNotNull(authorizationHeaders.get("mac"), "The mac was not supplied");
-    if (this.configuration.getPayloadValidation().equals(PayloadValidation.MANDATORY))
+    if ((this.configuration.getPayloadValidation().equals(PayloadValidation.MANDATORY)) && (hasBody))
     {
       checkNotNull(authorizationHeaders.get("hash"), "The payload hash was not supplied");
       checkNotNull(hash, "The payload hash could not be calculated");
@@ -144,6 +147,9 @@ public class HawkServer
   {
     final String bewit = extractBewit(uri);
     final ImmutableMap<String, String> bewitFields = splitBewit(bewit);
+    checkNotNull(bewitFields.get("id"), "ID missing from bewit");
+    checkNotNull(bewitFields.get("expiry"), "Expiry missing from bewit");
+    checkNotNull(bewitFields.get("mac"), "MAC missing from bewit");
     checkState((credentials.getKeyId().equals(bewitFields.get("id"))), "The id in the bewit is not recognised");
     final Long expiry = Long.parseLong(bewitFields.get("expiry"));
 
@@ -213,8 +219,6 @@ public class HawkServer
     StringBuilder sb = new StringBuilder(64);
     sb.append("Hawk ts=\"");
     sb.append(String.valueOf(System.currentTimeMillis() / 1000));
-    sb.append("\", ntp=\"");
-    sb.append(this.configuration.getNtpServer());
     sb.append('"');
 
     return sb.toString();
@@ -280,7 +284,16 @@ public class HawkServer
     final String decodedBewit = new String(BaseEncoding.base64().decode(bewit));
     List<String> bewitfields = Lists.newArrayList(BEWITSPLITTER.split(decodedBewit));
     checkState((bewitfields.size() == 4), "The bewit did not contain the correct number of values");
-    checkState((System.currentTimeMillis() / 1000 <= Long.parseLong(bewitfields.get(1))), "The bewit has expired");
+    long expiry;
+    try
+    {
+      expiry = Long.parseLong(bewitfields.get(1));
+    }
+    catch (NumberFormatException nfe)
+    {
+      throw new DataError.Bad("Timestamp is invalid");
+    }
+    checkState((System.currentTimeMillis() / 1000 <= expiry), "The bewit has expired");
 
     Map<String, String> bewitMap = Maps.newHashMap();
     bewitMap.put("id", bewitfields.get(0));
@@ -305,6 +318,35 @@ public class HawkServer
     checkState(m.find(), "The query string did not contain a bewit");
     final String bewit = m.group(1);
     return  bewit;
+  }
+
+  // Standard object methods follow
+  @Override
+  public String toString()
+  {
+    return Objects.toStringHelper(this)
+                  .add("configuration", this.configuration)
+                  .toString();
+  }
+
+  @Override
+  public boolean equals(final Object that)
+  {
+    return (that instanceof HawkServer) && (this.compareTo((HawkServer)that) == 0);
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return Objects.hashCode(this.configuration);
+  }
+
+  @Override
+  public int compareTo(final HawkServer that)
+  {
+    return ComparisonChain.start()
+                          .compare(this.configuration, that.configuration)
+                          .result();
   }
 
   public static class Builder

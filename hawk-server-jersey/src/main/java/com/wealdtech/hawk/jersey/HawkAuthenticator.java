@@ -16,8 +16,6 @@
 
 package com.wealdtech.hawk.jersey;
 
-import static com.wealdtech.Preconditions.*;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -34,6 +32,8 @@ import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkServer;
 import com.wealdtech.jersey.auth.Authenticator;
 import com.wealdtech.jersey.auth.PrincipalProvider;
+
+import static com.wealdtech.Preconditions.*;
 
 /**
  * Authenticate a request using Hawk.
@@ -91,7 +91,7 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
     final String bewit = server.extractBewit(request.getRequestUri());
     final ImmutableMap<String, String> bewitFields = server.splitBewit(bewit);
     final Optional<T> principal = provider.get(bewitFields.get("id"));
-    if (principal == null)
+    if (!principal.isPresent())
     {
       // Could not find the principal, reject this authentication request
       return Optional.absent();
@@ -137,7 +137,8 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
         throw new DataError.Bad("Failed to read the message body to calculate hash");
       }
     }
-    this.server.authenticate(credentials, uri, method, authorizationHeaders, hash);
+    boolean hasBody = request.getHeaderValue(ContainerRequest.CONTENT_LENGTH) != null ? true : false;
+    this.server.authenticate(credentials, uri, method, authorizationHeaders, hash, hasBody);
     return principal;
   }
 }
