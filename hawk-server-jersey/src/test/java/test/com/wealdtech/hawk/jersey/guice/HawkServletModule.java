@@ -29,6 +29,7 @@ import com.google.common.collect.ObjectArrays;
 import com.google.inject.servlet.ServletModule;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
+import com.wealdtech.hawk.jersey.BodyPrefetchFilter;
 import com.wealdtech.hawk.jersey.HawkUnauthorizedFilter;
 import com.wealdtech.jersey.filters.ServerHeadersFilter;
 
@@ -57,7 +58,7 @@ public class HawkServletModule extends ServletModule
     params.put(PackagesResourceConfig.PROPERTY_PACKAGES, this.packages);
 
     // Add the authentication filter to requests and the unauthorized filter to responses
-    final String requestFilters = joinClassNames(HawkExampleUserAuthenticationFilter.class);
+    final String requestFilters = joinClassNames(BodyPrefetchFilter.class, HawkExampleUserAuthenticationFilter.class);
     final String responseFilters = joinClassNames(HawkUnauthorizedFilter.class, ServerHeadersFilter.class);
 
     params.put(PackagesResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, requestFilters);

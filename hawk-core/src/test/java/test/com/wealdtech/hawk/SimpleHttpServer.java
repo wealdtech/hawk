@@ -163,9 +163,12 @@ public class SimpleHttpServer
         hash = Hawk.calculateMac(this.credentials, CharStreams.toString(new InputStreamReader(exchange.getRequestBody(), "UTF-8")));
       }
 
+      // Need to know if there is a body present
+      // TODO what happens if the client fakes this information
+      boolean hasBody = exchange.getRequestHeaders().getFirst("Content-Length") != null ? true : false;
       try
       {
-        server.authenticate(this.credentials, uri, exchange.getRequestMethod(), authorizationHeaders, hash);
+        server.authenticate(this.credentials, uri, exchange.getRequestMethod(), authorizationHeaders, hash, hasBody);
         System.out.println("Authenticated by header");
         exchange.sendResponseHeaders(200, 0);
       }
