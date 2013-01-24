@@ -16,8 +16,6 @@
 
 package test.com.wealdtech.hawk;
 
-import static org.testng.Assert.*;
-
 import java.net.URI;
 
 import org.testng.annotations.BeforeClass;
@@ -25,7 +23,10 @@ import org.testng.annotations.Test;
 
 import com.wealdtech.DataError;
 import com.wealdtech.hawk.Hawk;
+import com.wealdtech.hawk.Hawk.AuthType;
 import com.wealdtech.hawk.HawkCredentials;
+
+import static org.testng.Assert.*;
 
 public class HawkTest
 {
@@ -92,4 +93,40 @@ public class HawkTest
   {
     Hawk.generateBewit(this.testhc1, this.testuri1, 240L, "extdata");
   }
+
+  @Test
+  public void testBadScheme() throws Exception
+  {
+    URI invalidSchemeUri= new URI("ftp://www.example.com/file");
+    try
+    {
+      Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, invalidSchemeUri, "testnonce", "GET", null, null);
+      fail("MAC calculated with invalid scheme");
+    }
+    catch (DataError de)
+    {
+      // Good
+    }
+  }
+
+  @Test
+  public void testValidAuthType() throws Exception
+  {
+    AuthType.parse("header");
+  }
+
+  @Test
+  public void testInvalidAuthType() throws Exception
+  {
+    try
+    {
+      AuthType.parse("invalid");
+      fail("AuthType accepted invalid value");
+    }
+    catch (DataError de)
+    {
+      // Good
+    }
+  }
+
 }
