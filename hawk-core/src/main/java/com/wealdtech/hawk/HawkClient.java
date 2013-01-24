@@ -16,16 +16,18 @@
 
 package com.wealdtech.hawk;
 
-import static com.wealdtech.Preconditions.*;
-
 import java.net.URI;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.ComparisonChain;
 import com.google.inject.Inject;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.utils.StringUtils;
 
-public class HawkClient
+import static com.wealdtech.Preconditions.checkNotNull;
+
+public class HawkClient implements Comparable<HawkClient>
 {
   private final HawkClientConfiguration configuration;
   private final HawkCredentials credentials;
@@ -100,6 +102,37 @@ public class HawkClient
   {
     return ((this.configuration.getPathPrefix() == null) ||
             ((path == null) || (path.startsWith(this.configuration.getPathPrefix()))));
+  }
+
+  // Standard object methods follow
+  @Override
+  public String toString()
+  {
+    return Objects.toStringHelper(this)
+                  .add("configuration", this.configuration)
+                  .add("credentials", this.credentials)
+                  .toString();
+  }
+
+  @Override
+  public boolean equals(final Object that)
+  {
+    return (that instanceof HawkClient) && (this.compareTo((HawkClient)that) == 0);
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return Objects.hashCode(this.configuration, this.credentials);
+  }
+
+  @Override
+  public int compareTo(final HawkClient that)
+  {
+    return ComparisonChain.start()
+                          .compare(this.configuration, that.configuration)
+                          .compare(this.credentials, that.credentials)
+                          .result();
   }
 
   public static class Builder

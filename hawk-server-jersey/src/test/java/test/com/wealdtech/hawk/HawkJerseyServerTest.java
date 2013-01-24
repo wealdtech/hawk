@@ -16,8 +16,6 @@
 
 package test.com.wealdtech.hawk;
 
-import static org.testng.Assert.*;
-
 import java.net.HttpURLConnection;
 import java.net.URI;
 
@@ -36,6 +34,8 @@ import com.wealdtech.hawk.Hawk.PayloadValidation;
 import com.wealdtech.hawk.HawkClient;
 import com.wealdtech.hawk.HawkClientConfiguration;
 import com.wealdtech.hawk.HawkCredentials;
+
+import static org.testng.Assert.assertEquals;
 
 public class HawkJerseyServerTest
 {
@@ -284,4 +284,16 @@ public class HawkJerseyServerTest
     final HttpURLConnection connection = connect(testUri, "GET", null, null);
     assertEquals(connection.getResponseCode(), 401);
   }
+
+  @Test
+  public void testInvalidBewit4() throws Exception
+  {
+    // Test a valid bewit that doesn't exist on the server
+    final HawkCredentials otherCredentials = new HawkCredentials.Builder(this.goodCredentials).keyId("someoneelse").build();
+    final String bewit = Hawk.generateBewit(otherCredentials, this.validuri1, 600L, null);
+    URI testUri = new URI(this.validuri1.toString() + "?bewit=" + bewit);
+    final HttpURLConnection connection = connect(testUri, "GET", null, null);
+    assertEquals(connection.getResponseCode(), 401);
+  }
+
 }
