@@ -31,6 +31,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.wealdtech.hawk.jersey.BodyPrefetchFilter;
 
 /**
  * A simple Jetty container to test Jersey Hawk authentication
@@ -64,6 +65,7 @@ public class SampleJettyServer
         return SampleJettyServer.this.injector;
       }
     });
+    context.addFilter(BodyPrefetchFilter.class, "/*", null);
     context.addFilter(GuiceFilter.class, "/*", null);
     context.addServlet(DefaultServlet.class, "/");
 

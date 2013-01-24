@@ -68,7 +68,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
    * @param payloadValidation
    *          how to validate against payloads, or <code>null</code> for the default
    * @param nonceCacheSize
-   *          the maximum nubmer of nonces to hold in cache, or <code>null</code> for the default
+   *          the maximum number of nonces to hold in cache, or <code>null</code> for the default
    */
   @JsonCreator
   private HawkServerConfiguration(@JsonProperty("timestampskew") final Long timestampSkew,
