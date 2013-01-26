@@ -11,7 +11,7 @@ To add Hawk to your project you need to include the following dependency:
     &lt;dependency&gt;
       &lt;groupId&gt;com.wealdtech.hawk&lt;/groupId&gt;
       &lt;artifactId&gt;hawk-core&lt;/artifactId&gt;
-      &lt;version&gt;0.5.0&lt;/version&gt;
+      &lt;version&gt;0.6.0&lt;/version&gt;
     &lt;/dependency&gt;
 </pre>
 
@@ -22,7 +22,7 @@ If you want your clients to authenticate using Hawk then you will need to start 
 HawkCredentials hawkCredentials = new HawkCredentials.Builder()
                                                      .keyId("dh37fgj492je")
                                                      .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
-                                                     .algorithm(HawkCredentials.Algorithm.SHA256)
+                                                     .algorithm(Algorithm.SHA256)
                                                      .build();
 </pre>
 
