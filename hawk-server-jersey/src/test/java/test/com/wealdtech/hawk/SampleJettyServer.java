@@ -31,7 +31,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.GuiceServletContextListener;
-import com.wealdtech.hawk.jersey.BodyPrefetchFilter;
+import com.wealdtech.jersey.BodyPrefetchFilter;
 
 /**
  * A simple Jetty container to test Jersey Hawk authentication
