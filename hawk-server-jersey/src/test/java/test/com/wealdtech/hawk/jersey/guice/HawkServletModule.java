@@ -30,7 +30,7 @@ import com.google.inject.servlet.ServletModule;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import com.wealdtech.hawk.jersey.HawkUnauthorizedFilter;
-import com.wealdtech.jersey.BodyPrefetchFilter;
+import com.wealdtech.jersey.filters.BodyPrefetchFilter;
 import com.wealdtech.jersey.filters.ServerHeadersFilter;
 
 /**

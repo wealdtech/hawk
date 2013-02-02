@@ -27,5 +27,5 @@ import com.wealdtech.jersey.auth.PrincipalProvider;
 public abstract class HawkPrincipalProvider<T> implements PrincipalProvider<T, String>
 {
   @Override
-  public abstract Optional<T> get(String key) throws DataError, ServerError;
+  public abstract Optional<T> getFromKey(String key) throws DataError, ServerError;
 }

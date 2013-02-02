@@ -90,7 +90,7 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
     checkState((request.getMethod().equals("GET")), "HTTP method %s not supported with bewit", request.getMethod());
     final String bewit = server.extractBewit(request.getRequestUri());
     final ImmutableMap<String, String> bewitFields = server.splitBewit(bewit);
-    final Optional<T> principal = provider.get(bewitFields.get("id"));
+    final Optional<T> principal = provider.getFromKey(bewitFields.get("id"));
     if (!principal.isPresent())
     {
       // Could not find the principal, reject this authentication request
@@ -118,7 +118,7 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
     String hash = null;
     final URI uri = request.getRequestUri();
     final String method = request.getMethod();
-    final Optional<T> principal = provider.get(authorizationHeaders.get("id"));
+    final Optional<T> principal = provider.getFromKey(authorizationHeaders.get("id"));
     if (!principal.isPresent())
     {
       // Could not find the principal, reject this authentication request
