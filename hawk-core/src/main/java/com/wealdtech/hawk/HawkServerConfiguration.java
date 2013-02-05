@@ -16,15 +16,14 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.inject.Inject;
-import com.wealdtech.DataError;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
-
-import static com.wealdtech.Preconditions.*;
 
 /**
  * Configuration for a Hawk server. The Hawk server has a number of
@@ -41,12 +40,16 @@ import static com.wealdtech.Preconditions.*;
  * This is configured as a standard Jackson object and can be realized as part
  * of a ConfigurationSource.
  */
-public class HawkServerConfiguration implements Comparable<HawkServerConfiguration>
+public final class HawkServerConfiguration implements Comparable<HawkServerConfiguration>
 {
-  private Long timestampSkew = 60L;
-  private Boolean bewitAllowed = true;
-  private PayloadValidation payloadValidation = PayloadValidation.IFPRESENT;
-  private Long nonceCacheSize = 10000L;
+  private final long timestampSkew;
+  private static final long TIMESTAMPSKEW_DEFAULT = 60L;
+  private final boolean bewitAllowed;
+  private static final boolean BEWITALLOWED_DEFAULT = true;
+  private final PayloadValidation payloadValidation;
+  private static final PayloadValidation PAYLOADVALIDATION_DEFAULT = PayloadValidation.IFPRESENT;
+  private final long nonceCacheSize;
+  private static final long NONCECACHESIZE_DEFAULT = 10000L;
 
   /**
    * Inject a default configuration if none supplied elsewhere
@@ -54,6 +57,7 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   @Inject
   private HawkServerConfiguration()
   {
+    this(null, null, null, null);
   }
 
   /**
@@ -74,28 +78,44 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
   private HawkServerConfiguration(@JsonProperty("timestampskew") final Long timestampSkew,
                                   @JsonProperty("bewitallowed") final Boolean bewitAllowed,
                                   @JsonProperty("payloadvalidation") final PayloadValidation payloadValidation,
-                                  @JsonProperty("noncecachesize") final Long nonceCacheSize) throws DataError
+                                  @JsonProperty("noncecachesize") final Long nonceCacheSize)
   {
-    if (timestampSkew != null)
+    if (timestampSkew == null)
+    {
+      this.timestampSkew = TIMESTAMPSKEW_DEFAULT;
+    }
+    else
     {
       this.timestampSkew = timestampSkew;
     }
-    if (bewitAllowed != null)
+    if (bewitAllowed == null)
+    {
+      this.bewitAllowed = BEWITALLOWED_DEFAULT;
+    }
+    else
     {
       this.bewitAllowed = bewitAllowed;
     }
-    if (payloadValidation != null)
+    if (payloadValidation == null)
+    {
+      this.payloadValidation = PAYLOADVALIDATION_DEFAULT;
+    }
+    else
     {
       this.payloadValidation = payloadValidation;
     }
-    if (nonceCacheSize != null)
+    if (nonceCacheSize == null)
+    {
+      this.nonceCacheSize = NONCECACHESIZE_DEFAULT;
+    }
+    else
     {
       this.nonceCacheSize = nonceCacheSize;
     }
     validate();
   }
 
-  private void validate() throws DataError
+  private void validate()
   {
     checkNotNull(this.timestampSkew, "The timestamp skew is required");
     checkArgument((this.timestampSkew >= 0), "The timestamp may not be negative");
@@ -234,9 +254,9 @@ public class HawkServerConfiguration implements Comparable<HawkServerConfigurati
      * Create a new Hawk server configuration from the defaults
      * and overrides provided.
      * @return The Hawk server configuration
-     * @throws DataError If the data provided is invalid for a Hawk server configuration
+     * @throws com.wealdtech.DataError If the data provided is invalid for a Hawk server configuration
      */
-    public HawkServerConfiguration build() throws DataError
+    public HawkServerConfiguration build()
     {
       return new HawkServerConfiguration(this.timestampSkew, this.bewitAllowed, this.payloadValidation, this.nonceCacheSize);
     }

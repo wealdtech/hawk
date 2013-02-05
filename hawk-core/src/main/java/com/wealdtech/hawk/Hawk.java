@@ -26,6 +26,7 @@ import java.util.Locale;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
@@ -37,6 +38,11 @@ import com.wealdtech.ServerError;
 public class Hawk
 {
   public static final String HAWKVERSION = "1";
+
+  protected static final long MILLISECONDS_IN_SECONDS = 1000L;
+
+  private static final int DEFAULT_HTTP_PORT = 80;
+  private static final int DEFAULT_HTTPS_PORT = 443;
 
   /**
    * Calculate and return a MAC. The MAC is used to sign the method and
@@ -68,9 +74,6 @@ public class Hawk
    * @throws DataError
    *           if there is an issue with the data that prevents creation of the
    *           MAC
-   * @throws ServerError
-   *           if there is an issue with the server that prevents creation of
-   *           the MAC
    */
   public static String calculateMAC(final HawkCredentials credentials,
                                     final AuthType authType,
@@ -79,7 +82,7 @@ public class Hawk
                                     final String nonce,
                                     final String method,
                                     final String hash,
-                                    final String ext) throws DataError, ServerError
+                                    final String ext)
   {
     // Check that required parameters are present
     checkNotNull(credentials, "Credentials are required but not supplied");
@@ -125,26 +128,7 @@ public class Hawk
     sb.append('\n');
     sb.append(uri.getHost().toLowerCase(Locale.ENGLISH));
     sb.append('\n');
-    if (uri.getPort() == -1)
-    {
-      // Default port
-      if ("http".equals(uri.getScheme()))
-      {
-        sb.append("80");
-      }
-      else if ("https".equals(uri.getScheme()))
-      {
-        sb.append("443");
-      }
-      else
-      {
-        throw new DataError.Bad("Unknown URI scheme \"" + uri.getScheme() + "\"");
-      }
-    }
-    else
-    {
-      sb.append(uri.getPort());
-    }
+    sb.append(getPort(uri));
     sb.append('\n');
     if ((authType.equals(AuthType.HEADER)) &&
         (hash != null))
@@ -152,13 +136,37 @@ public class Hawk
       sb.append(hash);
     }
     sb.append('\n');
-    if (ext != null)
-    {
-      sb.append(ext);
-    }
+    sb.append(Strings.nullToEmpty(ext));
     sb.append('\n');
 
     return calculateMac(credentials, sb.toString());
+  }
+
+  /**
+   * Obtain the port of a URI.
+   * @param uri the URI
+   * @return The port.
+   */
+  private static int getPort(final URI uri)
+  {
+    int port = uri.getPort();
+    if (port == -1)
+    {
+      // Default port
+      if ("http".equals(uri.getScheme()))
+      {
+        port = DEFAULT_HTTP_PORT;
+      }
+      else if ("https".equals(uri.getScheme()))
+      {
+        port = DEFAULT_HTTPS_PORT;
+      }
+      else
+      {
+        throw new DataError.Bad("Unknown URI scheme \"" + uri.getScheme() + "\"");
+      }
+    }
+    return port;
   }
 
   /**
@@ -172,11 +180,8 @@ public class Hawk
    * @throws DataError
    *           if there is an issue with the data that prevents creation of the
    *           MAC
-   * @throws ServerError
-   *           if there is an issue with the server that prevents creation of
-   *           the MAC
    */
-  public static String calculateMac(final HawkCredentials credentials, final String text) throws DataError, ServerError
+  public static String calculateMac(final HawkCredentials credentials, final String text)
   {
     try
     {
@@ -214,14 +219,11 @@ public class Hawk
    * @throws DataError
    *           if there is an issue with the data that prevents creation of the
    *           MAC
-   * @throws ServerError
-   *           if there is an issue with the server that prevents creation of
-   *           the MAC
    */
   public static String generateBewit(final HawkCredentials credentials,
                                      final URI uri,
                                      final Long ttl,
-                                     final String ext) throws DataError, ServerError
+                                     final String ext)
   {
     checkNotNull(credentials, "Credentials are required but not supplied");
     checkNotNull(uri, "URI is required but not supplied");
@@ -229,7 +231,7 @@ public class Hawk
     checkState((ttl > 0), "TTL must be a positive value");
 
     // Calculate expiry from ttl and current time
-    Long expiry = System.currentTimeMillis() / 1000L + ttl;
+    Long expiry = System.currentTimeMillis() / MILLISECONDS_IN_SECONDS + ttl;
     final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, uri, null, null, null, ext);
 
     final StringBuffer sb = new StringBuffer(256);
@@ -265,7 +267,7 @@ public class Hawk
     }
 
     @JsonCreator
-    public static AuthType parse(final String authType) throws DataError
+    public static AuthType parse(final String authType)
     {
       try
       {
@@ -304,7 +306,7 @@ public class Hawk
     }
 
     @JsonCreator
-    public static PayloadValidation parse(final String payloadValidation) throws DataError
+    public static PayloadValidation parse(final String payloadValidation)
     {
       try
       {

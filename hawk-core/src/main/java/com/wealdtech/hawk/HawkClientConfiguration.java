@@ -16,15 +16,14 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
-import com.wealdtech.DataError;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
-
-import static com.wealdtech.Preconditions.*;
 
 /**
  * Configuration for a Hawk client. The Hawk client has a number of
@@ -60,7 +59,7 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
    */
   @JsonCreator
   private HawkClientConfiguration(@JsonProperty("pathprefix") final String pathPrefix,
-                                  @JsonProperty("payloadvalidation") final PayloadValidation payloadValidation) throws DataError
+                                  @JsonProperty("payloadvalidation") final PayloadValidation payloadValidation)
   {
     if (pathPrefix != null)
     {
@@ -73,7 +72,7 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
     validate();
   }
 
-  private void validate() throws DataError
+  private void validate()
   {
     checkNotNull(this.payloadValidation, "Payload validation setting is required");
     checkArgument(this.pathPrefix == null || this.pathPrefix.startsWith("/"), "Path prefix must start with \"/\" if present");
@@ -122,8 +121,8 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
 
   public static class Builder
   {
-    String pathPrefix;
-    PayloadValidation payloadValidation;
+    private String pathPrefix;
+    private PayloadValidation payloadValidation;
 
     /**
      * Generate a new builder.
@@ -168,9 +167,9 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
      * Create a new Hawk client configuration from the defaults
      * and overrides provided.
      * @return The Hawk client configuration
-     * @throws DataError If the data provided is invalid for a Hawk client configuration
+     * @throws com.wealdtech.DataError If the data provided is invalid for a Hawk client configuration
      */
-    public HawkClientConfiguration build() throws DataError
+    public HawkClientConfiguration build()
     {
       return new HawkClientConfiguration(this.pathPrefix, this.payloadValidation);
     }

@@ -17,8 +17,6 @@
 package com.wealdtech.hawk.jersey;
 
 import com.google.common.base.Optional;
-import com.wealdtech.DataError;
-import com.wealdtech.ServerError;
 import com.wealdtech.jersey.auth.PrincipalProvider;
 
 /**
@@ -27,5 +25,5 @@ import com.wealdtech.jersey.auth.PrincipalProvider;
 public abstract class HawkPrincipalProvider<T> implements PrincipalProvider<T, String>
 {
   @Override
-  public abstract Optional<T> getFromKey(String key) throws DataError, ServerError;
+  public abstract Optional<T> getFromKey(String key);
 }
