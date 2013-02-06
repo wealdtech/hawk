@@ -16,14 +16,14 @@
 
 package com.wealdtech.hawk;
 
-import static com.wealdtech.Preconditions.*;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.inject.Inject;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
+
+import static com.wealdtech.Preconditions.*;
 
 /**
  * Configuration for a Hawk server. The Hawk server has a number of
@@ -42,14 +42,10 @@ import com.wealdtech.hawk.Hawk.PayloadValidation;
  */
 public final class HawkServerConfiguration implements Comparable<HawkServerConfiguration>
 {
-  private final long timestampSkew;
-  private static final long TIMESTAMPSKEW_DEFAULT = 60L;
-  private final boolean bewitAllowed;
-  private static final boolean BEWITALLOWED_DEFAULT = true;
-  private final PayloadValidation payloadValidation;
-  private static final PayloadValidation PAYLOADVALIDATION_DEFAULT = PayloadValidation.IFPRESENT;
-  private final long nonceCacheSize;
-  private static final long NONCECACHESIZE_DEFAULT = 10000L;
+  private long timestampSkew = 60L;
+  private boolean bewitAllowed = true;
+  private PayloadValidation payloadValidation = PayloadValidation.IFPRESENT;
+  private long nonceCacheSize = 10000L;
 
   /**
    * Inject a default configuration if none supplied elsewhere
@@ -80,35 +76,19 @@ public final class HawkServerConfiguration implements Comparable<HawkServerConfi
                                   @JsonProperty("payloadvalidation") final PayloadValidation payloadValidation,
                                   @JsonProperty("noncecachesize") final Long nonceCacheSize)
   {
-    if (timestampSkew == null)
-    {
-      this.timestampSkew = TIMESTAMPSKEW_DEFAULT;
-    }
-    else
+    if (timestampSkew != null)
     {
       this.timestampSkew = timestampSkew;
     }
-    if (bewitAllowed == null)
-    {
-      this.bewitAllowed = BEWITALLOWED_DEFAULT;
-    }
-    else
+    if (bewitAllowed != null)
     {
       this.bewitAllowed = bewitAllowed;
     }
-    if (payloadValidation == null)
-    {
-      this.payloadValidation = PAYLOADVALIDATION_DEFAULT;
-    }
-    else
+    if (payloadValidation != null)
     {
       this.payloadValidation = payloadValidation;
     }
-    if (nonceCacheSize == null)
-    {
-      this.nonceCacheSize = NONCECACHESIZE_DEFAULT;
-    }
-    else
+    if (nonceCacheSize != null)
     {
       this.nonceCacheSize = nonceCacheSize;
     }

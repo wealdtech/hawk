@@ -16,14 +16,15 @@
 
 package com.wealdtech.hawk;
 
-import static com.wealdtech.Preconditions.*;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
+import com.wealdtech.configuration.Configuration;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
+
+import static com.wealdtech.Preconditions.*;
 
 /**
  * Configuration for a Hawk client. The Hawk client has a number of
@@ -35,7 +36,7 @@ import com.wealdtech.hawk.Hawk.PayloadValidation;
  * This is configured as a standard Jackson object and can be realized as part
  * of a ConfigurationSource.
  */
-public class HawkClientConfiguration implements Comparable<HawkClientConfiguration>
+public class HawkClientConfiguration implements Configuration, Comparable<HawkClientConfiguration>
 {
   private String pathPrefix = null;
   private PayloadValidation payloadValidation = PayloadValidation.NEVER;
@@ -45,6 +46,7 @@ public class HawkClientConfiguration implements Comparable<HawkClientConfigurati
    */
   public HawkClientConfiguration()
   {
+    // 0-configuration
   }
 
   /**
