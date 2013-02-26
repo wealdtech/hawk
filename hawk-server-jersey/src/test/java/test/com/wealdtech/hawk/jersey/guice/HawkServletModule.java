@@ -31,7 +31,7 @@ import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import com.wealdtech.hawk.jersey.HawkUnauthorizedFilter;
 import com.wealdtech.jersey.filters.BodyPrefetchFilter;
-import com.wealdtech.jersey.filters.ServerHeadersFilter;
+import com.wealdtech.jersey.filters.ServerHeaderFilter;
 
 /**
  * A Guice module to configure a Jetty server with servlets
@@ -59,7 +59,7 @@ public class HawkServletModule extends ServletModule
 
     // Add the authentication filter to requests and the unauthorized filter to responses
     final String requestFilters = joinClassNames(BodyPrefetchFilter.class, HawkExampleUserAuthenticationFilter.class);
-    final String responseFilters = joinClassNames(HawkUnauthorizedFilter.class, ServerHeadersFilter.class);
+    final String responseFilters = joinClassNames(HawkUnauthorizedFilter.class, ServerHeaderFilter.class);
 
     params.put(PackagesResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, requestFilters);
     params.put(PackagesResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, responseFilters);
