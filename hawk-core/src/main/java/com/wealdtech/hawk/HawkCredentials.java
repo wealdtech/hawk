@@ -34,7 +34,7 @@ import com.wealdtech.DataError;
  * Note that the key in the Hawk credentials is a shared secret, and should be
  * protected accordingly.
  */
-public class HawkCredentials implements Comparable<HawkCredentials>
+public final class HawkCredentials implements Comparable<HawkCredentials>
 {
   public enum Algorithm
   {
@@ -49,7 +49,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
     }
 
     @JsonCreator
-    public static Algorithm parse(final String algorithm) throws DataError
+    public static Algorithm parse(final String algorithm)
     {
       try
       {
@@ -65,16 +65,16 @@ public class HawkCredentials implements Comparable<HawkCredentials>
     }
   }
 
-  public final String keyId;
-  public final String key;
-  public final Algorithm algorithm;
+  private final String keyId;
+  private final String key;
+  private final Algorithm algorithm;
 
-  private final ImmutableMap<Algorithm, String> JAVAALGORITHMS = new ImmutableMap.Builder<Algorithm, String>()
-                                                                                 .put(Algorithm.SHA1, "HmacSHA1")
-                                                                                 .put(Algorithm.SHA256, "HmacSHA256")
-                                                                                 .build();
+  private static final ImmutableMap<Algorithm, String> JAVAALGORITHMS = new ImmutableMap.Builder<Algorithm, String>()
+                                                                                        .put(Algorithm.SHA1, "HmacSHA1")
+                                                                                        .put(Algorithm.SHA256, "HmacSHA256")
+                                                                                        .build();
 
-  private HawkCredentials(final String keyId, final String key, final Algorithm algorithm) throws DataError
+  private HawkCredentials(final String keyId, final String key, final Algorithm algorithm)
   {
     this.keyId = keyId;
     this.key = key;
@@ -89,7 +89,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
    *           if there is an issue with the data that prevents creation of the
    *           credentials
    */
-  private void validate() throws DataError
+  private void validate()
   {
     checkNotNull(this.keyId, "The key ID is required");
     checkNotNull(this.key, "The key is required");
@@ -176,9 +176,9 @@ public class HawkCredentials implements Comparable<HawkCredentials>
    */
   public static class Builder
   {
-    String keyId;
-    String key;
-    Algorithm algorithm;
+    private String keyId;
+    private String key;
+    private Algorithm algorithm;
 
     /**
      * Start a new builder.
@@ -248,7 +248,7 @@ public class HawkCredentials implements Comparable<HawkCredentials>
      *           if there is an issue with the data that prevents creation of
      *           the credentials
      */
-    public HawkCredentials build() throws DataError
+    public HawkCredentials build()
     {
       return new HawkCredentials(this.keyId, this.key, this.algorithm);
     }
