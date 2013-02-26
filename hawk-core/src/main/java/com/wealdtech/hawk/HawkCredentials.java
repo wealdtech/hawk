@@ -16,6 +16,8 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.util.Locale;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,8 +26,6 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 import com.wealdtech.DataError;
-
-import static com.wealdtech.Preconditions.checkNotNull;
 
 /**
  * HawkCredentials contains the information required to authenticate requests
@@ -70,8 +70,8 @@ public class HawkCredentials implements Comparable<HawkCredentials>
   public final Algorithm algorithm;
 
   private final ImmutableMap<Algorithm, String> JAVAALGORITHMS = new ImmutableMap.Builder<Algorithm, String>()
-                                                                                 .put(Algorithm.SHA1, "SHA-1")
-                                                                                 .put(Algorithm.SHA256, "SHA-256")
+                                                                                 .put(Algorithm.SHA1, "HmacSHA1")
+                                                                                 .put(Algorithm.SHA256, "HmacSHA256")
                                                                                  .build();
 
   private HawkCredentials(final String keyId, final String key, final Algorithm algorithm) throws DataError

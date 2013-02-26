@@ -20,9 +20,12 @@ import static com.wealdtech.Preconditions.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.security.MessageDigest;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -180,21 +183,42 @@ public class Hawk
   {
     try
     {
-      MessageDigest md = MessageDigest.getInstance(credentials.getJavaAlgorithm());
+      Mac mac = Mac.getInstance(credentials.getJavaAlgorithm());
       try
       {
-        md.update(text.getBytes("UTF-8"));
+        mac.init(new SecretKeySpec(credentials.getKey().getBytes("UTF-8"), credentials.getJavaAlgorithm()));
+        return BaseEncoding.base64().encode(mac.doFinal(text.getBytes("UTF-8")));
       }
       catch (UnsupportedEncodingException uee)
       {
         throw new ServerError("Unable to encode with UTF-8", uee);
       }
-      return BaseEncoding.base64().encode(md.digest(credentials.getKey().getBytes()));
+      catch (InvalidKeyException e)
+      {
+        throw new DataError.Bad("Invalid key", e);
+      }
     }
     catch (NoSuchAlgorithmException nsae)
     {
       throw new DataError.Bad("Unknown encryption algorithm", nsae);
     }
+//    try
+//    {
+//      MessageDigest md = MessageDigest.getInstance(credentials.getJavaAlgorithm());
+//      try
+//      {
+//        md.update(text.getBytes("UTF-8"));
+//      }
+//      catch (UnsupportedEncodingException uee)
+//      {
+//        throw new ServerError("Unable to encode with UTF-8", uee);
+//      }
+//      return BaseEncoding.base64().encode(md.digest(credentials.getKey().getBytes()));
+//    }
+//    catch (NoSuchAlgorithmException nsae)
+//    {
+//      throw new DataError.Bad("Unknown encryption algorithm", nsae);
+//    }
   }
 
   /**

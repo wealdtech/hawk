@@ -16,6 +16,8 @@
 
 package test.com.wealdtech.hawk;
 
+import static org.testng.Assert.*;
+
 import java.net.URI;
 
 import org.testng.annotations.BeforeClass;
@@ -25,8 +27,7 @@ import com.wealdtech.DataError;
 import com.wealdtech.hawk.Hawk;
 import com.wealdtech.hawk.Hawk.AuthType;
 import com.wealdtech.hawk.HawkCredentials;
-
-import static org.testng.Assert.*;
+import com.wealdtech.hawk.HawkCredentials.Algorithm;
 
 public class HawkTest
 {
@@ -50,28 +51,37 @@ public class HawkTest
   public void testMAC() throws Exception
   {
     String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri1, "testnonce", "GET", null, null);
-    assertEquals(testmac1, "yAyaat9VjarwY83O8iv/6Q40YkIrzIpxw1rM8NPB6dM=");
+    assertEquals(testmac1, "ST9uc4f43RcEx72niTPaj/3nADfjazou/wNODvi/SvM=");
   }
 
   @Test
   public void testHttpsMAC() throws Exception
   {
     String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 54321L, this.testuri2, "testnonce", "POST", null, null);
-    assertEquals(testmac1, "ZEtWFvxZUZel0BqGw6mJSfdZzVse+5ltv8jXSKcGrcg=");
+    assertEquals(testmac1, "afBpC1ZwH+s35f/OwKBoPLfrGQsQzEaKLpNM2ZG15Iw=");
   }
 
   @Test
   public void testExtDataMAC() throws Exception
   {
     String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri1, "testnonce", "GET", null, "Extra data");
-    assertEquals(testmac1, "1G+cw0tLT10b+IEno0PDwS2X4tMU0SG6KHIf2ivEMwI=");
+    assertEquals(testmac1, "ucCVBEnEMDICl5efmmgo4MnnObG2rStZq6a1o8yHPD8=");
   }
 
   @Test
   public void testRaw() throws Exception
   {
     String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri3, "testnonce", "GET", null, null);
-    assertEquals(testmac1, "fFBSTdQ/dx0DzRPA2hTmhp0wdk1ZqG9hjQISlz1bqg0=");
+    assertEquals(testmac1, "sbrKX3RkGZdLarMQEU6fmuBcFSlyVuTsOjBSeoeUp2I=");
+  }
+
+  @Test
+  public void testCorrectMethod() throws Exception
+  {
+    // Ensure that we are using the right method
+    final HawkCredentials testCredentials = new HawkCredentials.Builder().keyId("test").key("mysecretkey").algorithm(Algorithm.SHA256).build();
+    String testmac1 = Hawk.calculateMac(testCredentials, "myvalue");
+    assertEquals(testmac1, "C+QQeDUXTqKSPM4ZibEgFlPsXhJcSdU2sT48/fbeJtk=");
   }
 
   @Test
