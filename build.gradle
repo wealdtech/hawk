@@ -3,6 +3,7 @@ subprojects {
     apply plugin: 'eclipse'
     apply plugin: 'maven'
     apply plugin: 'signing'
+    apply plugin: 'sonar'
 
     repositories {
         mavenLocal()
@@ -17,7 +18,7 @@ subprojects {
     }
 
     group = 'com.wealdtech.hawk'
-    version = '0.6.1'
+    version = '0.7.0'
 
     task copyLibs (type: Copy) {
         into "$buildDir/output/libs"
@@ -92,4 +93,21 @@ subprojects {
             }
         }
     }
+
+  sonar
+  {
+    server
+    {
+      url="http://10.0.0.101:9000/"
+    }
+    database
+    {
+      url = "jdbc:h2:tcp://10.0.0.101/sonar"
+    }
+    project
+    {
+      language="java"
+      sourceEncoding = "UTF-8"
+    }
+  }
 }

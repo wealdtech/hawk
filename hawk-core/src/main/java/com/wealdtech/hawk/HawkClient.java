@@ -16,18 +16,17 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.net.URI;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.inject.Inject;
 import com.wealdtech.DataError;
-import com.wealdtech.ServerError;
 import com.wealdtech.utils.StringUtils;
 
-import static com.wealdtech.Preconditions.checkNotNull;
-
-public class HawkClient implements Comparable<HawkClient>
+public final class HawkClient implements Comparable<HawkClient>
 {
   private final HawkClientConfiguration configuration;
   private final HawkCredentials credentials;
@@ -48,7 +47,7 @@ public class HawkClient implements Comparable<HawkClient>
     validate();
   }
 
-  private void validate() throws DataError
+  private void validate()
   {
     checkNotNull(this.configuration, "The client configuration is required");
     checkNotNull(this.credentials, "The credentials are required");
@@ -63,14 +62,13 @@ public class HawkClient implements Comparable<HawkClient>
    * @param ext extra data, or <code>null</code> if none
    * @return The value for the Hawk authorization header.
    * @throws DataError If there is a problem with the data passed in which makes it impossible to generate a valid authorization header
-   * @throws ServerError If there is a server problem whilst generating the authorization header
    */
   public String generateAuthorizationHeader(final URI uri,
                                             final String method,
                                             final String hash,
-                                            final String ext) throws DataError, ServerError
+                                            final String ext)
   {
-    long timestamp = System.currentTimeMillis() / 1000;
+    long timestamp = System.currentTimeMillis() / Hawk.MILLISECONDS_IN_SECONDS;
     final String nonce = StringUtils.generateRandomString(6);
     final String mac = Hawk.calculateMAC(this.credentials, Hawk.AuthType.HEADER, timestamp, uri, nonce, method, hash, ext);
 
