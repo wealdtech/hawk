@@ -70,8 +70,8 @@ public final class HawkCredentials implements Comparable<HawkCredentials>
   private final Algorithm algorithm;
 
   private static final ImmutableMap<Algorithm, String> JAVAALGORITHMS = new ImmutableMap.Builder<Algorithm, String>()
-                                                                                        .put(Algorithm.SHA1, "SHA-1")
-                                                                                        .put(Algorithm.SHA256, "SHA-256")
+                                                                                        .put(Algorithm.SHA1, "HmacSHA1")
+                                                                                        .put(Algorithm.SHA256, "HmacSHA256")
                                                                                         .build();
 
   private HawkCredentials(final String keyId, final String key, final Algorithm algorithm)
