@@ -32,7 +32,7 @@ import com.wealdtech.hawk.HawkServer;
  */
 public class HawkUnauthorizedFilter implements ContainerResponseFilter
 {
-  private transient final HawkServer server;
+  private final transient HawkServer server;
 
   @Inject
   public HawkUnauthorizedFilter(final HawkServer server)

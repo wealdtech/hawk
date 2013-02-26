@@ -22,7 +22,6 @@ import java.net.URI;
 
 import com.google.common.net.HttpHeaders;
 import com.google.inject.Inject;
-import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
@@ -34,7 +33,7 @@ import com.wealdtech.hawk.HawkClient;
  */
 public class HawkAuthorizationFilter extends ClientFilter
 {
-  private transient final HawkClient client;
+  private final transient HawkClient client;
 
   @Inject
   public HawkAuthorizationFilter(final HawkClient client)
@@ -44,7 +43,7 @@ public class HawkAuthorizationFilter extends ClientFilter
   }
 
   @Override
-  public ClientResponse handle(final ClientRequest cr) throws ClientHandlerException
+  public ClientResponse handle(final ClientRequest cr)
   {
     if ((!cr.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) &&
         (client.isValidFor(cr.getURI().getRawPath())))
