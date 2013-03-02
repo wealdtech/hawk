@@ -61,6 +61,8 @@ public final class HawkServer implements Comparable<HawkServer>
   private static final String HEADER_ID = "id";
   private static final String HEADER_EXPIRY = "expiry";
   private static final String HEADER_EXT = "ext";
+  private static final String HEADER_APP = "app";
+  private static final String HEADER_DLG = "dlg";
 
   private static final int BEWIT_FIELDS = 4;
   private static final int BEWIT_FIELD_ID = 0;
@@ -133,7 +135,7 @@ public final class HawkServer implements Comparable<HawkServer>
     confirmUniqueNonce(authorizationHeaders.get(HEADER_NONCE) + authorizationHeaders.get(HEADER_TS) + authorizationHeaders.get(HEADER_ID));
 
     // Ensure that the MAC is correct
-    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.HEADER, Long.valueOf(authorizationHeaders.get(HEADER_TS)), uri, authorizationHeaders.get(HEADER_NONCE), method, hash, authorizationHeaders.get(HEADER_EXT));
+    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.HEADER, Long.valueOf(authorizationHeaders.get(HEADER_TS)), uri, authorizationHeaders.get(HEADER_NONCE), method, hash, authorizationHeaders.get(HEADER_EXT), authorizationHeaders.get(HEADER_APP), authorizationHeaders.get(HEADER_DLG));
     if (!timeConstantEquals(mac, authorizationHeaders.get(HEADER_MAC)))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
@@ -157,7 +159,7 @@ public final class HawkServer implements Comparable<HawkServer>
 
     final URI strippedUri = stripBewit(uri);
 
-    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, null, bewitFields.get(HEADER_EXT));
+    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, null, bewitFields.get(HEADER_EXT), null, null);
     if (!timeConstantEquals(calculatedMac, bewitFields.get(HEADER_MAC)))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");

@@ -50,28 +50,28 @@ public class HawkTest
   @Test
   public void testMAC() throws Exception
   {
-    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri1, "testnonce", "GET", null, null);
+    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri1, "testnonce", "GET", null, null, null, null);
     assertEquals(testmac1, "ST9uc4f43RcEx72niTPaj/3nADfjazou/wNODvi/SvM=");
   }
 
   @Test
   public void testHttpsMAC() throws Exception
   {
-    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 54321L, this.testuri2, "testnonce", "POST", null, null);
+    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 54321L, this.testuri2, "testnonce", "POST", null, null, null, null);
     assertEquals(testmac1, "afBpC1ZwH+s35f/OwKBoPLfrGQsQzEaKLpNM2ZG15Iw=");
   }
 
   @Test
   public void testExtDataMAC() throws Exception
   {
-    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri1, "testnonce", "GET", null, "Extra data");
+    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri1, "testnonce", "GET", null, "Extra data", null, null);
     assertEquals(testmac1, "ucCVBEnEMDICl5efmmgo4MnnObG2rStZq6a1o8yHPD8=");
   }
 
   @Test
   public void testRaw() throws Exception
   {
-    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri3, "testnonce", "GET", null, null);
+    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri3, "testnonce", "GET", null, null, null, null);
     assertEquals(testmac1, "sbrKX3RkGZdLarMQEU6fmuBcFSlyVuTsOjBSeoeUp2I=");
   }
 
@@ -110,7 +110,7 @@ public class HawkTest
     URI invalidSchemeUri= new URI("ftp://www.example.com/file");
     try
     {
-      Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, invalidSchemeUri, "testnonce", "GET", null, null);
+      Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, invalidSchemeUri, "testnonce", "GET", null, null, null, null);
       fail("MAC calculated with invalid scheme");
     }
     catch (DataError de)
