@@ -35,7 +35,7 @@ import com.wealdtech.jersey.exceptions.UnauthorizedException;
  */
 public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
 {
-  private transient final Authenticator<T> authenticator;
+  private final transient Authenticator<T> authenticator;
 
   @Context
   private transient HttpServletRequest servletrequest;

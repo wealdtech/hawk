@@ -72,7 +72,7 @@ public class ExampleUserService extends HawkPrincipalProvider<ExampleUser>
    * @return An Optional, containing the ExampleUser if they were found
    */
   @Override
-  public Optional<ExampleUser> get(final String hawkKeyId)
+  public Optional<ExampleUser> getFromKey(final String hawkKeyId)
   {
     return Optional.fromNullable(this.usermap.get(hawkKeyId));
   }

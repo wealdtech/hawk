@@ -16,6 +16,8 @@
 
 package com.wealdtech.hawk;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -41,13 +43,11 @@ import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
 
-import static com.wealdtech.Preconditions.*;
-
 /**
  * The Hawk server. Note that this is not an HTTP server in itself, but provides
  * the backbone of any Hawk implementation within an HTTP server.
  */
-public class HawkServer implements Comparable<HawkServer>
+public final class HawkServer implements Comparable<HawkServer>
 {
   private static final Splitter WHITESPACESPLITTER = Splitter.onPattern("\\s+").limit(2);
   private static final Pattern FIELDPATTERN = Pattern.compile("([^=]*)\\s*=\\s*\"([^\"]*)[,\"\\s]*");
@@ -55,18 +55,24 @@ public class HawkServer implements Comparable<HawkServer>
   private static final Splitter BEWITSPLITTER = Splitter.on('\\');
   private static final String BEWITREMOVEALMATCH = "bewit=[^&]*";
 
+  private static final String HEADER_MAC = "mac";
+  private static final String HEADER_TS = "ts";
+  private static final String HEADER_NONCE = "nonce";
+  private static final String HEADER_ID = "id";
+  private static final String HEADER_EXPIRY = "expiry";
+  private static final String HEADER_EXT = "ext";
+  private static final String HEADER_APP = "app";
+  private static final String HEADER_DLG = "dlg";
+
+  private static final int BEWIT_FIELDS = 4;
+  private static final int BEWIT_FIELD_ID = 0;
+  private static final int BEWIT_FIELD_EXPIRY = 1;
+  private static final int BEWIT_FIELD_MAC = 2;
+  private static final int BEWIT_FIELD_EXT = 3;
+
   private final HawkServerConfiguration configuration;
   private LoadingCache<String, Boolean> nonces;
 
-//  /**
-//   * Create an instance of the Hawk server with default configuration.
-//   */
-//  public HawkServer()
-//  {
-//    this.configuration = new HawkServerConfiguration.Builder().build();
-//    initializeCache();
-//  }
-//
   /**
    * Create an instance of the Hawk server with custom configuration.
    *
@@ -87,7 +93,7 @@ public class HawkServer implements Comparable<HawkServer>
     initializeCache();
   }
 
-  private final void initializeCache()
+  private void initializeCache()
   {
     this.nonces = CacheBuilder.newBuilder()
                               .expireAfterWrite(this.configuration.getTimestampSkew() * 2, TimeUnit.SECONDS)
@@ -108,16 +114,14 @@ public class HawkServer implements Comparable<HawkServer>
    * @param authorizationHeaders the Hawk authentication headers
    * @param hash the hash of the body, if available
    * @param hasBody <code>true</code> if the request has a body, <code>false</code> if not
-   * @throws DataError if the authentication fails due to incorrect or missing data
-   * @throws ServerError if there is a problem with the server whilst authenticating
    */
-  public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationHeaders, final String hash, final boolean hasBody) throws DataError, ServerError
+  public void authenticate(final HawkCredentials credentials, final URI uri, final String method, final ImmutableMap<String, String> authorizationHeaders, final String hash, final boolean hasBody)
   {
     // Ensure that the required fields are present
-    checkNotNull(authorizationHeaders.get("ts"), "The timestamp was not supplied");
-    checkNotNull(authorizationHeaders.get("nonce"), "The nonce was not supplied");
-    checkNotNull(authorizationHeaders.get("id"), "The id was not supplied");
-    checkNotNull(authorizationHeaders.get("mac"), "The mac was not supplied");
+    checkNotNull(authorizationHeaders.get(HEADER_TS), "The timestamp was not supplied");
+    checkNotNull(authorizationHeaders.get(HEADER_NONCE), "The nonce was not supplied");
+    checkNotNull(authorizationHeaders.get(HEADER_ID), "The id was not supplied");
+    checkNotNull(authorizationHeaders.get(HEADER_MAC), "The mac was not supplied");
     if ((this.configuration.getPayloadValidation().equals(PayloadValidation.MANDATORY)) && (hasBody))
     {
       checkNotNull(authorizationHeaders.get("hash"), "The payload hash was not supplied");
@@ -125,14 +129,14 @@ public class HawkServer implements Comparable<HawkServer>
     }
 
     // Ensure that the timestamp passed in is within suitable bounds
-    confirmTimestampWithinBounds(authorizationHeaders.get("ts"));
+    confirmTimestampWithinBounds(authorizationHeaders.get(HEADER_TS));
 
     // Ensure that this is not a replay of a previous request
-    confirmUniqueNonce(authorizationHeaders.get("nonce") + authorizationHeaders.get("ts") + authorizationHeaders.get("id"));
+    confirmUniqueNonce(authorizationHeaders.get(HEADER_NONCE) + authorizationHeaders.get(HEADER_TS) + authorizationHeaders.get(HEADER_ID));
 
     // Ensure that the MAC is correct
-    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.HEADER, Long.valueOf(authorizationHeaders.get("ts")), uri, authorizationHeaders.get("nonce"), method, hash, authorizationHeaders.get("ext"));
-    if (!timeConstantEquals(mac, authorizationHeaders.get("mac")))
+    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.HEADER, Long.valueOf(authorizationHeaders.get(HEADER_TS)), uri, authorizationHeaders.get(HEADER_NONCE), method, hash, authorizationHeaders.get(HEADER_EXT), authorizationHeaders.get(HEADER_APP), authorizationHeaders.get(HEADER_DLG));
+    if (!timeConstantEquals(mac, authorizationHeaders.get(HEADER_MAC)))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
     }
@@ -147,16 +151,16 @@ public class HawkServer implements Comparable<HawkServer>
   {
     final String bewit = extractBewit(uri);
     final ImmutableMap<String, String> bewitFields = splitBewit(bewit);
-    checkNotNull(bewitFields.get("id"), "ID missing from bewit");
-    checkNotNull(bewitFields.get("expiry"), "Expiry missing from bewit");
-    checkNotNull(bewitFields.get("mac"), "MAC missing from bewit");
-    checkState((credentials.getKeyId().equals(bewitFields.get("id"))), "The id in the bewit is not recognised");
-    final Long expiry = Long.parseLong(bewitFields.get("expiry"));
+    checkNotNull(bewitFields.get(HEADER_ID), "ID missing from bewit");
+    checkNotNull(bewitFields.get(HEADER_EXPIRY), "Expiry missing from bewit");
+    checkNotNull(bewitFields.get(HEADER_MAC), "MAC missing from bewit");
+    checkState((credentials.getKeyId().equals(bewitFields.get(HEADER_ID))), "The id in the bewit is not recognised");
+    final Long expiry = Long.parseLong(bewitFields.get(HEADER_EXPIRY));
 
     final URI strippedUri = stripBewit(uri);
 
-    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, null, bewitFields.get("ext"));
-    if (!timeConstantEquals(calculatedMac, bewitFields.get("mac")))
+    final String calculatedMac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, strippedUri, null, null, null, bewitFields.get(HEADER_EXT), null, null);
+    if (!timeConstantEquals(calculatedMac, bewitFields.get(HEADER_MAC)))
     {
       throw new DataError.Authentication("The MAC in the request does not match the server-calculated MAC");
     }
@@ -180,19 +184,19 @@ public class HawkServer implements Comparable<HawkServer>
     }
     catch (URISyntaxException use)
     {
-      throw new ServerError("Failed to remove bewit from query string");
+      throw new ServerError("Failed to remove bewit from query string", use);
     }
   }
 
   // Confirm that the request nonce has not already been seen within the allowable time period
-  private void confirmUniqueNonce(final String nonce) throws DataError
+  private void confirmUniqueNonce(final String nonce)
   {
-    checkState((this.nonces.getUnchecked(nonce) == false), "The nonce supplied is the same as one seen previously");
+    checkState(!this.nonces.getUnchecked(nonce), "The nonce supplied is the same as one seen previously");
     this.nonces.put(nonce, true);
   }
 
   // Confirm that the request timestamp is within an acceptable range of current time
-  private void confirmTimestampWithinBounds(final String ts) throws DataError
+  private void confirmTimestampWithinBounds(final String ts)
   {
     Long timestamp;
     try
@@ -201,9 +205,9 @@ public class HawkServer implements Comparable<HawkServer>
     }
     catch (Exception e)
     {
-      throw new DataError.Bad("The timestamp is in the wrong format; we expect seconds since the epoch");
+      throw new DataError.Bad("The timestamp is in the wrong format; we expect seconds since the epoch", e);
     }
-    long now = System.currentTimeMillis() / 1000;
+    long now = System.currentTimeMillis() / Hawk.MILLISECONDS_IN_SECONDS;
     checkState((Math.abs(now - timestamp) <= configuration.getTimestampSkew()), "The timestamp is too far from the current time to be acceptable");
   }
 
@@ -218,7 +222,7 @@ public class HawkServer implements Comparable<HawkServer>
   {
     StringBuilder sb = new StringBuilder(64);
     sb.append("Hawk ts=\"");
-    sb.append(String.valueOf(System.currentTimeMillis() / 1000));
+    sb.append(String.valueOf(System.currentTimeMillis() / Hawk.MILLISECONDS_IN_SECONDS));
     sb.append('"');
 
     return sb.toString();
@@ -248,13 +252,13 @@ public class HawkServer implements Comparable<HawkServer>
     return (res == 0);
   }
 
-  /**
+  /*
    * Split an authorization header into individual fields.
    * @param authorizationheader the Hawk authorization header
    * @return A map of authorization parameters
    * @throws DataError If the authorization header is invalid in some way
    */
-  public ImmutableMap<String, String> splitAuthorizationHeader(final String authorizationheader) throws DataError
+  public ImmutableMap<String, String> splitAuthorizationHeader(final String authorizationheader)
   {
     checkNotNull(authorizationheader, "No authorization header");
     List<String> headerfields = Lists.newArrayList(WHITESPACESPLITTER.split(authorizationheader));
@@ -278,12 +282,12 @@ public class HawkServer implements Comparable<HawkServer>
    * @return A map of bewit parameters
    * @throws DataError If the bewit is invalid in some way
    */
-  public ImmutableMap<String, String> splitBewit(final String bewit) throws DataError
+  public ImmutableMap<String, String> splitBewit(final String bewit)
   {
     checkNotNull(bewit, "No bewit");
     final String decodedBewit = new String(BaseEncoding.base64().decode(bewit));
     List<String> bewitfields = Lists.newArrayList(BEWITSPLITTER.split(decodedBewit));
-    checkState((bewitfields.size() == 4), "The bewit did not contain the correct number of values");
+    checkState((bewitfields.size() == BEWIT_FIELDS), "The bewit did not contain the correct number of values");
     long expiry;
     try
     {
@@ -291,15 +295,15 @@ public class HawkServer implements Comparable<HawkServer>
     }
     catch (NumberFormatException nfe)
     {
-      throw new DataError.Bad("Timestamp is invalid");
+      throw new DataError.Bad("Timestamp is invalid", nfe);
     }
-    checkState((System.currentTimeMillis() / 1000 <= expiry), "The bewit has expired");
+    checkState((System.currentTimeMillis() / Hawk.MILLISECONDS_IN_SECONDS <= expiry), "The bewit has expired");
 
     Map<String, String> bewitMap = Maps.newHashMap();
-    bewitMap.put("id", bewitfields.get(0));
-    bewitMap.put("expiry", bewitfields.get(1));
-    bewitMap.put("mac", bewitfields.get(2));
-    bewitMap.put("ext", bewitfields.get(3));
+    bewitMap.put(HEADER_ID, bewitfields.get(BEWIT_FIELD_ID));
+    bewitMap.put(HEADER_EXPIRY, bewitfields.get(BEWIT_FIELD_EXPIRY));
+    bewitMap.put(HEADER_MAC, bewitfields.get(BEWIT_FIELD_MAC));
+    bewitMap.put(HEADER_EXT, bewitfields.get(BEWIT_FIELD_EXT));
     return ImmutableMap.copyOf(bewitMap);
   }
 
@@ -316,8 +320,7 @@ public class HawkServer implements Comparable<HawkServer>
 
     Matcher m = BEWITPATTERN.matcher(uristr);
     checkState(m.find(), "The query string did not contain a bewit");
-    final String bewit = m.group(1);
-    return  bewit;
+    return m.group(1);
   }
 
   // Standard object methods follow

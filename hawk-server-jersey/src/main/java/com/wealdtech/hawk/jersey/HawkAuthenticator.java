@@ -16,6 +16,8 @@
 
 package com.wealdtech.hawk.jersey;
 
+import static com.wealdtech.Preconditions.*;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -26,14 +28,11 @@ import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.wealdtech.DataError;
-import com.wealdtech.ServerError;
 import com.wealdtech.hawk.Hawk;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkServer;
 import com.wealdtech.jersey.auth.Authenticator;
 import com.wealdtech.jersey.auth.PrincipalProvider;
-
-import static com.wealdtech.Preconditions.*;
 
 /**
  * Authenticate a request using Hawk.
@@ -63,10 +62,9 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
    * @param request the HTTP request
    * @return the authenticated principal, or <code>Optional.absent()</code> if the request was not authenticated
    * @throws DataError if there is a problem with the data that prevents the authentication attempt
-   * @throws ServerError if there is an internal problem during the authentication attempt
    */
   @Override
-  public Optional<T> authenticate(final ContainerRequest request) throws DataError, ServerError
+  public Optional<T> authenticate(final ContainerRequest request)
   {
     if (request.getQueryParameters().containsKey("bewit"))
     {
@@ -83,14 +81,13 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
    * @param request the HTTP request
    * @return the authenticated principal, or <code>Optional.absent()</code> if the request was not authenticated
    * @throws DataError if there is a problem with the data that prevents the authentication attempt
-   * @throws ServerError if there is an internal problem during the authentication attempt
    */
-  private Optional<T> authenticateFromBewit(final ContainerRequest request) throws DataError, ServerError
+  private Optional<T> authenticateFromBewit(final ContainerRequest request)
   {
     checkState((request.getMethod().equals("GET")), "HTTP method %s not supported with bewit", request.getMethod());
     final String bewit = server.extractBewit(request.getRequestUri());
     final ImmutableMap<String, String> bewitFields = server.splitBewit(bewit);
-    final Optional<T> principal = provider.get(bewitFields.get("id"));
+    final Optional<T> principal = provider.getFromKey(bewitFields.get("id"));
     if (!principal.isPresent())
     {
       // Could not find the principal, reject this authentication request
@@ -106,9 +103,8 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
    * @param request the HTTP request
    * @return the authenticated principal, or <code>Optional.absent()</code> if the request was not authenticated
    * @throws DataError if there is a problem with the data that prevents the authentication attempt
-   * @throws ServerError if there is an internal problem during the authentication attempt
    */
-  private Optional<T> authenticateFromHeader(final ContainerRequest request) throws DataError, ServerError
+  private Optional<T> authenticateFromHeader(final ContainerRequest request)
   {
     final ImmutableMap<String, String> authorizationHeaders = server.splitAuthorizationHeader(request.getHeaderValue(ContainerRequest.AUTHORIZATION));
     checkNotNull(authorizationHeaders.get("id"), "Missing required Hawk authorization header \"id\"");
@@ -118,7 +114,7 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
     String hash = null;
     final URI uri = request.getRequestUri();
     final String method = request.getMethod();
-    final Optional<T> principal = provider.get(authorizationHeaders.get("id"));
+    final Optional<T> principal = provider.getFromKey(authorizationHeaders.get("id"));
     if (!principal.isPresent())
     {
       // Could not find the principal, reject this authentication request
@@ -127,17 +123,16 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
     final HawkCredentials credentials = principal.get().getHawkCredentials(authorizationHeaders.get("id"));
     if (authorizationHeaders.get("hash") != null)
     {
-//      throw new ServerError("Authentication using body hashes is not supported");
       try
       {
         hash = Hawk.calculateMac(credentials, CharStreams.toString(new InputStreamReader(request.getEntityInputStream(), "UTF-8")));
       }
       catch (IOException ioe)
       {
-        throw new DataError.Bad("Failed to read the message body to calculate hash");
+        throw new DataError.Bad("Failed to read the message body to calculate hash", ioe);
       }
     }
-    boolean hasBody = request.getHeaderValue(ContainerRequest.CONTENT_LENGTH) != null ? true : false;
+    final boolean hasBody = request.getHeaderValue(ContainerRequest.CONTENT_LENGTH) != null ? true : false;
     this.server.authenticate(credentials, uri, method, authorizationHeaders, hash, hasBody);
     return principal;
   }

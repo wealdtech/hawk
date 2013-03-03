@@ -16,6 +16,8 @@
 
 package test.com.wealdtech.hawk;
 
+import static org.testng.Assert.*;
+
 import java.net.HttpURLConnection;
 import java.net.URI;
 
@@ -29,8 +31,6 @@ import com.wealdtech.hawk.Hawk.PayloadValidation;
 import com.wealdtech.hawk.HawkClient;
 import com.wealdtech.hawk.HawkClientConfiguration;
 import com.wealdtech.hawk.HawkCredentials;
-
-import static org.testng.Assert.*;
 
 public class HawkClientTest
 {
@@ -94,7 +94,7 @@ public class HawkClientTest
   public void testValidRequest() throws Exception
   {
     final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
-    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
     final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
   }
@@ -104,7 +104,7 @@ public class HawkClientTest
   {
     // Test with blank EXT data
     final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
-    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, "");
+    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, "", null, null);
     final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
   }
@@ -114,7 +114,7 @@ public class HawkClientTest
   {
     // Test with EXT data
     final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
-    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, "some data");
+    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, "some data", null, null);
     final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
   }
@@ -124,7 +124,7 @@ public class HawkClientTest
   {
     // Mismatch of HTTP method
     final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
-    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "post", null, null);
+    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "post", null, null, null, null);
     final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 401);
   }
@@ -134,7 +134,7 @@ public class HawkClientTest
   {
     // Attempt repeat requests
     final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
-    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
     final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
     final HttpURLConnection connection2 = connect(this.validuri1, authorizationHeader);
