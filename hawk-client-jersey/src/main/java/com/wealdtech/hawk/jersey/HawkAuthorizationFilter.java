@@ -50,7 +50,7 @@ public class HawkAuthorizationFilter extends ClientFilter
     {
       final URI uri = cr.getURI();
       final String method = cr.getMethod();
-      cr.getHeaders().add(HttpHeaders.AUTHORIZATION, this.client.generateAuthorizationHeader(uri, method, null, null));
+      cr.getHeaders().add(HttpHeaders.AUTHORIZATION, this.client.generateAuthorizationHeader(uri, method, null, null, null, null));
     }
     return getNext().handle(cr);}
   }
