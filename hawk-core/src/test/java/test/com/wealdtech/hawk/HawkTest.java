@@ -1,5 +1,5 @@
 /*
- *    Copyright 2012 Weald Technology Trading Limited
+ *    Copyright 2012, 2013 Weald Technology Trading Limited
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -66,6 +66,13 @@ public class HawkTest
   {
     String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri1, "testnonce", "GET", null, "Extra data", null, null);
     assertEquals(testmac1, "ucCVBEnEMDICl5efmmgo4MnnObG2rStZq6a1o8yHPD8=");
+  }
+
+  @Test
+  public void testOzMAC() throws Exception
+  {
+    String testmac1 = Hawk.calculateMAC(this.testhc1, Hawk.AuthType.HEADER, 12345L, this.testuri1, "testnonce", "GET", null, "Extra data", "12345", "54321");
+    assertEquals(testmac1, "bH7bZlofGKZUW6oNLF8scxXfCwYiNmijELwGJPGI3Gs=");
   }
 
   @Test
