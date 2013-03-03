@@ -16,13 +16,13 @@
 
 package test.com.wealdtech.hawk;
 
+import static org.testng.Assert.*;
+
 import org.testng.annotations.Test;
 
 import com.wealdtech.DataError;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkCredentials.Algorithm;
-
-import static org.testng.Assert.*;
 
 public class HawkCredentialsTest
 {
@@ -51,7 +51,7 @@ public class HawkCredentialsTest
     assertEquals(testhc2, testhc2);
     assertNotEquals(null, testhc2);
     assertNotEquals(testhc1, testhc2);
-    assertEquals(testhc1.getJavaAlgorithm(), "SHA-256");
+    assertEquals(testhc1.getJavaAlgorithm(), "HmacSHA256");
   }
 
   @Test

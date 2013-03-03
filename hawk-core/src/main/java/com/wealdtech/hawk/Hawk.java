@@ -1,5 +1,5 @@
 /*
- *    Copyright 2012 Weald Technology Trading Limited
+ *    Copyright 2012, 2013 Weald Technology Trading Limited
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -73,6 +73,10 @@ public class Hawk
    * @param ext
    *          optional extra data, as supplied by the requestor to differentiate
    *          the request if required
+   * @param app
+   *          application ID, used for Oz
+   * @param dlg
+   *          delegator, used for Oz
    * @return the MAC
    * @throws DataError
    *           if there is an issue with the data that prevents creation of the
@@ -85,7 +89,9 @@ public class Hawk
                                     final String nonce,
                                     final String method,
                                     final String hash,
-                                    final String ext)
+                                    final String ext,
+                                    final String app,
+                                    final String dlg)
   {
     // Check that required parameters are present
     checkNotNull(credentials, "Credentials are required but not supplied");
@@ -139,8 +145,15 @@ public class Hawk
       sb.append(hash);
     }
     sb.append('\n');
-    sb.append(Strings.nullToEmpty(ext));
+    sb.append(Strings.nullToEmpty(ext).replace("\\", "\\\\").replace("\n", "\\n"));
     sb.append('\n');
+    if (app != null)
+    {
+      sb.append(app);
+      sb.append('\n');
+      sb.append(Strings.nullToEmpty(dlg));
+      sb.append('\n');
+    }
 
     return calculateMac(credentials, sb.toString());
   }
@@ -207,23 +220,6 @@ public class Hawk
     {
       throw new DataError.Bad("Unknown encryption algorithm", nsae);
     }
-//    try
-//    {
-//      MessageDigest md = MessageDigest.getInstance(credentials.getJavaAlgorithm());
-//      try
-//      {
-//        md.update(text.getBytes("UTF-8"));
-//      }
-//      catch (UnsupportedEncodingException uee)
-//      {
-//        throw new ServerError("Unable to encode with UTF-8", uee);
-//      }
-//      return BaseEncoding.base64().encode(md.digest(credentials.getKey().getBytes()));
-//    }
-//    catch (NoSuchAlgorithmException nsae)
-//    {
-//      throw new DataError.Bad("Unknown encryption algorithm", nsae);
-//    }
   }
 
   /**
@@ -256,7 +252,7 @@ public class Hawk
 
     // Calculate expiry from ttl and current time
     Long expiry = System.currentTimeMillis() / MILLISECONDS_IN_SECONDS + ttl;
-    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, uri, null, null, null, ext);
+    final String mac = Hawk.calculateMAC(credentials, Hawk.AuthType.BEWIT, expiry, uri, null, null, null, ext, null, null);
 
     final StringBuffer sb = new StringBuffer(256);
     sb.append(credentials.getKeyId());

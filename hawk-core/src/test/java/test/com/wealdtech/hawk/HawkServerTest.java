@@ -16,6 +16,8 @@
 
 package test.com.wealdtech.hawk;
 
+import static org.testng.Assert.*;
+
 import java.net.HttpURLConnection;
 import java.net.URI;
 
@@ -30,8 +32,6 @@ import com.wealdtech.hawk.HawkClient;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.HawkServer;
 import com.wealdtech.hawk.HawkServerConfiguration;
-
-import static org.testng.Assert.*;
 
 public class HawkServerTest
 {
@@ -166,7 +166,7 @@ public class HawkServerTest
 
     SimpleHttpServer server = new SimpleHttpServer(this.testcredentials1, configuration);
 
-    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+    final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
     Thread.sleep(2000L);
     try
     {
@@ -215,7 +215,7 @@ public class HawkServerTest
 
     try
     {
-      final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+      final String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, null);
       assertEquals(connection.getResponseCode(), 200);
     }
@@ -235,7 +235,7 @@ public class HawkServerTest
     final String hash = Hawk.calculateMac(this.testcredentials1, body);
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "post", hash, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "post", hash, null, null, null);
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, body);
       assertEquals(connection.getResponseCode(), 200);
     }
@@ -253,7 +253,7 @@ public class HawkServerTest
 
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
       authorizationHeader = authorizationHeader.replace("Hawk", "Eagle");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, null);
       assertEquals(connection.getResponseCode(), 401);
@@ -272,7 +272,7 @@ public class HawkServerTest
 
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
       authorizationHeader = authorizationHeader.replace("nonce=", "invalid=");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, null);
       assertEquals(connection.getResponseCode(), 401);
@@ -291,7 +291,7 @@ public class HawkServerTest
 
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
       authorizationHeader = authorizationHeader.replace("ts=", "invalid=");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, null);
       assertEquals(connection.getResponseCode(), 401);
@@ -310,7 +310,7 @@ public class HawkServerTest
 
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
       authorizationHeader = authorizationHeader.replace("mac=", "invalid=");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, null);
       assertEquals(connection.getResponseCode(), 401);
@@ -329,7 +329,7 @@ public class HawkServerTest
 
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
       authorizationHeader = authorizationHeader.replace("id=", "invalid=");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, null);
       assertEquals(connection.getResponseCode(), 401);
@@ -348,7 +348,7 @@ public class HawkServerTest
 
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri2, "get", null, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri2, "get", null, null, null, null);
       authorizationHeader = authorizationHeader.replace("mac=\"", "mac=\"x");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, null);
       assertEquals(connection.getResponseCode(), 401);
@@ -369,7 +369,7 @@ public class HawkServerTest
     final String hash = Hawk.calculateMac(this.testcredentials1, "Some other text");
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "post", hash, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "post", hash, null, null, null);
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, body);
       assertEquals(connection.getResponseCode(), 401);
     }
@@ -387,7 +387,7 @@ public class HawkServerTest
 
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
       authorizationHeader = authorizationHeader.replace("ts=\"", "ts=\"x");
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, null);
       assertEquals(connection.getResponseCode(), 401);
@@ -425,7 +425,7 @@ public class HawkServerTest
     final String body = "Body text";
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, body);
       assertEquals(connection.getResponseCode(), 401);
     }
@@ -443,7 +443,7 @@ public class HawkServerTest
 
     try
     {
-      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null);
+      String authorizationHeader = testclient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
       final HttpURLConnection connection = connect(this.validuri1, authorizationHeader, null);
       assertEquals(connection.getResponseCode(), 200);
     }
@@ -519,7 +519,7 @@ public class HawkServerTest
 
     // Calculate expiry from ttl and current time
     Long expiry = System.currentTimeMillis() / 1000L + 120L;
-    final String mac = Hawk.calculateMAC(this.testcredentials1, Hawk.AuthType.BEWIT, expiry, new URI(BASEBEWITURI), null, null, null, null);
+    final String mac = Hawk.calculateMAC(this.testcredentials1, Hawk.AuthType.BEWIT, expiry, new URI(BASEBEWITURI), null, null, null, null, null, null);
 
     final StringBuffer sb = new StringBuffer(256);
     sb.append('\\');
@@ -549,7 +549,7 @@ public class HawkServerTest
 
     // Calculate expiry from ttl and current time
     Long expiry = System.currentTimeMillis() / 1000L + 120L;
-    final String mac = Hawk.calculateMAC(this.testcredentials1, Hawk.AuthType.BEWIT, expiry, new URI(BASEBEWITURI), null, null, null, null);
+    final String mac = Hawk.calculateMAC(this.testcredentials1, Hawk.AuthType.BEWIT, expiry, new URI(BASEBEWITURI), null, null, null, null, null, null);
 
     final StringBuffer sb = new StringBuffer(256);
     sb.append(this.testcredentials1.getKeyId());
@@ -609,7 +609,7 @@ public class HawkServerTest
 
     // Calculate expiry from ttl and current time
     Long expiry = System.currentTimeMillis() / 1000L + 120L;
-    final String mac = Hawk.calculateMAC(this.testcredentials1, Hawk.AuthType.BEWIT, expiry, new URI(BASEBEWITURI), null, null, null, null);
+    final String mac = Hawk.calculateMAC(this.testcredentials1, Hawk.AuthType.BEWIT, expiry, new URI(BASEBEWITURI), null, null, null, null, null, null);
 
     final StringBuffer sb = new StringBuffer(256);
     sb.append(this.testcredentials1.getKeyId());
