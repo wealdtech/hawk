@@ -55,6 +55,22 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
     this.provider = provider;
   }
 
+  @Override
+  public boolean canAuthenticate(final ContainerRequest request)
+  {
+    boolean result = false;
+    try
+    {
+      server.splitAuthorizationHeader(request.getHeaderValue(ContainerRequest.AUTHORIZATION));
+      result = true;
+    }
+    catch (DataError de)
+    {
+      // Means we can't authenticate using Hawk
+    }
+    return result;
+  }
+
   /**
    * Authenticate a request.
    * <p>Authentication can be with an authentication header or a query string, so
