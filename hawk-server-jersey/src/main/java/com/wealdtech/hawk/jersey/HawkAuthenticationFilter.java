@@ -69,7 +69,7 @@ public class HawkAuthenticationFilter<T> implements ContainerRequestFilter
     if (!result.isPresent())
     {
       // No result returned; authentication did not result in a valid principal
-      throw new UnauthorizedException("Unknown or invalid authentication");
+      throw new UnauthorizedException("Unknown or invalid authentication", "Authentication failed");
     }
 
     // At this point the request has been authenticated successfully.
