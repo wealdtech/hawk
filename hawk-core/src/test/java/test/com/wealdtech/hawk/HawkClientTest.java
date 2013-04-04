@@ -36,7 +36,7 @@ public class HawkClientTest
 {
   private SimpleHttpServer server;
   private HawkCredentials testcredentials1, testcredentials2;
-  private URI validuri1, validuri2;
+  private URI validuri1;
 
   // Helper
   private HttpURLConnection connect(final URI uri, final String authorizationHeader) throws Exception
@@ -64,7 +64,6 @@ public class HawkClientTest
                                                .algorithm(HawkCredentials.Algorithm.SHA256)
                                                .build();
     this.validuri1 = new URI("http://localhost:18234/testpath/subpath?param1=val1&param2=val2");
-    this.validuri2 = new URI("http://localhost:18234/v1/usergroups/");
   }
 
   @AfterClass
