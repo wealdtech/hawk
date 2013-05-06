@@ -220,9 +220,12 @@ public final class HawkServer implements Comparable<HawkServer>
    */
   public String generateAuthenticateHeader()
   {
+    long curTime = System.currentTimeMillis() / Hawk.MILLISECONDS_IN_SECONDS;
     StringBuilder sb = new StringBuilder(64);
     sb.append("Hawk ts=\"");
-    sb.append(String.valueOf(System.currentTimeMillis() / Hawk.MILLISECONDS_IN_SECONDS));
+    sb.append(String.valueOf(curTime));
+    sb.append("\" tsm=\"");
+    sb.append(Hawk.calculateTSMac(curTime));
     sb.append('"');
 
     return sb.toString();
