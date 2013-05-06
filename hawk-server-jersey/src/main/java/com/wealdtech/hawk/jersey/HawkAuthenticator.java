@@ -21,6 +21,7 @@ import static com.wealdtech.Preconditions.*;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.util.List;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
@@ -141,7 +142,12 @@ public class HawkAuthenticator<T extends HawkCredentialsProvider> implements Aut
     {
       try
       {
-        hash = Hawk.calculateMac(credentials, CharStreams.toString(new InputStreamReader(request.getEntityInputStream(), "UTF-8")));
+        List<String> contentTypes = request.getRequestHeader(ContainerRequest.CONTENT_TYPE);
+        if ((contentTypes == null) || (contentTypes.size() == 0))
+        {
+          throw new DataError.Bad("Missing content type header for body verification");
+        }
+        hash = Hawk.calculateBodyMac(credentials, contentTypes.get(0), CharStreams.toString(new InputStreamReader(request.getEntityInputStream(), "UTF-8")));
       }
       catch (IOException ioe)
       {
