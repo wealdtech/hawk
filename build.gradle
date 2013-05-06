@@ -3,7 +3,6 @@ subprojects {
     apply plugin: 'eclipse'
     apply plugin: 'maven'
     apply plugin: 'signing'
-    apply plugin: 'sonar'
 
     repositories {
         mavenLocal()
@@ -18,7 +17,7 @@ subprojects {
     }
 
     group = 'com.wealdtech.hawk'
-    version = '0.9.1'
+    version = '0.9.2'
 
     task copyLibs (type: Copy) {
         into "$buildDir/output/libs"
@@ -57,10 +56,6 @@ subprojects {
                     MavenDeployment deployment -> signing.signPom(deployment)
                 }
 
-//                repository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-//                    authentication(userName: sonatypeUsername, password: sonatypePassword)
-//                }
-
                 repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                     authentication(userName: sonatypeUsername, password: sonatypePassword)
                 }
@@ -93,21 +88,4 @@ subprojects {
             }
         }
     }
-
-  sonar
-  {
-    server
-    {
-      url="http://10.0.0.101:9000/"
-    }
-    database
-    {
-      url = "jdbc:h2:tcp://10.0.0.101/sonar"
-    }
-    project
-    {
-      language="java"
-      sourceEncoding = "UTF-8"
-    }
-  }
 }

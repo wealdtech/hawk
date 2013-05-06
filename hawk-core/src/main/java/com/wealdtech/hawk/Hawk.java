@@ -33,6 +33,7 @@ import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
 import com.wealdtech.DataError;
 import com.wealdtech.ServerError;
+import com.wealdtech.hawk.HawkCredentials.Algorithm;
 
 /**
  * The Hawk class provides helper methods for calculating the MAC, required by
@@ -183,6 +184,54 @@ public class Hawk
       }
     }
     return port;
+  }
+
+  public static String calculateTSMac(final long curtime)
+  {
+    final HawkCredentials credentials = new HawkCredentials.Builder()
+                                                           .keyId("dummy")
+                                                           .key("dummy")
+                                                           .algorithm(Algorithm.SHA256)
+                                                           .build();
+    return calculateMac(credentials, String.valueOf(curtime));
+  }
+
+  /**
+   * Generate the MAC for a body with a specific content-type
+   *
+   * @param credentials
+   *          Hawk credentials of the requestor
+   * @param contentType
+   *          the MIME content type
+   * @param body
+   *          the body
+   * @return the MAC
+   * @throws DataError
+   *           if there is an issue with the data that prevents creation of the
+   *           MAC
+   */
+  public static String calculateBodyMac(final HawkCredentials credentials, final String contentType, final String body)
+  {
+    // Check that required parameters are present
+    checkNotNull(contentType, "Content type is required but not supplied");
+    checkNotNull(body, "Body is required but not supplied");
+
+    final StringBuilder sb = new StringBuilder(1024);
+    sb.append("hawk.");
+    sb.append(HAWKVERSION);
+    sb.append(".payload\n");
+    if (contentType.indexOf(';') != -1)
+    {
+      sb.append(contentType.substring(0, contentType.indexOf(';')).toLowerCase(Locale.ENGLISH));
+    }
+    else
+    {
+      sb.append(contentType.toLowerCase(Locale.ENGLISH));
+    }
+    sb.append(body);
+    sb.append('\n');
+
+    return calculateMac(credentials, sb.toString());
   }
 
   /**
