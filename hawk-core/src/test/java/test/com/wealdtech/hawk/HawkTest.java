@@ -92,6 +92,16 @@ public class HawkTest
   }
 
   @Test
+  public void testBodyMac() throws Exception
+  {
+    // Ensure that the body MAC gives the correct result
+    final HawkCredentials testCredentials = new HawkCredentials.Builder().keyId("test").key("mysecretkey").algorithm(Algorithm.SHA256).build();
+    final String contentType = "text/plain; charset=utf-8";
+    String testmac1 = Hawk.calculateBodyMac(testCredentials, contentType, "Text body");
+    assertEquals(testmac1, "w1rO8cxeoTwVmO1Weffal3VCYHBTcIxpjgQUZx01mRU=");
+  }
+
+  @Test
   public void testBewitValidation1() throws Exception
   {
     try
