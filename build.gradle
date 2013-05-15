@@ -17,7 +17,7 @@ subprojects {
     }
 
     group = 'com.wealdtech.hawk'
-    version = '0.13.0'
+    version = '0.13.1'
 
     task copyLibs (type: Copy) {
         into "$buildDir/output/libs"
