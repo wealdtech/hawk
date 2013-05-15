@@ -228,6 +228,7 @@ public class Hawk
     {
       sb.append(contentType.toLowerCase(Locale.ENGLISH));
     }
+    sb.append('\n');
     sb.append(body);
     sb.append('\n');
 
