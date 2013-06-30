@@ -1,7 +1,7 @@
 dependencies {
     compile project(':hawk-core')
-    compile 'com.wealdtech:wealdtech-core:1.5.0'
-    compile 'com.wealdtech:wealdtech-jersey-server:1.5.0'
+    compile 'com.wealdtech:wealdtech-core:1.7.0'
+    compile 'com.wealdtech:wealdtech-jersey-server:1.7.0'
     compile 'com.sun.jersey:jersey-core:1.17.1'
     compile 'com.sun.jersey:jersey-server:1.17.1'
     compile 'com.sun.jersey:jersey-servlet:1.17.1'
@@ -9,8 +9,8 @@ dependencies {
     compile 'com.sun.jersey.contribs:jersey-guice:1.17.1'
     compile 'javax.servlet:javax.servlet-api:3.0.1'
     compile 'javax.ws.rs:jsr311-api:1.1.1'
-    testCompile 'org.eclipse.jetty:jetty-server:9.0.0.v20130308'
-    testCompile 'org.eclipse.jetty:jetty-servlet:9.0.0.v20130308'
+    testCompile 'org.eclipse.jetty:jetty-server:9.0.3.v20130506'
+    testCompile 'org.eclipse.jetty:jetty-servlet:9.0.3.v20130506'
 }
 
 uploadArchives {
