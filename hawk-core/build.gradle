@@ -6,8 +6,8 @@ dependencies {
 uploadArchives {
     repositories {
         mavenDeployer {
-            pom.artifactId = 'hawk-core'
             pom.project {
+                pom.artifactId = 'hawk-core'
                 name 'Hawk Core'
                 description 'Java implementation of Hawk protocol - core'
             }
