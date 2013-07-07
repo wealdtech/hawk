@@ -7,9 +7,6 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
     }
 
     dependencies {
@@ -48,7 +45,14 @@ subprojects {
     signing {
         sign configurations.archives
     }
+    signArchives.onlyIf { gradle.taskGraph.hasTask(uploadArchives) }
 
+    if (!project.hasProperty('sonatypeUsername')) {
+        ext.sonatypeUsername = ''
+    }
+    if (!project.hasProperty('sonatypePassword')) {
+        sonatypePassword = ''
+    }
     uploadArchives {
         repositories {
             mavenDeployer {
