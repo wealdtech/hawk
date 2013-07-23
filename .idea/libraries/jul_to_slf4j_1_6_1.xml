@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="jul-to-slf4j-1.6.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/artifacts-24/filestore/org.slf4j/jul-to-slf4j/1.6.1/jar/c5300fc91f48697ae3f0d8ec8eac7a43a9dd03f7/jul-to-slf4j-1.6.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/artifacts-24/filestore/org.slf4j/jul-to-slf4j/1.6.1/source/b6330c9f0b8054e456ac0e84bb5dac406231408e/jul-to-slf4j-1.6.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

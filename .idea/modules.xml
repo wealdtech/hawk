@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/hawk.iml" filepath="$PROJECT_DIR$/hawk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hawk-client-jersey/hawk-client-jersey.iml" filepath="$PROJECT_DIR$/hawk-client-jersey/hawk-client-jersey.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hawk-core/hawk-core.iml" filepath="$PROJECT_DIR$/hawk-core/hawk-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hawk-server-jersey/hawk-server-jersey.iml" filepath="$PROJECT_DIR$/hawk-server-jersey/hawk-server-jersey.iml" />
+    </modules>
+  </component>
+</project>
+

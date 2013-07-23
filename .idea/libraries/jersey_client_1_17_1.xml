@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="jersey-client-1.17.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/artifacts-24/filestore/com.sun.jersey/jersey-client/1.17.1/jar/b92fb0f202ca548f9067d57a133635fc1b8ad0ff/jersey-client-1.17.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/artifacts-24/filestore/com.sun.jersey/jersey-client/1.17.1/source/1a9a6f56f8fac1e3a96387bcfab099f1135624c6/jersey-client-1.17.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

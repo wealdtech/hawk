@@ -9,8 +9,8 @@ dependencies {
     compile 'com.sun.jersey.contribs:jersey-guice:1.17.1'
     compile 'javax.servlet:javax.servlet-api:3.0.1'
     compile 'javax.ws.rs:jsr311-api:1.1.1'
-    testCompile 'org.eclipse.jetty:jetty-server:9.0.3.v20130506'
-    testCompile 'org.eclipse.jetty:jetty-servlet:9.0.3.v20130506'
+    testCompile 'org.eclipse.jetty:jetty-server:9.0.4.v20130625'
+    testCompile 'org.eclipse.jetty:jetty-servlet:9.0.4.v20130625'
 }
 
 uploadArchives {

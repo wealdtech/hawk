@@ -1,12 +1,11 @@
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'eclipse'
     apply plugin: 'maven'
     apply plugin: 'signing'
 
     repositories {
-        mavenLocal()
         mavenCentral()
+        mavenLocal()
     }
 
     dependencies {
