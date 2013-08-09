@@ -23,6 +23,8 @@ build
 # IntelliJ
 #
 workspace.xml
+libraries/
+*.iml
 
 #
 # TestNG
