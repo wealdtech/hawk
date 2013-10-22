@@ -16,16 +16,16 @@
 
 package com.wealdtech.hawk.jersey;
 
-import static com.wealdtech.Preconditions.*;
-
-import java.net.URI;
-
 import com.google.common.net.HttpHeaders;
 import com.google.inject.Inject;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
 import com.wealdtech.hawk.HawkClient;
+
+import java.net.URI;
+
+import static com.wealdtech.Preconditions.checkNotNull;
 
 /**
  * Request filter providing an Authorization header
@@ -38,7 +38,7 @@ public class HawkAuthorizationFilter extends ClientFilter
   @Inject
   public HawkAuthorizationFilter(final HawkClient client)
   {
-    checkNotNull(client, "Hawk athorization filter requires a hawk client");
+    checkNotNull(client, "Hawk authorization filter requires a hawk client");
     this.client = client;
   }
 

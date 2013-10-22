@@ -1,19 +1,34 @@
+#
+# Java
+#
 *.class
+bin
+.pmd
+out
 
-# Package Files #
+#
+# Package Files
+#
 *.jar
 *.war
 *.ear
 
-# Eclipse
-bin
-.classpath
-.metadata
-.settings
-
+#
 # Gradle
+#
 build
 .gradle
+gradle/
 
+#
+# IntelliJ
+#
+workspace.xml
+libraries/
+*.iml
+
+#
 # TestNG
+#
 test-output
+testng.xml
