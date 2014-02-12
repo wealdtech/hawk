@@ -1,12 +1,5 @@
 package test.com.wealdtech.hawk.jersey;
 
-import static org.testng.Assert.*;
-
-import javax.ws.rs.core.MediaType;
-
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import com.sun.jersey.api.client.WebResource;
@@ -15,6 +8,12 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.wealdtech.hawk.HawkClient;
 import com.wealdtech.hawk.HawkCredentials;
 import com.wealdtech.hawk.jersey.HawkAuthorizationFilter;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import javax.ws.rs.core.MediaType;
+
+import static org.testng.Assert.fail;
 
 public class TestHawkClient
 {
@@ -49,7 +48,7 @@ public class TestHawkClient
     }
     catch (UniformInterfaceException uie)
     {
-      fail(uie.getResponse().getClientResponseStatus().getReasonPhrase());
+      fail(uie.getResponse().getStatusInfo().getReasonPhrase());
     }
   }
 }
