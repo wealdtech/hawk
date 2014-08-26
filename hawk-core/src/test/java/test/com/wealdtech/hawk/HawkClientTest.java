@@ -1,5 +1,5 @@
 /*
- *    Copyright 2012 Weald Technology Trading Limited
+ *   Copyright 2012 - 2014 Weald Technology Trading Limited
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,32 +16,31 @@
 
 package test.com.wealdtech.hawk;
 
-import static org.testng.Assert.*;
-
-import java.net.HttpURLConnection;
-import java.net.URI;
-
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import com.wealdtech.DataError;
 import com.wealdtech.configuration.ConfigurationSource;
 import com.wealdtech.hawk.Hawk.PayloadValidation;
 import com.wealdtech.hawk.HawkClient;
 import com.wealdtech.hawk.HawkClientConfiguration;
 import com.wealdtech.hawk.HawkCredentials;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import java.net.HttpURLConnection;
+import java.net.URI;
+
+import static org.testng.Assert.*;
 
 public class HawkClientTest
 {
   private SimpleHttpServer server;
-  private HawkCredentials testcredentials1, testcredentials2;
-  private URI validuri1;
+  private HawkCredentials testCredentials1, testCredentials2;
+  private URI validUri1;
 
   // Helper
   private HttpURLConnection connect(final URI uri, final String authorizationHeader) throws Exception
   {
-    final HttpURLConnection connection = (HttpURLConnection)this.validuri1.toURL().openConnection();
+    final HttpURLConnection connection = (HttpURLConnection)uri.toURL().openConnection();
     connection.setRequestMethod("GET");
     connection.setRequestProperty("Authorization", authorizationHeader);
     connection.setDoOutput(true);
@@ -52,18 +51,18 @@ public class HawkClientTest
   @BeforeClass
   public void setUp() throws Exception
   {
-    this.testcredentials1 = new HawkCredentials.Builder()
+    this.testCredentials1 = new HawkCredentials.Builder()
                                                .keyId("dh37fgj492je")
                                                .key("werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn")
                                                .algorithm(HawkCredentials.Algorithm.SHA256)
                                                .build();
-    this.server = new SimpleHttpServer(this.testcredentials1, null);
-    this.testcredentials2 = new HawkCredentials.Builder()
+    this.server = new SimpleHttpServer(this.testCredentials1, null);
+    this.testCredentials2 = new HawkCredentials.Builder()
                                                .keyId("kbmdu72h12xt")
                                                .key("nzvxvljms2n239w7alsaduanpet109apbisuda0bt79")
                                                .algorithm(HawkCredentials.Algorithm.SHA256)
                                                .build();
-    this.validuri1 = new URI("http://localhost:18234/testpath/subpath?param1=val1&param2=val2");
+    this.validUri1 = new URI("http://localhost:18234/testpath/subpath?param1=val1&param2=val2");
   }
 
   @AfterClass
@@ -75,14 +74,14 @@ public class HawkClientTest
   @Test
   public void testModel() throws Exception
   {
-    final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
+    final HawkClient testClient = new HawkClient.Builder().credentials(this.testCredentials1).build();
     testClient.toString();
     testClient.hashCode();
     assertEquals(testClient, testClient);
     assertNotEquals(testClient, null);
     assertNotEquals(null, testClient);
 
-    final HawkClient testClient2 = new HawkClient.Builder(testClient).credentials(this.testcredentials2).build();
+    final HawkClient testClient2 = new HawkClient.Builder(testClient).credentials(this.testCredentials2).build();
     testClient2.toString();
     testClient2.hashCode();
     assertEquals(testClient2, testClient2);
@@ -92,9 +91,9 @@ public class HawkClientTest
   @Test
   public void testValidRequest() throws Exception
   {
-    final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
-    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
-    final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+    final HawkClient testClient = new HawkClient.Builder().credentials(this.testCredentials1).build();
+    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validUri1, "get", null, null, null, null);
+    final HttpURLConnection connection = connect(this.validUri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -102,9 +101,9 @@ public class HawkClientTest
   public void testBlankExt() throws Exception
   {
     // Test with blank EXT data
-    final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
-    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, "", null, null);
-    final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+    final HawkClient testClient = new HawkClient.Builder().credentials(this.testCredentials1).build();
+    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validUri1, "get", null, "", null, null);
+    final HttpURLConnection connection = connect(this.validUri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -112,9 +111,9 @@ public class HawkClientTest
   public void testValidExt() throws Exception
   {
     // Test with EXT data
-    final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
-    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, "some data", null, null);
-    final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+    final HawkClient testClient = new HawkClient.Builder().credentials(this.testCredentials1).build();
+    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validUri1, "get", null, "some data", null, null);
+    final HttpURLConnection connection = connect(this.validUri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
   }
 
@@ -122,9 +121,9 @@ public class HawkClientTest
   public void testIncorrectMethod() throws Exception
   {
     // Mismatch of HTTP method
-    final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
-    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "post", null, null, null, null);
-    final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+    final HawkClient testClient = new HawkClient.Builder().credentials(this.testCredentials1).build();
+    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validUri1, "post", null, null, null, null);
+    final HttpURLConnection connection = connect(this.validUri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 401);
   }
 
@@ -132,11 +131,11 @@ public class HawkClientTest
   public void testDuplicateNonce() throws Exception
   {
     // Attempt repeat requests
-    final HawkClient testClient = new HawkClient.Builder().credentials(this.testcredentials1).build();
-    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validuri1, "get", null, null, null, null);
-    final HttpURLConnection connection = connect(this.validuri1, authorizationHeader);
+    final HawkClient testClient = new HawkClient.Builder().credentials(this.testCredentials1).build();
+    final String authorizationHeader = testClient.generateAuthorizationHeader(this.validUri1, "get", null, null, null, null);
+    final HttpURLConnection connection = connect(this.validUri1, authorizationHeader);
     assertEquals(connection.getResponseCode(), 200);
-    final HttpURLConnection connection2 = connect(this.validuri1, authorizationHeader);
+    final HttpURLConnection connection2 = connect(this.validUri1, authorizationHeader);
     assertEquals(connection2.getResponseCode(), 401);
   }
 
@@ -144,7 +143,7 @@ public class HawkClientTest
   public void testPrefix() throws Exception
   {
     // Check client path prefix
-    final HawkClient testClient1 = new HawkClient.Builder().credentials(this.testcredentials1).build();
+    final HawkClient testClient1 = new HawkClient.Builder().credentials(this.testCredentials1).build();
     assertTrue(testClient1.isValidFor("/test/test2"));
     assertTrue(testClient1.isValidFor(null));
 
@@ -152,7 +151,7 @@ public class HawkClientTest
                                                                              .pathPrefix("/foo")
                                                                              .build();
     final HawkClient testClient2 = new HawkClient.Builder()
-                                             .credentials(this.testcredentials1)
+                                             .credentials(this.testCredentials1)
                                              .configuration(clientConfiguration)
                                              .build();
     assertTrue(testClient2.isValidFor("/foo"));
@@ -162,7 +161,7 @@ public class HawkClientTest
                                                      .pathPrefix("/test/")
                                                      .build();
     final HawkClient testClient3 = new HawkClient.Builder()
-                                             .credentials(this.testcredentials1)
+                                             .credentials(this.testCredentials1)
                                              .configuration(clientConfiguration)
                                              .build();
     assertTrue(testClient3.isValidFor("/test/test2"));

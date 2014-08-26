@@ -1,15 +1,12 @@
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'eclipse'
     apply plugin: 'maven'
+    apply plugin: 'idea'
     apply plugin: 'signing'
 
     repositories {
-        mavenLocal()
         mavenCentral()
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
+        mavenLocal()
     }
 
     dependencies {
@@ -17,7 +14,11 @@ subprojects {
     }
 
     group = 'com.wealdtech.hawk'
-    version = '1.0.0'
+    version = '1.2.0'
+
+    test {
+        useTestNG()
+    }
 
     task copyLibs (type: Copy) {
         into "$buildDir/output/libs"
@@ -48,7 +49,14 @@ subprojects {
     signing {
         sign configurations.archives
     }
+    signArchives.onlyIf { gradle.taskGraph.hasTask(uploadArchives) }
 
+    if (!project.hasProperty('sonatypeUsername')) {
+        ext.sonatypeUsername = ''
+    }
+    if (!project.hasProperty('sonatypePassword')) {
+        sonatypePassword = ''
+    }
     uploadArchives {
         repositories {
             mavenDeployer {
@@ -88,4 +96,11 @@ subprojects {
             }
         }
     }
+
+    idea.module.iml {
+        beforeMerged { module ->
+            module.dependencies.clear()
+        }
+    }
 }
+

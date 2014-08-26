@@ -36,12 +36,13 @@ import com.wealdtech.hawk.Hawk.PayloadValidation;
 import com.wealdtech.hawk.HawkClient;
 import com.wealdtech.hawk.HawkClientConfiguration;
 import com.wealdtech.hawk.HawkCredentials;
+import com.wealdtech.jetty.JettyServer;
 
 public class HawkJerseyServerTest
 {
   private HawkCredentials goodCredentials;
   private URI validuri1, validuri2;
-  private SampleJettyServer webserver;
+  private JettyServer webserver;
 
   // Helper
   private HttpURLConnection connect(final URI uri, final String method, final String authorizationHeader, String contentType, final String body) throws Exception
@@ -82,7 +83,7 @@ public class HawkJerseyServerTest
                                                    new HawkConfigurationModule(),
                                                    new HawkServletModule("test.com.wealdtech.hawk.providers",
                                                                          "test.com.wealdtech.hawk.resources"));
-    this.webserver = injector.getInstance(SampleJettyServer.class);
+    this.webserver = injector.getInstance(JettyServer.class);
     webserver.start();
   }
 
