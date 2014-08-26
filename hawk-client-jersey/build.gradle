@@ -1,8 +1,8 @@
 dependencies {
     compile project(':hawk-core')
-    compile 'com.wealdtech:wealdtech-core:1.8.1'
-    compile 'com.sun.jersey:jersey-core:1.17.1'
-    compile 'com.sun.jersey:jersey-client:1.17.1'
+    compile 'com.wealdtech:wealdtech-core:1.8.2'
+    compile 'com.sun.jersey:jersey-core:1.18'
+    compile 'com.sun.jersey:jersey-client:1.18'
 }
 
 uploadArchives {

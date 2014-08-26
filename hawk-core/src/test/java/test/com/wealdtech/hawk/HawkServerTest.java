@@ -1,5 +1,5 @@
 /*
- *    Copyright 2012, 2013 Weald Technology Trading Limited
+ *   Copyright 2012 - 2014 Weald Technology Trading Limited
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
  *   you may not use this file except in compliance with the License.
@@ -16,22 +16,17 @@
 
 package test.com.wealdtech.hawk;
 
-import static org.testng.Assert.*;
+import com.google.common.io.BaseEncoding;
+import com.wealdtech.DataError;
+import com.wealdtech.hawk.*;
+import com.wealdtech.hawk.Hawk.PayloadValidation;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.net.HttpURLConnection;
 import java.net.URI;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.google.common.io.BaseEncoding;
-import com.wealdtech.DataError;
-import com.wealdtech.hawk.Hawk;
-import com.wealdtech.hawk.Hawk.PayloadValidation;
-import com.wealdtech.hawk.HawkClient;
-import com.wealdtech.hawk.HawkCredentials;
-import com.wealdtech.hawk.HawkServer;
-import com.wealdtech.hawk.HawkServerConfiguration;
+import static org.testng.Assert.*;
 
 public class HawkServerTest
 {
