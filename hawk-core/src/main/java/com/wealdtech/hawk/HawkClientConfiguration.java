@@ -18,6 +18,7 @@ package com.wealdtech.hawk;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
@@ -94,7 +95,7 @@ public class HawkClientConfiguration implements Configuration, Comparable<HawkCl
   @Override
   public String toString()
   {
-    return Objects.toStringHelper(this)
+    return MoreObjects.toStringHelper(this)
                   .add("pathPrefix", this.getPathPrefix())
                   .add("payloadValidation", this.getPayloadValidation())
                   .toString();

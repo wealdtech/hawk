@@ -18,6 +18,7 @@ package com.wealdtech.hawk;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.inject.Inject;
@@ -129,7 +130,7 @@ public final class HawkServerConfiguration implements Comparable<HawkServerConfi
   @Override
   public String toString()
   {
-    return Objects.toStringHelper(this)
+    return MoreObjects.toStringHelper(this)
                   .add("timestampSkew", this.getTimestampSkew())
                   .add("bewitAllowed", this.isBewitAllowed())
                   .add("payloadValidation", this.getPayloadValidation())

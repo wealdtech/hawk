@@ -20,6 +20,7 @@ import static com.wealdtech.Preconditions.*;
 
 import java.net.URI;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.inject.Inject;
@@ -110,7 +111,7 @@ public final class HawkClient implements Comparable<HawkClient>
   @Override
   public String toString()
   {
-    return Objects.toStringHelper(this)
+    return MoreObjects.toStringHelper(this)
                   .add("configuration", this.configuration)
                   .add("credentials", this.credentials)
                   .toString();
