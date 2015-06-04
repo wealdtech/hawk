@@ -1,6 +1,6 @@
 dependencies {
-    compile 'com.wealdtech:wealdtech-core:2.2.0'
-    compile 'com.wealdtech:wealdtech-configuration:2.2.0'
+    compile 'com.wealdtech:wealdtech-core:3.0.0'
+    compile 'com.wealdtech:wealdtech-configuration:3.0.0'
     compile 'com.google.guava:guava:18.0'
 }
 

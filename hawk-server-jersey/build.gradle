@@ -1,7 +1,7 @@
 dependencies {
     compile project(':hawk-core')
-    compile 'com.wealdtech:wealdtech-core:2.2.0'
-    compile 'com.wealdtech:wealdtech-jersey-server:2.2.0'
+    compile 'com.wealdtech:wealdtech-core:3.0.0'
+    compile 'com.wealdtech:wealdtech-jersey-server:3.0.0'
     compile 'com.sun.jersey:jersey-core:1.18'
     compile 'com.sun.jersey:jersey-server:1.18'
     compile 'com.sun.jersey:jersey-servlet:1.18'
