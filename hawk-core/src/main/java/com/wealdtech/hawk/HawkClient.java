@@ -57,15 +57,15 @@ public final class HawkClient implements Comparable<HawkClient>
 
   /**
    * Adjust the client to handle clock skew from server clock.
-   * <p/>
+   * <p>
    * Calculate the time-skew between the client and server, for any future
-   * request.<br/>
+   * request.<br>
    * This can handle clock skew in either the client or the server, or
-   * any timezone mis-configuration.<br/>
+   * any timezone mis-configuration.<br>
    * Just call this method any time (or any number of times) after receiving
-   * a response from the server.<br/>
+   * a response from the server.<br>
    * This can be either successful or error response.
-   * <p/>
+   * <p>
    * Example:
    * <pre>
    *
