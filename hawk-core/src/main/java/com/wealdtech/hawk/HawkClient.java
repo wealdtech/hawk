@@ -32,6 +32,8 @@ public final class HawkClient implements Comparable<HawkClient>
   private final HawkClientConfiguration configuration;
   private final HawkCredentials credentials;
 
+  private long mTimeSkew = 0;
+
   @Inject
   private HawkClient(final HawkClientConfiguration configuration,
                      final HawkCredentials credentials)
@@ -55,6 +57,31 @@ public final class HawkClient implements Comparable<HawkClient>
   }
 
   /**
+   * Adjust the client to handle clock skew from server clock.
+   * <p>
+   * Calculate the time-skew between the client and server, for any future
+   * request.<br>
+   * This can handle clock skew in either the client or the server, or
+   * any timezone mis-configuration.<br>
+   * Just call this method any time (or any number of times) after receiving
+   * a response from the server.<br>
+   * This can be either successful or error response.
+   * <p>
+   * Example:
+   * <pre>
+   *
+   *     URLConnection conn;
+   *     ...
+   *     //send request, receive anything.
+   *     if ( conn.getDate()!=0 ) hawkClient.setServerDate(conn.getDate());
+   * </pre>
+   * @param date the current server date, as was received from the server.
+   */
+  public void setServerDate(long date) {
+    mTimeSkew = date - System.currentTimeMillis();
+  }
+
+  /**
    * Generate the value for the Hawk authorization header.
    *
    * @param uri the URI for the request
@@ -73,7 +100,7 @@ public final class HawkClient implements Comparable<HawkClient>
                                             final String app,
                                             final String dlg)
   {
-    long timestamp = System.currentTimeMillis() / Hawk.MILLISECONDS_IN_SECONDS;
+    long timestamp = (System.currentTimeMillis() + mTimeSkew) / Hawk.MILLISECONDS_IN_SECONDS;
     final String nonce = StringUtils.generateRandomString(6);
     final String mac = Hawk.calculateMAC(this.credentials, Hawk.AuthType.HEADER, timestamp, uri, nonce, method, hash, ext, app, dlg);
 
