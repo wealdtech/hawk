@@ -1,13 +1,13 @@
 dependencies {
     compile project(':hawk-core')
-    compile 'com.wealdtech:wealdtech-core:2.1.0'
-    compile 'com.wealdtech:wealdtech-jersey-server:2.1.0'
+    compile 'com.wealdtech:wealdtech-core:1.8.2'
+    compile 'com.wealdtech:wealdtech-jersey-server:1.8.2'
     compile 'com.sun.jersey:jersey-core:1.18'
     compile 'com.sun.jersey:jersey-server:1.18'
     compile 'com.sun.jersey:jersey-servlet:1.18'
     compile 'com.sun.jersey:jersey-json:1.18'
     compile 'com.sun.jersey.contribs:jersey-guice:1.18'
-    compile 'javax.servlet:javax.servlet-api:3.1.0'
+    compile 'javax.servlet:javax.servlet-api:3.0.1'
     compile 'javax.ws.rs:jsr311-api:1.1.1'
     testCompile 'org.eclipse.jetty:jetty-server:9.1.2.v20140210'
     testCompile 'org.eclipse.jetty:jetty-servlet:9.1.2.v20140210'
