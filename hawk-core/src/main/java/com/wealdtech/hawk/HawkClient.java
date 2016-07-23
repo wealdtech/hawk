@@ -31,6 +31,8 @@ public final class HawkClient implements Comparable<HawkClient>
   private final HawkClientConfiguration configuration;
   private final HawkCredentials credentials;
 
+  private long mTimeSkew = 0;
+
   @Inject
   private HawkClient(final HawkClientConfiguration configuration,
                      final HawkCredentials credentials)
