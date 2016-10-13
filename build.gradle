@@ -55,7 +55,7 @@ subprojects {
         ext.sonatypeUsername = ''
     }
     if (!project.hasProperty('sonatypePassword')) {
-        sonatypePassword = ''
+        ext.sonatypePassword = ''
     }
     uploadArchives {
         repositories {
