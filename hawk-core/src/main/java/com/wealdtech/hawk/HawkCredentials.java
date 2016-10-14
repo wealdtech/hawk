@@ -30,7 +30,7 @@ import com.wealdtech.DataError;
 /**
  * HawkCredentials contains the information required to authenticate requests
  * requests between a client and server.
- * <p/>
+ * <p>
  * Note that the key in the Hawk credentials is a shared secret, and should be
  * protected accordingly.
  */
