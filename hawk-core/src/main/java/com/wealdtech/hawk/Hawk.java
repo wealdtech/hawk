@@ -22,6 +22,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.MessageDigest;
 import java.util.Locale;
 
 import javax.crypto.Mac;
@@ -233,6 +234,53 @@ public class Hawk
     sb.append('\n');
 
     return calculateMac(credentials, sb.toString());
+  }
+
+  /**
+   * Generate the payload hash for a body with a specific content-type
+   *
+   * @param credentials
+   *          Hawk credentials of the requestor
+   * @param contentType
+   *          the MIME content type
+   * @param body
+   *          the body
+   * @return the MAC
+   * @throws DataError
+   *           if there is an issue with the data that prevents creation of the
+   *           hash
+   */
+  public static String calculateBodyHash(final HawkCredentials credentials, final String contentType, final String body)
+  {
+    // Check that required parameters are present
+    checkNotNull(contentType, "Content type is required but not supplied");
+    checkNotNull(body, "Body is required but not supplied");
+
+    final StringBuilder sb = new StringBuilder(1024);
+    sb.append("hawk.");
+    sb.append(HAWKVERSION);
+    sb.append(".payload\n");
+    if (contentType.indexOf(';') != -1)
+    {
+      sb.append(contentType.substring(0, contentType.indexOf(';')).toLowerCase(Locale.ENGLISH));
+    }
+    else
+    {
+      sb.append(contentType.toLowerCase(Locale.ENGLISH));
+    }
+    sb.append('\n');
+    sb.append(body);
+    sb.append('\n');
+
+    try {
+      MessageDigest md = MessageDigest.getInstance(credentials.getDigestAlgorithm());
+      md.update(sb.toString().getBytes());
+      return new String(BaseEncoding.base64().encode(md.digest()));
+    }
+    catch (NoSuchAlgorithmException nsae)
+    {
+      throw new DataError.Bad("Unknown encryption algorithm", nsae);
+    }
   }
 
   /**

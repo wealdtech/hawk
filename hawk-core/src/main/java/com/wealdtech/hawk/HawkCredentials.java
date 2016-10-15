@@ -74,6 +74,11 @@ public final class HawkCredentials implements Comparable<HawkCredentials>
                                                                                         .put(Algorithm.SHA256, "HmacSHA256")
                                                                                         .build();
 
+  private static final ImmutableMap<Algorithm, String> DIGESTALGORITHMS = new ImmutableMap.Builder<Algorithm, String>()
+                                                                                        .put(Algorithm.SHA1, "SHA-1")
+                                                                                        .put(Algorithm.SHA256, "SHA-256")
+                                                                                        .build();
+
   private HawkCredentials(final String keyId, final String key, final Algorithm algorithm)
   {
     this.keyId = keyId;
@@ -125,6 +130,16 @@ public final class HawkCredentials implements Comparable<HawkCredentials>
   public Algorithm getAlgorithm()
   {
     return this.algorithm;
+  }
+
+  /**
+   * Obtain the algorithm used to calculate the MAC
+   *
+   * @return the algorithm used to calculate the MAC
+   */
+  public String getDigestAlgorithm()
+  {
+    return DIGESTALGORITHMS.get(this.algorithm);
   }
 
   /**

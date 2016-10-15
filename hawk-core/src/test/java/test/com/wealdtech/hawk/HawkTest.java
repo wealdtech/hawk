@@ -102,6 +102,17 @@ public class HawkTest
   }
 
   @Test
+  public void testBodyHash() throws Exception
+  {
+    // Ensure that the body hash gives the correct result
+    // This validates the example provided at https://github.com/hueniverse/hawk#payload-validation
+    final HawkCredentials testCredentials = new HawkCredentials.Builder().keyId("test").key("mysecretkey").algorithm(Algorithm.SHA256).build();
+    final String contentType = "text/plain";
+    String testhash1 = Hawk.calculateBodyHash(testCredentials, contentType, "Thank you for flying Hawk");
+    assertEquals(testhash1, "Yi9LfIIFRtBEPt74PVmbTF/xVAwPn7ub15ePICfgnuY=");
+  }
+
+  @Test
   public void testBewitValidation1() throws Exception
   {
     try
