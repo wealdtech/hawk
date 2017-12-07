@@ -35,7 +35,7 @@ public class HawkCredentialsTest
                                                        .algorithm(HawkCredentials.Algorithm.SHA256)
                                                        .build();
     assertEquals(testhc1.getKeyId(), "testkeyid");
-    assertEquals(testhc1.getKey(), "testkey");
+    assertEquals(testhc1.getKey(), "testkey".getBytes());
     assertEquals(testhc1.getAlgorithm().toString(), "sha256");
     testhc1.toString();
     testhc1.hashCode();
@@ -44,7 +44,7 @@ public class HawkCredentialsTest
 
     final HawkCredentials testhc2 = new HawkCredentials.Builder(testhc1).keyId("testkeyid2").build();
     assertEquals(testhc2.getKeyId(), "testkeyid2");
-    assertEquals(testhc1.getKey(), "testkey");
+    assertEquals(testhc1.getKey(), "testkey".getBytes());
     assertEquals(testhc1.getAlgorithm().toString(), "sha256");
     testhc2.toString();
     testhc2.hashCode();
@@ -74,7 +74,7 @@ public class HawkCredentialsTest
   {
     try
     {
-      new HawkCredentials.Builder().keyId("testkeyid").key(null).algorithm(HawkCredentials.Algorithm.SHA256).build();
+      new HawkCredentials.Builder().keyId("testkeyid").key((String) null).algorithm(HawkCredentials.Algorithm.SHA256).build();
       // Should not reach here
       fail();
     }
