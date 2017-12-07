@@ -19,6 +19,7 @@ package com.wealdtech.hawk;
 import static com.wealdtech.Preconditions.*;
 
 import java.util.Locale;
+import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -66,7 +67,7 @@ public final class HawkCredentials implements Comparable<HawkCredentials>
   }
 
   private final String keyId;
-  private final String key;
+  private final byte[] key;
   private final Algorithm algorithm;
 
   private static final ImmutableMap<Algorithm, String> JAVAALGORITHMS = new ImmutableMap.Builder<Algorithm, String>()
@@ -74,7 +75,10 @@ public final class HawkCredentials implements Comparable<HawkCredentials>
                                                                                         .put(Algorithm.SHA256, "HmacSHA256")
                                                                                         .build();
 
-  private HawkCredentials(final String keyId, final String key, final Algorithm algorithm)
+  private static final Charset utf8 = Charset.forName("UTF-8");
+  private static final Charset latin1 = Charset.forName("ISO-8859-1");
+
+  private HawkCredentials(final String keyId, final byte[] key, final Algorithm algorithm)
   {
     this.keyId = keyId;
     this.key = key;
@@ -109,10 +113,10 @@ public final class HawkCredentials implements Comparable<HawkCredentials>
   /**
    * Obtain the key.
    *
-   * @return the Key ID. Note that the key ID is a shared secret, and should be
+   * @return the Key. Note that the key is a shared secret, and should be
    *         protected accordingly
    */
-  public String getKey()
+  public byte[] getKey()
   {
     return this.key;
   }
@@ -144,7 +148,7 @@ public final class HawkCredentials implements Comparable<HawkCredentials>
   {
     return Objects.toStringHelper(this)
                   .add("keyId", this.getKeyId())
-                  .add("key", this.getKey())
+                  .add("key", java.util.Arrays.toString(this.getKey()))
                   .add("algorithm", this.getAlgorithm())
                   .toString();
   }
@@ -166,7 +170,7 @@ public final class HawkCredentials implements Comparable<HawkCredentials>
   {
     return ComparisonChain.start()
                           .compare(this.getKeyId(), that.getKeyId())
-                          .compare(this.getKey(), that.getKey())
+                          .compare(new String(this.getKey(), latin1), new String(that.getKey(), latin1))
                           .compare(this.getAlgorithm(), that.getAlgorithm())
                           .result();
   }
@@ -177,7 +181,7 @@ public final class HawkCredentials implements Comparable<HawkCredentials>
   public static class Builder
   {
     private String keyId;
-    private String key;
+    private byte[] key;
     private Algorithm algorithm;
 
     /**
@@ -222,6 +226,18 @@ public final class HawkCredentials implements Comparable<HawkCredentials>
      * @return the builder
      */
     public Builder key(final String key)
+    {
+      return this.key(key != null ? key.getBytes(utf8) : null);
+    }
+
+    /**
+     * Set the key.
+     *
+     * @param key
+     *          the key
+     * @return the builder
+     */
+    public Builder key(final byte[] key)
     {
       this.key = key;
       return this;

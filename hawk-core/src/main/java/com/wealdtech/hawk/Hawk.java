@@ -254,7 +254,7 @@ public class Hawk
       Mac mac = Mac.getInstance(credentials.getJavaAlgorithm());
       try
       {
-        mac.init(new SecretKeySpec(credentials.getKey().getBytes("UTF-8"), credentials.getJavaAlgorithm()));
+        mac.init(new SecretKeySpec(credentials.getKey(), credentials.getJavaAlgorithm()));
         return BaseEncoding.base64().encode(mac.doFinal(text.getBytes("UTF-8")));
       }
       catch (UnsupportedEncodingException uee)
